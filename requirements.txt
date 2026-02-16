@@ -1,0 +1,25 @@
+# Core Dependencies
+langchain-google-genai
+langchain-core
+langgraph
+pydantic
+python-dotenv
+
+# Document Processing
+PyPDF2
+python-docx
+pandas
+openpyxl
+Pillow
+
+# Azure OCR
+azure-cognitiveservices-vision-computervision
+msrest
+
+# API Server (Optional)
+fastapi
+uvicorn
+
+# Testing (Optional)
+pytest
+pytest-asyncio
