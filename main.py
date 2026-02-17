@@ -1,39 +1,41 @@
-"""
-Main Entry Point
-Detection Score Agent
-"""
-
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+
 from detection.agent import DetectionAgentLangGraph
-from detection.schemas import ComplaintData
+from router import register_routes
 
 # Load environment variables
 load_dotenv()
 
+# Initialize FastAPI app
+app = FastAPI(
+    title="Agents",
+    description="Centralized repository for all agents",
+    version="1.0.0"
+)
 
-def main():
-    """Main function to demonstrate agent usage."""
-    
-    # Initialize agent
-    print("Initializing Detection Agent...")
-    agent = DetectionAgentLangGraph()
-    
-    # Example complaint
-    complaint = ComplaintData(
-        complaint_id="C-001",
-        source="Service Report",
-        description="Seal integrity failure observed after sterilization"
-    )
-    
-    # Process complaint
-    print(f"\nProcessing complaint: {complaint.complaint_id}")
-    result = agent.process_complaint(complaint, policy_document_path=None)
-    
-    print(f"\nDetection Score: {result['detection_score']}")
-    print(f"Confidence: {result['confidence']}")
-    print(f"Decision Source: {result['decision_source']}")
-    print(f"Explanation: {result['explanation']}")
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize agents
+detection_agent = DetectionAgentLangGraph()
+
+# Register routes
+register_routes(app, detection_agent)
 
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
