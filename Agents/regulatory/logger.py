@@ -7,8 +7,8 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-# Create logs directory if it doesn't exist
-log_dir = Path("logs")
+# Create logs directory inside Regulatory folder
+log_dir = Path(__file__).parent / "logs"
 log_dir.mkdir(exist_ok=True)
 
 # Configure logger
@@ -16,7 +16,7 @@ logger = logging.getLogger("RegulatoryAgent")
 logger.setLevel(logging.INFO)
 
 # File handler only 
-log_file = log_dir / f"regulatory_agent_{datetime.now().strftime('%Y%m%d')}.log"
+log_file = log_dir / "process.log"
 file_handler = logging.FileHandler(log_file)
 file_handler.setLevel(logging.INFO)
 
