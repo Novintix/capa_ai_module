@@ -41,8 +41,8 @@ class BedrockLLM:
 
         payload = {
             "messages": messages,
-            "max_tokens": 500,
-            "temperature": 0.3
+            "max_tokens": 2000,
+            "temperature": 0.0
         }
 
         response = self.client.invoke_model(
@@ -83,16 +83,29 @@ class BedrockLLM:
             raise ValueError(f"Unknown Bedrock response format: {result}")
 
         # -----------------------------
-        # Extract JSON safely
+        # Strip <reasoning> tags if present (model thinking block)
+        # -----------------------------
+        original_content = content
+        content = re.sub(r"<reasoning>.*?</reasoning>", "", content, flags=re.DOTALL).strip()
+
+        # -----------------------------
+        # Extract JSON safely — fallback to original if strip removed everything
         # -----------------------------
         json_match = re.search(r"\{.*\}", content, re.DOTALL)
 
         if not json_match:
-            raise ValueError(f"No JSON found in model response: {content}")
+            # Fallback: search original content (handles JSON inside reasoning block)
+            json_match = re.search(r"\{.*\}", original_content, re.DOTALL)
+
+        if not json_match:
+            raise ValueError(f"No JSON found in model response: {original_content}")
 
         clean_json = json_match.group()
 
-        return type("LLMResponse", (), {"content": clean_json})
+        return type("LLMResponse", (), {
+            "content": clean_json,
+            "raw_content": original_content   # full response before stripping
+        })()
 
 
 def get_llm():

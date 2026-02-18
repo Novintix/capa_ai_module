@@ -5,6 +5,9 @@ langgraph
 pydantic
 python-dotenv
 
+# AWS Bedrock
+boto3
+
 # Document Processing
 PyPDF2
 python-docx
@@ -19,6 +22,7 @@ msrest
 # API Server (Optional)
 fastapi
 uvicorn
+python-multipart
 
 # Testing (Optional)
 pytest

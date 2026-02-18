@@ -1,7 +1,11 @@
 import json
 from Agents.occurrence.state import OccurrenceState, OccurrenceScoreResponse, OccurrenceOutput
-from Agents.occurrence.prompts import build_prompt, get_weights, load_metrics
+from Agents.occurrence.utils import build_prompt, get_weights
 from config.aws_bedrock_config import get_llm
+from Agents.occurrence.logger import (
+    log_prompt, log_raw_response, log_score_audit,
+    log_weighted_calculation, log_error
+)
 
 
 def generate_scores(state: OccurrenceState):
@@ -36,9 +40,15 @@ def generate_scores(state: OccurrenceState):
         metrics=metrics
     )
 
+    # Log the full prompt sent to the LLM
+    log_prompt(prompt)
+
     try:
         llm = get_llm()
         response = llm.invoke(prompt)
+
+        # Log the raw LLM response before any parsing
+        log_raw_response(response.raw_content)
 
         # Parse response content
         content = json.loads(response.content)
@@ -46,9 +56,13 @@ def generate_scores(state: OccurrenceState):
         # Create score response object
         scores = OccurrenceScoreResponse(**content)
 
+        # Deep audit: score vs rubric vs input evidence (hallucination detection)
+        log_score_audit(content, input_data.similar_cases or [])
+
         return {"raw_scores": scores}
 
     except Exception as e:
+        log_error("generate_scores", str(e))
         raise RuntimeError(f"Error generating scores: {str(e)}")
 
 
@@ -88,6 +102,8 @@ def calculate_weighted_score(state: OccurrenceState):
     }
 
     weighted_sum = sum(score_dict[code] * weights.get(code, 0) for code in score_dict)
+
+    log_weighted_calculation(scores, weights)
 
     rating_map = {
         1: "Remote",

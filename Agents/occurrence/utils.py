@@ -4,6 +4,10 @@ import io
 from fastapi import UploadFile
 import PyPDF2
 from docx import Document
+import os
+
+# Default metrics file path
+DEFAULT_METRICS_PATH = os.path.join(os.path.dirname(__file__), "metrics.json")
 
 class MetricsParser:
     @staticmethod
@@ -52,3 +56,66 @@ class MetricsParser:
                 
         except Exception as e:
             return f"Error parsing file {filename}: {str(e)}"
+
+
+def load_metrics(metrics_path: str = None) -> dict:
+    """Load metrics from a JSON file. Falls back to default metrics.json."""
+    path = metrics_path or DEFAULT_METRICS_PATH
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        # Fallback to empty if default file missing (though it should be there)
+        print(f"Warning: Could not load metrics from {path}: {e}")
+        return {}
+
+
+def get_weights(metrics: dict = None) -> dict:
+    """Extract weights dict from metrics definition."""
+    if metrics is None:
+        metrics = load_metrics()
+    return {
+        code: param["weight"]
+        for code, param in metrics.get("parameters", {}).items()
+    }
+
+
+def build_prompt(description: str, product: str, date: str,
+                 similar_cases: str, context: str,
+                 metrics: dict = None) -> str:
+    """
+    Build the full scoring prompt dynamically from the metrics definition.
+    If metrics is None, loads from the default metrics.json.
+    """
+    if metrics is None:
+        metrics = load_metrics()
+
+    parameters = metrics.get("parameters", {})
+
+    # Build per-parameter scoring guide
+    param_guide = ""
+    weights_block = "| Code | Parameter | Weight |\n|------|-----------|--------|\n"
+
+    for code, param in parameters.items():
+        name = param["name"]
+        weight = param["weight"]
+        levels = param["levels"]
+
+        param_guide += f"\n#### {code} — {name} (Weight: {int(weight * 100)}%)\n"
+        for score, desc in sorted(levels.items(), key=lambda x: int(x[0])):
+            param_guide += f"{score} → {desc}\n"
+
+        weights_block += f"| {code} | {name} | {int(weight * 100)}% |\n"
+
+    # Import template here to avoid circular imports if prompts.py imports utils
+    from Agents.occurrence.prompts import OCCURRENCE_PROMPT_TEMPLATE
+    
+    return OCCURRENCE_PROMPT_TEMPLATE.format(
+        description=description,
+        product=product,
+        date=date,
+        similar_cases=similar_cases,
+        context=context,
+        param_guide=param_guide,
+        weights_block=weights_block
+    )
