@@ -1,0 +1,82 @@
+{
+  "SEVERITY_LABELS": {
+    "1": "Negligible",
+    "2": "Very Minor",
+    "3": "Minor",
+    "4": "Low-Moderate",
+    "5": "Moderate",
+    "6": "Elevated Moderate",
+    "7": "Major",
+    "8": "Severe",
+    "9": "Critical",
+    "10": "Catastrophic"
+  },
+  "WEIGHTS": {
+    "clinical_score": 0.40,
+    "reversibility_score": 0.20,
+    "medical_score": 0.25,
+    "duration_score": 0.15
+  },
+  "SEVERITY_MATRIX": {
+    "1": {
+      "clinical": "No injury / No clinical impact",
+      "reversibility": "Fully reversible with no intervention",
+      "medical": "No medical intervention needed",
+      "duration": "No impact / instantaneous"
+    },
+    "2": {
+      "clinical": "Minimal reversible discomfort (slight irritation, inconvenience)",
+      "reversibility": "Fully reversible with minimal intervention",
+      "medical": "Self-care only",
+      "duration": "Minutes"
+    },
+    "3": {
+      "clinical": "Mild reversible discomfort (symptom noticeable but harmless)",
+      "reversibility": "Fully reversible with minor treatment",
+      "medical": "Minimal first aid",
+      "duration": "Hours"
+    },
+    "4": {
+      "clinical": "Minor temporary injury (local & short-term; no treatment needed)",
+      "reversibility": "Reversible with standard outpatient treatment",
+      "medical": "Outpatient evaluation, no treatment",
+      "duration": "Less than 1 day"
+    },
+    "5": {
+      "clinical": "Minor temporary injury requiring minor first aid",
+      "reversibility": "Reversible with extended outpatient care",
+      "medical": "Outpatient treatment required",
+      "duration": "1–3 days"
+    },
+    "6": {
+      "clinical": "Moderate temporary injury requiring outpatient care",
+      "reversibility": "Reversible with minor hospitalization",
+      "medical": "Minor hospitalization",
+      "duration": "3–7 days"
+    },
+    "7": {
+      "clinical": "Serious temporary injury requiring short hospitalization",
+      "reversibility": "Reversible with moderate hospitalization",
+      "medical": "Moderate hospitalization",
+      "duration": "1–4 weeks"
+    },
+    "8": {
+      "clinical": "Serious injury with long recovery time; potential long-term effects",
+      "reversibility": "Reversible only with major hospitalization or prolonged treatment",
+      "medical": "Major hospitalization / intensive care unit",
+      "duration": "1–3 months"
+    },
+    "9": {
+      "clinical": "Permanent injury or permanent functional impairment",
+      "reversibility": "Irreversible injury / permanent impairment",
+      "medical": "Life-support required",
+      "duration": "Permanent / lifelong effect"
+    },
+    "10": {
+      "clinical": "Death or life-threatening injury",
+      "reversibility": "Irreversible injury causing permanent disability or death",
+      "medical": "Death or unavoidable fatal outcome",
+      "duration": "Permanent with fatal or irreversible outcome"
+    }
+  }
+}
