@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from Agents.detection.agent import DetectionAgentLangGraph
 from router import register_routes
 
 # Load environment variables
@@ -25,11 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize agents
-detection_agent = DetectionAgentLangGraph()
-
 # Register routes
-register_routes(app, detection_agent)
+register_routes(app)
 
 
 if __name__ == "__main__":

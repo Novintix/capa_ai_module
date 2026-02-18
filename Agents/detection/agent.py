@@ -6,9 +6,9 @@ Main agent class that uses the LangGraph workflow.
 import os
 from typing import Dict, Any, Optional
 
-from detection.graph import create_detection_graph
-from detection.state import AgentState
-from detection.schemas import ComplaintData
+from .graph import create_detection_graph
+from .state import AgentState
+from .schemas import ComplaintData
 
 
 class DetectionAgentLangGraph:
