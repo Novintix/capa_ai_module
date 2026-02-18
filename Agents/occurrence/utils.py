@@ -80,19 +80,51 @@ def get_weights(metrics: dict = None) -> dict:
     }
 
 
+def build_evidence_summary(similar_cases: list, param_factor_keys: dict) -> dict:
+    """
+    Builds a deterministic evidence string per parameter using only the
+    highest-similarity case. This ensures the LLM receives exactly one
+    evidence string per parameter — no conflict, no random selection.
+    """
+    # Sort cases by similarity_score descending — highest similarity first
+    sorted_cases = sorted(
+        similar_cases,
+        key=lambda c: float(c.get("similarity_score", 0)),
+        reverse=True
+    )
+
+    evidence = {}
+    for code, factor_key in param_factor_keys.items():
+        # Find the first (highest-similarity) case that has this factor
+        found = False
+        for case in sorted_cases:
+            val = case.get("occurrence_factors", {}).get(factor_key, "").strip()
+            if val:
+                case_id = case.get("case_id", "?")
+                sim = case.get("similarity_score", "?")
+                evidence[code] = f"{case_id} (similarity {sim}): {val}"
+                found = True
+                break
+        if not found:
+            evidence[code] = "No historical evidence available."
+
+    return evidence
+
+
+
 def build_prompt(description: str, product: str, date: str,
                  similar_cases: str, context: str,
-                 metrics: dict = None) -> str:
+                 metrics: dict = None,
+                 evidence_summary: dict = None) -> str:
     """
     Build the full scoring prompt dynamically from the metrics definition.
-    If metrics is None, loads from the default metrics.json.
+    If evidence_summary is provided, injects pre-computed per-parameter evidence.
     """
     if metrics is None:
         metrics = load_metrics()
 
     parameters = metrics.get("parameters", {})
 
-    # Build per-parameter scoring guide
     param_guide = ""
     weights_block = "| Code | Parameter | Weight |\n|------|-----------|--------|\n"
 
@@ -101,15 +133,22 @@ def build_prompt(description: str, product: str, date: str,
         weight = param["weight"]
         levels = param["levels"]
 
-        param_guide += f"\n#### {code} — {name} (Weight: {int(weight * 100)}%)\n"
+        param_guide += f"\n#### {code} - {name} (Weight: {int(weight * 100)}%)\n"
         for score, desc in sorted(levels.items(), key=lambda x: int(x[0])):
-            param_guide += f"{score} → {desc}\n"
+            param_guide += f"{score} -> {desc}\n"
 
         weights_block += f"| {code} | {name} | {int(weight * 100)}% |\n"
 
-    # Import template here to avoid circular imports if prompts.py imports utils
+    # Build pre-computed evidence block
+    evidence_block = ""
+    if evidence_summary:
+        evidence_block = "\n### PRE-COMPUTED EVIDENCE FROM SIMILAR CASES\n"
+        evidence_block += "The evidence below is already merged from all similar cases. Use it directly — do NOT re-average or re-interpret.\n\n"
+        for code, evidence_text in evidence_summary.items():
+            evidence_block += f"- **{code}**: {evidence_text}\n"
+
     from Agents.occurrence.prompts import OCCURRENCE_PROMPT_TEMPLATE
-    
+
     return OCCURRENCE_PROMPT_TEMPLATE.format(
         description=description,
         product=product,
@@ -117,5 +156,7 @@ def build_prompt(description: str, product: str, date: str,
         similar_cases=similar_cases,
         context=context,
         param_guide=param_guide,
-        weights_block=weights_block
+        weights_block=weights_block,
+        evidence_block=evidence_block
     )
+

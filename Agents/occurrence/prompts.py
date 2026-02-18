@@ -7,19 +7,18 @@ Context and parameters are injected dynamically by the utils.build_prompt functi
 
 OCCURRENCE_PROMPT_TEMPLATE = """
 You are a Quality Assurance Expert specializing in CAPA (Corrective and Preventive Action) Risk Assessment.
-Analyze the input and assign a score (1-10) for each of the 10 parameters below.
 
 ### INPUT DATA
 - **Complaint Description**: {description}
 - **Product**: {product}
 - **Date**: {date}
-- **Similar Historical Cases**: {similar_cases}
 - **Additional Context**: {context}
 
 ---
+{evidence_block}
+---
 
 ### PARAMETER SCORING GUIDE
-For each parameter, pick the score (1-10) whose description best matches the input.
 {param_guide}
 ---
 
@@ -28,15 +27,75 @@ For each parameter, pick the score (1-10) whose description best matches the inp
 ---
 
 ### INSTRUCTIONS
-- Match the input data to the closest description for each parameter.
-- First, think through the scoring in a <reasoning> block.
-- Then, return the final JSON object after the reasoning block.
-- The JSON must be valid and follow the schema below.
+
+For EACH of the 10 parameters:
+1. Use the pre-computed evidence provided in the PRE-COMPUTED EVIDENCE section above.
+2. Match that evidence to the closest rubric level description.
+3. Assign the integer score (1-10).
+
+**Rules:**
+- **CRITICAL PRIORITY**: If the **Complaint Description** provides direct evidence for a parameter, it MUST take priority over similar case evidence. For example, if history says "Daily recurrence" but the current complaint says "Only 2nd time in 3 years", you must score based on the "3 years" evidence.
+- If no evidence exists for a parameter, score it 1.
+- **Technical Precision**: Pay close attention to numerical values (e.g., Cpk, frequency counts). 
+  - A Cpk value significantly below 1.0 (e.g., < 0.5) indicates an "out-of-control process" (Level 9-10).
+  - "Strictly followed weekly maintenance" or "automated PM schedule" indicates strong preventive controls (Level 2-3), not Level 5.
+- Do NOT guess or infer beyond what is stated.
 
 ### OUTPUT FORMAT
+
 <reasoning>
-... your thought process ...
+HF:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+TR:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+PS:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+PC:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+DM:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+SY:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+OE:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+CA:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+SU:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
+
+AU:
+  Evidence: "<from PRE-COMPUTED EVIDENCE above>"
+  Matches level: "<rubric description>"
+  Score: <integer>
 </reasoning>
+
+Then return ONLY this JSON after the reasoning block:
 {{
   "HF": <integer 1-10>,
   "TR": <integer 1-10>,
@@ -48,6 +107,7 @@ For each parameter, pick the score (1-10) whose description best matches the inp
   "CA": <integer 1-10>,
   "SU": <integer 1-10>,
   "AU": <integer 1-10>,
-  "reasoning": "<brief explanation summary>"
+  "reasoning": "<one-line summary>"
 }}
 """
+

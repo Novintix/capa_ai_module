@@ -3,17 +3,9 @@ logger.py
 
 Deep Audit Logger for the Occurrence Agent.
 
-Logs every step in detail to help detect LLM hallucinations:
-  STEP 1 — API request (who called, what complaint)
-  STEP 2 — Full prompt sent to LLM
-  STEP 3 — Raw LLM response (before any parsing)
-  STEP 4 — Score audit: for each parameter, logs:
-              - Score given by LLM
-              - Rubric description for that score (what score X means)
-              - Input evidence from occurrence_factors
-              - Consistency flag (does rubric match evidence?)
-  STEP 5 — Weighted calculation (score × weight = contribution)
-  STEP 6 — Final output
+Logs every step in detail to help detect LLM hallucinations.
+Refactored to OVERWRITE the log file on every new API request (Step 1),
+so the log always reflects only the latest run.
 
 Log file: Agents/logs/occurrence.log
 """
@@ -27,20 +19,37 @@ from pathlib import Path
 # -------------------------------------------------------
 log_dir = Path(__file__).parent.parent / "logs"
 log_dir.mkdir(exist_ok=True)
+LOG_FILE = log_dir / "occurrence.log"
+NUM_RUNS = 1  # Single-run with evidence-first anchoring (Option G)
 
-logger = logging.getLogger("occurrence_agent")
-logger.setLevel(logging.DEBUG)
+# Optional: Keep a console logger for debugging output in terminal
+console = logging.getLogger("occurrence_console")
+console.setLevel(logging.INFO)
+if not console.handlers:
+    sh = logging.StreamHandler()
+    sh.setFormatter(logging.Formatter("%(asctime)s | %(levelname)-8s | %(message)s"))
+    console.addHandler(sh)
 
-if not logger.handlers:
-    log_file = log_dir / "occurrence.log"
-    file_handler = logging.FileHandler(log_file, encoding="utf-8")
-    file_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)-8s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+
+# -------------------------------------------------------
+# Helper: Write to File
+# -------------------------------------------------------
+def _log(message: str, mode: str = "a"):
+    """
+    Writes message to log file.
+    mode='w' -> overwrites file (start of new request)
+    mode='a' -> appends to file (subsequent steps)
+    """
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"{timestamp} | INFO     | {message}\n"
+    
+    try:
+        with open(LOG_FILE, mode, encoding="utf-8") as f:
+            f.write(line)
+        # Also print to console
+        # print(line.strip()) 
+    except Exception as e:
+        console.error(f"Failed to write to {LOG_FILE}: {e}")
 
 
 # -------------------------------------------------------
@@ -219,23 +228,14 @@ METRIC_META = {
     },
 }
 
-# Simple keyword hints per score band for consistency checking
-# If score >= 7 but evidence has "no", "none", "stable", "isolated" → flag
 HIGH_SCORE_NEGATIVE_HINTS = ["no ", "none", "stable", "isolated", "not ", "no history", "no finding"]
-# If score <= 3 but evidence has "major", "failed", "critical", "systemic" → flag
 LOW_SCORE_POSITIVE_HINTS  = ["major", "failed", "critical", "systemic", "chronic", "ineffective", "defect"]
 
 
 def _check_consistency(code: str, score: int, evidence: str) -> str:
-    """
-    Simple heuristic consistency check.
-    Returns 'OK', 'REVIEW' (possible hallucination), or 'NO_EVIDENCE'.
-    """
     if not evidence or evidence.strip() == "":
         return "NO_EVIDENCE"
-
     ev_lower = evidence.lower()
-
     if score >= 7:
         for hint in HIGH_SCORE_NEGATIVE_HINTS:
             if hint in ev_lower:
@@ -248,63 +248,72 @@ def _check_consistency(code: str, score: int, evidence: str) -> str:
 
 
 # -------------------------------------------------------
-# STEP 1 — API Request
+# STEP 1 — API Request (Truncates file!)
 # -------------------------------------------------------
 def log_request(complaint_id: str, product: str, source: str,
                 date: str, num_similar_cases: int):
-    logger.info("=" * 80)
-    logger.info("[STEP 1] API REQUEST RECEIVED")
-    logger.info(f"  Complaint ID      : {complaint_id}")
-    logger.info(f"  Product           : {product}")
-    logger.info(f"  Source            : {source}")
-    logger.info(f"  Date              : {date}")
-    logger.info(f"  Similar Cases     : {num_similar_cases} case(s) provided")
-    logger.info(f"  Timestamp         : {datetime.now().isoformat()}")
+    # FORCE OVERWRITE MODE ('w') for the first step
+    _log("=" * 80, mode="w")
+    _log("[STEP 1] API REQUEST RECEIVED", mode="a")
+    _log(f"  Complaint ID      : {complaint_id}")
+    _log(f"  Product           : {product}")
+    _log(f"  Source            : {source}")
+    _log(f"  Date              : {date}")
+    _log(f"  Similar Cases     : {num_similar_cases} case(s) provided")
+    _log(f"  Timestamp         : {datetime.now().isoformat()}")
 
 
 # -------------------------------------------------------
-# STEP 2 — Full Prompt Sent to LLM
+# NODE LIFECYCLE — Start / End (DO #7 Observability)
+# -------------------------------------------------------
+def log_node_start(node_name: str):
+    """Log when a node begins execution."""
+    _log("-" * 80)
+    _log(f"[NODE START] >>> {node_name.upper()} | {datetime.now().isoformat()}")
+
+
+def log_node_end(node_name: str, output_summary: str = ""):
+    """Log when a node finishes execution."""
+    _log(f"[NODE END]   <<< {node_name.upper()} | {datetime.now().isoformat()}")
+    if output_summary:
+        _log(f"  Output: {output_summary}")
+
+
+# -------------------------------------------------------
+# STEP 2 — Full Prompt
 # -------------------------------------------------------
 def log_prompt(prompt: str):
-    logger.info("-" * 80)
-    logger.info("[STEP 2] FULL PROMPT SENT TO LLM")
-    logger.info(f"  Prompt Length     : {len(prompt)} characters")
-    logger.info("  --- PROMPT START ---")
+    _log("-" * 80)
+    _log("[STEP 2] FULL PROMPT SENT TO LLM")
+    _log(f"  Prompt Length     : {len(prompt)} characters")
+    _log("  --- PROMPT START ---")
     for line in prompt.splitlines():
-        logger.info(f"  {line}")
-    logger.info("  --- PROMPT END ---")
+        _log(f"  {line}")
+    _log("  --- PROMPT END ---")
 
 
 # -------------------------------------------------------
-# STEP 3 — Raw LLM Response
+# STEP 3 — Raw Response
 # -------------------------------------------------------
-def log_raw_response(raw: str):
-    logger.info("-" * 80)
-    logger.info("[STEP 3] RAW LLM RESPONSE (before parsing)")
-    logger.info(f"  Response Length   : {len(raw)} characters")
-    logger.info("  --- RESPONSE START ---")
+def log_raw_response(raw: str, run_number: int = 1):
+    _log("-" * 80)
+    _log(f"[STEP 3] RAW LLM RESPONSE — Run {run_number} of {NUM_RUNS} (before parsing)")
+    _log(f"  Response Length   : {len(raw)} characters")
+    _log("  --- RESPONSE START ---")
     for line in raw.splitlines():
-        logger.info(f"  {line}")
-    logger.info("  --- RESPONSE END ---")
+        _log(f"  {line}")
+    _log("  --- RESPONSE END ---")
 
 
 # -------------------------------------------------------
-# STEP 4 — Score Audit (per parameter)
+# STEP 4 — Score Audit
 # -------------------------------------------------------
 def log_score_audit(scores: dict, similar_cases: list):
-    """
-    For each of the 10 parameters:
-      - Log the score the LLM gave
-      - Log what that score MEANS (rubric description)
-      - Log the input evidence from occurrence_factors across all similar cases
-      - Flag if the score looks inconsistent with the evidence
-    """
-    logger.info("-" * 80)
-    logger.info("[STEP 4] SCORE AUDIT — LLM SCORE vs RUBRIC vs INPUT EVIDENCE")
-    logger.info("  (Use REVIEW flags to spot potential hallucinations)")
-    logger.info("")
+    _log("-" * 80)
+    _log("[STEP 4] SCORE AUDIT — LLM SCORE vs RUBRIC vs INPUT EVIDENCE")
+    _log("  (Use REVIEW flags to spot potential hallucinations)")
+    _log("")
 
-    # Collect all occurrence_factors evidence across similar cases
     all_factors: dict[str, list[str]] = {}
     for case in similar_cases:
         factors = case.get("occurrence_factors", {})
@@ -319,27 +328,27 @@ def log_score_audit(scores: dict, similar_cases: list):
         evidence_str = " | ".join(evidence_list) if evidence_list else "(no occurrence_factors provided)"
         consistency = _check_consistency(code, score, evidence_str) if isinstance(score, int) else "N/A"
 
-        logger.info(f"  [{code}] {meta['name']}")
-        logger.info(f"    Score Given     : {score}/10")
-        logger.info(f"    Rubric (score {score}): {rubric_text}")
-        logger.info(f"    Input Evidence  : {evidence_str}")
-        logger.info(f"    Consistency     : {consistency}")
-        logger.info("")
+        _log(f"  [{code}] {meta['name']}")
+        _log(f"    Score Given     : {score}/10")
+        _log(f"    Rubric (score {score}): {rubric_text}")
+        _log(f"    Input Evidence  : {evidence_str}")
+        _log(f"    Consistency     : {consistency}")
+        _log("")
 
     reasoning = scores.get("reasoning", "")
     if reasoning:
-        logger.info(f"  LLM Reasoning   : {reasoning}")
-        logger.info("")
+        _log(f"  LLM Reasoning   : {reasoning}")
+        _log("")
 
 
 # -------------------------------------------------------
-# STEP 5 — Weighted Calculation
+# STEP 5 — Weighted Calc
 # -------------------------------------------------------
 def log_weighted_calculation(scores, weights: dict):
-    logger.info("-" * 80)
-    logger.info("[STEP 5] WEIGHTED SCORE CALCULATION")
-    logger.info(f"  {'Code':<5} {'Parameter':<48} {'Score':>5} {'Weight':>7} {'Contribution':>13}")
-    logger.info(f"  {'-'*5} {'-'*48} {'-'*5} {'-'*7} {'-'*13}")
+    _log("-" * 80)
+    _log("[STEP 5] WEIGHTED SCORE CALCULATION")
+    _log(f"  {'Code':<5} {'Parameter':<48} {'Score':>5} {'Weight':>7} {'Contribution':>13}")
+    _log(f"  {'-'*5} {'-'*48} {'-'*5} {'-'*7} {'-'*13}")
 
     score_map = {
         "HF": scores.HF, "TR": scores.TR, "PS": scores.PS,
@@ -353,54 +362,27 @@ def log_weighted_calculation(scores, weights: dict):
         weight = weights.get(code, meta["weight"])
         contribution = score * weight
         total += contribution
-        logger.info(
+        _log(
             f"  {code:<5} {meta['name']:<48} {score:>5} "
             f"{weight*100:>6.0f}%  {contribution:>12.4f}"
         )
 
-    logger.info(f"  {'':5} {'':48} {'':5} {'':7} {'─'*13}")
-    logger.info(f"  {'':5} {'TOTAL WEIGHTED SCORE':<48} {'':5} {'100%':>7} {total:>12.4f}")
-    logger.info(f"  Rounded Score     : {max(1, min(10, int(round(total))))}")
+    _log(f"  {'':5} {'':48} {'':5} {'':7} {'─'*13}")
+    _log(f"  {'':5} {'TOTAL WEIGHTED SCORE':<48} {'':5} {'100%':>7} {total:>12.4f}")
+    _log(f"  Rounded Score     : {max(1, min(10, int(round(total))))}")
 
 
 # -------------------------------------------------------
 # STEP 6 — Final Output
 # -------------------------------------------------------
 def log_final_output(complaint_id: str, weighted_score: float, rating: str):
-    logger.info("-" * 80)
-    logger.info("[STEP 6] FINAL OUTPUT")
-    logger.info(f"  Complaint ID      : {complaint_id}")
-    logger.info(f"  Weighted Score    : {weighted_score}")
-    logger.info(f"  Rating            : {rating}")
-    logger.info("=" * 80)
-
-
-# -------------------------------------------------------
-# Helpers kept for backward compatibility
-# -------------------------------------------------------
-def log_prompt_built(description: str, num_similar_cases: int, has_custom_metrics: bool):
-    """Lightweight summary log (used when full prompt log is not needed)."""
-    logger.info("-" * 80)
-    logger.info("[STEP 2] PROMPT BUILT")
-    logger.info(f"  Description       : {description[:120]}{'...' if len(description) > 120 else ''}")
-    logger.info(f"  Similar Cases     : {num_similar_cases} injected into prompt")
-    logger.info(f"  Metrics Source    : {'Custom (uploaded)' if has_custom_metrics else 'Default metrics.json'}")
-    logger.info(f"  Parameters        : {', '.join(METRIC_META.keys())} (10 total)")
-
-
-def log_llm_scores(scores: dict):
-    """Simple score table (Step 3 summary, used before full audit)."""
-    logger.info("-" * 80)
-    logger.info("[STEP 3] LLM SCORES RECEIVED")
-    logger.info(f"  {'Code':<5} {'Parameter':<48} {'Score':>5}")
-    logger.info(f"  {'-'*5} {'-'*48} {'-'*5}")
-    for code, meta in METRIC_META.items():
-        score = scores.get(code, "?")
-        logger.info(f"  {code:<5} {meta['name']:<48} {score:>5}")
-    reasoning = scores.get("reasoning", "")
-    if reasoning:
-        logger.info(f"\n  Reasoning: {reasoning}")
+    _log("-" * 80)
+    _log("[STEP 6] FINAL OUTPUT")
+    _log(f"  Complaint ID      : {complaint_id}")
+    _log(f"  Weighted Score    : {weighted_score}")
+    _log(f"  Rating            : {rating}")
+    _log("=" * 80)
 
 
 def log_error(location: str, error: str):
-    logger.error(f"[ERROR] {location}: {error}")
+    _log(f"[ERROR] {location}: {error}")
