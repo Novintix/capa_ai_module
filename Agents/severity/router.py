@@ -13,8 +13,8 @@ Responsibilities:
 
 
 from fastapi import APIRouter, HTTPException
-from graph import build_graph
-from model import SeverityRequest, SeverityResponse
+from .graph import build_graph
+from .model import SeverityRequest, SeverityResponse
 router = APIRouter()
 
 graph = build_graph()

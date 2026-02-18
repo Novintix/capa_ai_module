@@ -19,17 +19,17 @@ Each node:
 
 
 import json
-from state import SeverityState
+from .state import SeverityState
 from config.aws_bedrock_config import get_llm
-from prompts import build_severity_prompt
-from tools.tools import load_matrix
-from model import SeverityLLMOutput
-from logger import (
+from .prompts import build_severity_prompt
+from .tools.tools import load_matrix
+from .model import SeverityLLMOutput
+from .logger import (
     log_node_entry,
     log_node_exit,
     log_error
 )
-from tools.tools import (
+from .tools.tools import (
     load_matrix,
     calculate_weighted_severity,
     get_severity_label

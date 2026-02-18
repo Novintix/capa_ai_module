@@ -9,20 +9,20 @@ from pathlib import Path
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
 
-from detection.state import AgentState
+from .state import AgentState
 from config.gemini_model_config import MODEL_NAME, TEMPERATURE, MAX_TOKENS, TIMEOUT, DEFAULT_SCORE_ON_ERROR
-from detection.prompt import (
+from .prompt import (
     POLICY_EXTRACTION_SYSTEM_PROMPT,
     POLICY_EXTRACTION_USER_PROMPT_TEMPLATE,
     DETECTION_SYSTEM_PROMPT,
     DETECTION_WITH_POLICY_USER_PROMPT_TEMPLATE,
     DETECTION_DEFAULT_USER_PROMPT_TEMPLATE
 )
-from detection.tools.pdf_extractor import extract_text_from_pdf
-from detection.tools.word_extractor import extract_text_from_word
-from detection.tools.excel_extractor import extract_text_from_excel
-from detection.tools.ocr_extractor import extract_text_from_image
-from detection.logger import log_node_entry, log_node_exit, log_routing_decision, log_error
+from .tools.pdf_extractor import extract_text_from_pdf
+from .tools.word_extractor import extract_text_from_word
+from .tools.excel_extractor import extract_text_from_excel
+from .tools.ocr_extractor import extract_text_from_image
+from .logger import log_node_entry, log_node_exit, log_routing_decision, log_error
 
 
 def initialize_state_node(state: AgentState) -> AgentState:

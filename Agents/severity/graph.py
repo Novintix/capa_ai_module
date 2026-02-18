@@ -15,8 +15,8 @@ Graph responsibilities:
 """
 
 from langgraph.graph import StateGraph
-from app.state import SeverityState
-from app.nodes import severity_classification_node, severity_calculation_node
+from .state import SeverityState
+from .nodes import severity_classification_node, severity_calculation_node
 
 # Constructs and compiles the severity evaluation graph
 

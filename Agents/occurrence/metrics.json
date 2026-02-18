@@ -1,0 +1,176 @@
+{
+  "parameters": {
+    "HF": {
+      "name": "Historical Frequency of Events",
+      "weight": 0.18,
+      "levels": {
+        "1": "No history of events (0 occurrences in last 3–5 years)",
+        "2": "1 isolated event, no recurrence",
+        "3": "1–2 events; no trend",
+        "4": "2–3 events sporadically",
+        "5": "Recurs quarterly or similar frequency",
+        "6": "Recurs monthly",
+        "7": "Recurs multiple times monthly",
+        "8": "Recurs weekly",
+        "9": "Recurs several times per week",
+        "10": "Recurs daily or every cycle/run"
+      }
+    },
+    "TR": {
+      "name": "Trend Analysis / Pattern Recognition",
+      "weight": 0.12,
+      "levels": {
+        "1": "No trend; stable flat data",
+        "2": "Minor fluctuation but no upward trend",
+        "3": "One short-term spike, not repeated",
+        "4": "Weak increasing tendency",
+        "5": "Small but noticeable trend signal",
+        "6": "Clear visible upward trend",
+        "7": "Strong accelerating trend",
+        "8": "Recurring trend peaks",
+        "9": "Persistent accelerating trend",
+        "10": "Uncontrolled exponential trend"
+      }
+    },
+    "PS": {
+      "name": "Process Stability / Cp-Cpk Variability",
+      "weight": 0.10,
+      "levels": {
+        "1": "High stability (Cp/Cpk > 2.0)",
+        "2": "Cp/Cpk 1.67–2.0",
+        "3": "Cp/Cpk 1.33–1.67",
+        "4": "Cp/Cpk 1.1–1.33",
+        "5": "Cp/Cpk at minimum acceptable (1.0–1.1)",
+        "6": "Cp/Cpk below requirement (<1.0)",
+        "7": "Significant variation; unstable",
+        "8": "Chronic variability",
+        "9": "Out-of-control process",
+        "10": "Process failure almost guaranteed"
+      }
+    },
+    "PC": {
+      "name": "Effectiveness of Preventive Controls",
+      "weight": 0.12,
+      "levels": {
+        "1": "Highly effective controls; proven elimination",
+        "2": "Strong controls, minimal risk",
+        "3": "Controls adequate with minor gaps",
+        "4": "Acceptable but partially effective",
+        "5": "Controls reduce but do not prevent occurrence",
+        "6": "Controls inconsistently effective",
+        "7": "Controls weak; high recurrence probability",
+        "8": "Preventive controls largely ineffective",
+        "9": "No functional preventive controls",
+        "10": "No controls exist or controls cannot be applied"
+      }
+    },
+    "DM": {
+      "name": "Effectiveness of Detection / Monitoring",
+      "weight": 0.10,
+      "levels": {
+        "1": "Automated 100% detection; real-time",
+        "2": "Very high detection reliability (≥95%)",
+        "3": "Reliable manual/automated detection",
+        "4": "Moderate detection capability",
+        "5": "Detection identifies only some issues",
+        "6": "Low detection reliability",
+        "7": "Detection unreliable; major gaps",
+        "8": "Detection seldom effective",
+        "9": "Almost undetectable failures",
+        "10": "Cannot detect until after failure / field complaint"
+      }
+    },
+    "SY": {
+      "name": "Systemic vs Isolated Issue",
+      "weight": 0.12,
+      "levels": {
+        "1": "Proven isolated root cause",
+        "2": "Very low systemic probability",
+        "3": "Mostly isolated with minimal spread",
+        "4": "Potential systemic contributors",
+        "5": "Mixed root causes; recurring",
+        "6": "Recurrence suggests systemic risk",
+        "7": "Systemic confirmed across products/lines",
+        "8": "Widespread systemic behavior",
+        "9": "Major systemic failure",
+        "10": "Fully systemic and uncontained"
+      }
+    },
+    "OE": {
+      "name": "Operator / Equipment Factors",
+      "weight": 0.08,
+      "levels": {
+        "1": "No operator/equipment involvement",
+        "2": "Extremely rare operator/equipment errors",
+        "3": "Minor isolated errors",
+        "4": "Occasional operator/equipment fluctuations",
+        "5": "Regular but manageable impacts",
+        "6": "Frequent operator/equipment error contribution",
+        "7": "Known failure mode tied to human or equipment",
+        "8": "Chronic operator or equipment issues",
+        "9": "Multiple unresolved causes",
+        "10": "Unavoidable failure without redesign"
+      }
+    },
+    "CA": {
+      "name": "CAPA / Past Corrective Actions Effectiveness",
+      "weight": 0.08,
+      "levels": {
+        "1": "CAPA permanently resolved issue",
+        "2": "CAPA highly effective; no recurrence",
+        "3": "Minor recurrence but controlled",
+        "4": "CAPA partially effective",
+        "5": "Recurrence observed despite CAPA",
+        "6": "CAPA weaknesses confirmed",
+        "7": "Recurring CAPA cycles required",
+        "8": "CAPAs repeatedly failed",
+        "9": "Major CAPA failure / systemic flaws",
+        "10": "No CAPA applicable or failed continuously"
+      }
+    },
+    "SU": {
+      "name": "Supplier / External Factors",
+      "weight": 0.05,
+      "levels": {
+        "1": "Supplier process stable; no history",
+        "2": "Rare supplier issues",
+        "3": "Minor variations manageable",
+        "4": "Occasional supplier impact",
+        "5": "Noticeable supplier variability",
+        "6": "Supplier instability visible",
+        "7": "Frequent supplier-driven failures",
+        "8": "Chronic supplier quality problems",
+        "9": "Major supplier fails capability requirements",
+        "10": "Supplier environment uncontrollable"
+      }
+    },
+    "AU": {
+      "name": "Audit / Compliance Findings",
+      "weight": 0.05,
+      "levels": {
+        "1": "No audit findings; full compliance",
+        "2": "Very minor observations",
+        "3": "Low-severity documented finding",
+        "4": "Observations requiring minor action",
+        "5": "Noted risk requiring monitoring",
+        "6": "Repeated audit findings",
+        "7": "Significant observations",
+        "8": "Major regulatory findings (e.g., 483/audit major)",
+        "9": "Systemic non-compliance",
+        "10": "Enforcement/critical shutdown level"
+      }
+    }
+  },
+  "score_terms": {
+    "1": "Remote",
+    "2": "Very Low",
+    "3": "Low",
+    "4": "Low–Moderate",
+    "5": "Moderate",
+    "6": "Elevated Moderate",
+    "7": "High",
+    "8": "Very High",
+    "9": "Critical",
+    "10": "Almost Certain"
+  }
+}

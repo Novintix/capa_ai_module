@@ -6,8 +6,8 @@ Defines the detection agent graph structure and routing logic.
 from typing import Literal
 from langgraph.graph import StateGraph
 
-from detection.state import AgentState
-from detection.nodes import (
+from .state import AgentState
+from .nodes import (
     initialize_state_node,
     check_policy_node,
     extract_policy_node,

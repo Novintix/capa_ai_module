@@ -21,17 +21,17 @@ from typing import Dict
 # --------------------------------------------------
 # Load Severity Matrix JSON
 # --------------------------------------------------
-
 def load_matrix() -> Dict:
     """
     Loads the severity matrix configuration from matrix.json
     """
 
-    base_path = os.path.dirname(__file__)
+    # Go one level up from tools directory
+    base_path = os.path.dirname(os.path.dirname(__file__))
     file_path = os.path.join(base_path, "matrix.json")
 
     if not os.path.exists(file_path):
-        raise FileNotFoundError("matrix.json not found in app directory")
+        raise FileNotFoundError(f"matrix.json not found at path: {file_path}")
 
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
