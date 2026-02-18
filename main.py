@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from detection.agent import DetectionAgentLangGraph
+from Agents.detection.agent import DetectionAgentLangGraph
 from router import register_routes
 
 # Load environment variables

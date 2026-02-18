@@ -6,8 +6,8 @@ All API endpoints (GET, POST methods)
 import os
 from fastapi import FastAPI, HTTPException
 
-from detection.schemas import ComplaintData, DetectionScore
-from detection.logger import log_api_request, log_api_response
+from Agents.detection.schemas import ComplaintData, DetectionScore
+from Agents.detection.logger import log_api_request, log_api_response
 
 
 def register_routes(app: FastAPI, detection_agent):
