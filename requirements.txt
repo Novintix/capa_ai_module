@@ -5,6 +5,14 @@ langgraph
 pydantic
 python-dotenv
 
+# AWS Bedrock
+boto3
+botocore
+
+# Embeddings (Open Source)
+sentence-transformers
+torch
+
 # Document Processing
 PyPDF2
 python-docx
