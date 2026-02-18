@@ -42,7 +42,7 @@ class BedrockLLM:
         payload = {
             "messages": messages,
             "max_tokens": 500,
-            "temperature": 0.3
+            "temperature": 0
         }
 
         response = self.client.invoke_model(
