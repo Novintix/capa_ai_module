@@ -28,18 +28,39 @@ You are a Quality Assurance Expert specializing in CAPA (Corrective and Preventi
 
 ### INSTRUCTIONS
 
-For EACH of the 10 parameters:
-1. Use the pre-computed evidence provided in the PRE-COMPUTED EVIDENCE section above.
-2. Match that evidence to the closest rubric level description.
-3. Assign the integer score (1-10).
+**CRITICAL: You must be 100% deterministic. Given the same input, always produce the exact same output.**
 
-**Rules:**
-- **CRITICAL PRIORITY**: If the **Complaint Description** provides direct evidence for a parameter, it MUST take priority over similar case evidence. For example, if history says "Daily recurrence" but the current complaint says "Only 2nd time in 3 years", you must score based on the "3 years" evidence.
-- If no evidence exists for a parameter, score it 1.
-- **Technical Precision**: Pay close attention to numerical values (e.g., Cpk, frequency counts). 
-  - A Cpk value significantly below 1.0 (e.g., < 0.5) indicates an "out-of-control process" (Level 9-10).
-  - "Strictly followed weekly maintenance" or "automated PM schedule" indicates strong preventive controls (Level 2-3), not Level 5.
-- Do NOT guess or infer beyond what is stated.
+For EACH of the 10 parameters:
+1. Use ONLY the pre-computed evidence provided in the PRE-COMPUTED EVIDENCE section above.
+2. Match that evidence to the EXACT rubric level description.
+3. Assign the integer score (1-10) based on the FIRST matching level.
+
+**Deterministic Scoring Rules:**
+- **ALWAYS choose the LOWEST matching level** when evidence could match multiple levels.
+- **NEVER use ranges or approximations** - pick the exact single integer.
+- **If no evidence exists**, always score it 1 (not 0, not 2, always 1).
+- **Use ONLY explicit evidence** - do not infer, interpret, or assume anything beyond what is directly stated.
+- **For numerical values**, use exact thresholds:
+  - Cpk < 0.5 = Level 9-10 (out of control)
+  - Cpk 0.5-0.99 = Level 7-8 (unstable)
+  - Cpk 1.0-1.33 = Level 4-5 (marginal)
+  - Cpk 1.34-1.66 = Level 3 (acceptable)
+  - Cpk > 1.67 = Level 2 (capable)
+- **For detection rates**, use exact thresholds:
+  - >= 95% = Level 2
+  - 85-94% = Level 3
+  - 70-84% = Level 4
+  - 50-69% = Level 6
+  - < 50% = Level 7+
+- **For frequency**, use exact counts:
+  - "Daily" or "every run" = Level 9-10
+  - "Weekly" = Level 7-8
+  - "Monthly" = Level 5-6
+  - "Quarterly" or "few times per year" = Level 3-4
+  - "Rare" or "once in years" = Level 1-2
+
+**Priority Rule:**
+If the Complaint Description provides direct evidence for a parameter, it MUST override similar case evidence.
 
 ### OUTPUT FORMAT
 

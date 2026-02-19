@@ -42,9 +42,16 @@ class BedrockLLM:
         payload = {
             "messages": messages,
             "max_tokens": 4000,
-            "temperature": 0.0
+            "temperature": 0.0,
+            "top_p": 0.001,
+            "frequency_penalty": 0.0,
+            "presence_penalty": 0.0
         }
 
+        return self._single_invoke(payload)
+
+    def _single_invoke(self, payload):
+        """Single model invocation"""
         response = self.client.invoke_model(
             modelId=self.model_id,
             contentType="application/json",
@@ -104,7 +111,7 @@ class BedrockLLM:
 
         return type("LLMResponse", (), {
             "content": clean_json,
-            "raw_content": original_content   # full response before stripping
+            "raw_content": original_content
         })()
 
 
