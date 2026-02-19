@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from Agents.detection.router import api_router as detection_router
 from Agents.occurrence.router import router as occurrence_router
+from Agents.aireasoning.router import router as aireasoning_router
 
 
 def register_routes(app: FastAPI):
@@ -14,6 +15,7 @@ def register_routes(app: FastAPI):
     # Include agent routers
     app.include_router(detection_router)
     app.include_router(occurrence_router)
+    app.include_router(aireasoning_router)
     
     @app.get("/")
     def root():
@@ -24,12 +26,14 @@ def register_routes(app: FastAPI):
             "version": "1.0.0",
             "agents": {
                 "detection": "Policy-Driven Detection Score Agent",
-                "occurrence": "Occurrence Rating Agent"
+                "occurrence": "Occurrence Rating Agent",
+                "aireasoning": "AI Reasoning Agent"
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
                 "GET /detection/health": "Detection agent health check",
                 "POST /occurrence/analyze": "Analyze occurrence rating for a complaint",
+                "POST /aireasoning/analyze": "Generate AI reasoning for risk assessment",
                 "GET /health": "Global health check"
             }
         }
