@@ -27,6 +27,7 @@ msrest
 # API Server (Optional)
 fastapi
 uvicorn
+python-multipart
 
 # Testing (Optional)
 pytest

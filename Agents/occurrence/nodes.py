@@ -1,69 +1,165 @@
 import json
+import re
 from Agents.occurrence.state import OccurrenceState, OccurrenceScoreResponse, OccurrenceOutput
-from Agents.occurrence.prompts import build_prompt, get_weights, load_metrics
+from Agents.occurrence.utils import build_prompt, get_weights, build_evidence_summary
 from config.aws_bedrock_config import get_llm
+from Agents.occurrence.logger import (
+    log_prompt, log_raw_response, log_score_audit,
+    log_weighted_calculation, log_error,
+    log_node_start, log_node_end
+)
+
+# Maps parameter codes to their occurrence_factors key names
+PARAM_FACTOR_KEYS = {
+    "HF": "Historical Frequency of Events",
+    "TR": "Trend Analysis / Pattern Recognition",
+    "PS": "Process Stability / Cp-Cpk Variability",
+    "PC": "Effectiveness of Preventive Controls",
+    "DM": "Effectiveness of Detection / Monitoring",
+    "SY": "Systemic vs Isolated Issue",
+    "OE": "Operator / Equipment Factors",
+    "CA": "CAPA / Past Corrective Actions Effectiveness",
+    "SU": "Supplier / External Factors",
+    "AU": "Audit / Compliance Findings",
+}
+
+# DO #4: Maximum iteration limit — agent must stop
+MAX_ITERATIONS = 3
 
 
-def generate_scores(state: OccurrenceState):
+# ─────────────────────────────────────────────────────────────
+# NODE 1: prepare_evidence
+# DO #2: Single responsibility — only builds evidence summary
+# DO #5: Separated from LLM call (orchestration vs processing)
+# ─────────────────────────────────────────────────────────────
+def prepare_evidence(state: OccurrenceState) -> dict:
     """
-    Node to call LLM and generate occurrence scores for each parameter.
-    Loads metrics from metrics.json (or from uploaded metrics data in state).
+    Node 1: Pre-computes a deterministic evidence summary per parameter
+    from similar cases. Separated from LLM call (DO #2, DO #5).
     """
+    log_node_start("prepare_evidence")
+
+    # DO #4: Guard against runaway loops
+    if state.iteration >= MAX_ITERATIONS:
+        log_node_end("prepare_evidence", "MAX_ITERATIONS reached — aborting")
+        raise RuntimeError(f"Max iteration limit ({MAX_ITERATIONS}) reached.")
+
     input_data = state.input
 
-    # Load metrics — use uploaded metrics if provided, else default metrics.json
+    evidence_summary = build_evidence_summary(
+        similar_cases=input_data.similar_cases or [],
+        param_factor_keys=PARAM_FACTOR_KEYS
+    )
+
+    log_node_end(
+        "prepare_evidence",
+        f"Evidence built for {len(evidence_summary)} parameters from {len(input_data.similar_cases or [])} case(s)"
+    )
+
+    # DON'T #1: Return dict — let LangGraph merge state (not in-place mutation)
+    # DON'T #7: evidence_summary is declared in OccurrenceState — no hidden state
+    return {
+        "iteration": state.iteration + 1,
+        "evidence_summary": evidence_summary
+    }
+
+
+# ─────────────────────────────────────────────────────────────
+# NODE 2: generate_scores
+# DO #2: Single responsibility — only calls LLM and parses scores
+# ─────────────────────────────────────────────────────────────
+def generate_scores(state: OccurrenceState) -> dict:
+    """
+    Node 2: Calls LLM once with pre-computed evidence and parses scores.
+    Uses evidence-first chain-of-thought anchoring for consistent scoring.
+    """
+    log_node_start("generate_scores")
+
+    input_data = state.input
+
     metrics = None
     if hasattr(input_data, "metrics_data") and input_data.metrics_data:
         try:
             metrics = json.loads(input_data.metrics_data)
         except Exception:
-            metrics = None  # Fall back to default if parse fails
+            metrics = None
 
-    # Format similar cases for the prompt
+    # Retrieve pre-computed evidence from state (set by prepare_evidence node)
+    # DON'T #7: evidence_summary is declared in OccurrenceState — no hidden state
+    evidence_summary = state.evidence_summary
+
+    # DO #6: Defensive guard — fallback if evidence not in state
+    if evidence_summary is None:
+        evidence_summary = build_evidence_summary(
+            similar_cases=input_data.similar_cases or [],
+            param_factor_keys=PARAM_FACTOR_KEYS
+        )
+
     similar_cases_str = (
         json.dumps(input_data.similar_cases, indent=2)
         if input_data.similar_cases
         else "None"
     )
 
-    # Build prompt dynamically from metrics
     prompt = build_prompt(
         description=input_data.description,
         product=input_data.product,
         date=input_data.date,
         similar_cases=similar_cases_str,
         context=input_data.additional_context or "None",
-        metrics=metrics
+        metrics=metrics,
+        evidence_summary=evidence_summary
     )
+
+    log_prompt(prompt)
 
     try:
         llm = get_llm()
         response = llm.invoke(prompt)
 
-        # Parse response content
-        content = json.loads(response.content)
+        log_raw_response(response.raw_content)
 
-        # Create score response object
+        # Robust JSON extraction
+        raw_content = response.content
+        json_match = re.search(r'({.*})', raw_content, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1)
+        else:
+            json_str = raw_content
+
+        content = json.loads(json_str)
         scores = OccurrenceScoreResponse(**content)
+        log_score_audit(content, input_data.similar_cases or [])
 
+        log_node_end("generate_scores", f"Scores parsed for 10 parameters")
+
+        # DON'T #1: Return dict — let LangGraph merge state
         return {"raw_scores": scores}
 
     except Exception as e:
+        log_error("generate_scores", str(e))
         raise RuntimeError(f"Error generating scores: {str(e)}")
 
 
-def calculate_weighted_score(state: OccurrenceState):
+# ─────────────────────────────────────────────────────────────
+# NODE 3: calculate_weighted_score
+# DO #2: Single responsibility — only computes final score
+# DO #6: Guards that raw_scores exist and values are in range
+# ─────────────────────────────────────────────────────────────
+def calculate_weighted_score(state: OccurrenceState) -> dict:
     """
-    Node to calculate the final weighted score based on raw scores and weights.
-    Loads weights from metrics.json (or from uploaded metrics data in state).
+    Node 3: Computes the final weighted score from raw scores.
+    Guards that scores exist and are in valid range (DO #6).
     """
+    log_node_start("calculate_weighted_score")
+
+    # DO #6: Guard — raw_scores must exist before routing here
     scores = state.raw_scores
     if not scores:
-        raise ValueError("No raw scores found in state")
+        raise ValueError("State guard failed: raw_scores is None before calculate_weighted_score")
 
     input_data = state.input
 
-    # Load weights from metrics
     metrics = None
     if hasattr(input_data, "metrics_data") and input_data.metrics_data:
         try:
@@ -73,7 +169,6 @@ def calculate_weighted_score(state: OccurrenceState):
 
     weights = get_weights(metrics)
 
-    # Calculate weighted sum
     score_dict = {
         "HF": scores.HF,
         "TR": scores.TR,
@@ -87,13 +182,18 @@ def calculate_weighted_score(state: OccurrenceState):
         "AU": scores.AU,
     }
 
+    # DO #6: Clamp scores to valid range as a safety net
+    score_dict = {k: max(1, min(10, v)) for k, v in score_dict.items()}
+
     weighted_sum = sum(score_dict[code] * weights.get(code, 0) for code in score_dict)
+
+    log_weighted_calculation(scores, weights)
 
     rating_map = {
         1: "Remote",
         2: "Very Low",
         3: "Low",
-        4: "Low–Moderate",
+        4: "Low-Moderate",
         5: "Moderate",
         6: "Elevated Moderate",
         7: "High",
@@ -106,9 +206,15 @@ def calculate_weighted_score(state: OccurrenceState):
     rating = rating_map.get(rounded_score, "Unknown")
 
     output = OccurrenceOutput(
-        weighted_score=round(weighted_sum, 2),
+        weighted_score=rounded_score,
         rating=rating,
         breakdown=scores
     )
 
+    log_node_end(
+        "calculate_weighted_score",
+        f"weighted_score={rounded_score} | rating={rating}"
+    )
+
+    # DON'T #1: Return dict — let LangGraph merge state
     return {"final_output": output}

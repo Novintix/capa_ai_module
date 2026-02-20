@@ -1,12 +1,13 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 from typing import Optional
 import json
 from Agents.occurrence.state import ComplaintData, OccurrenceOutput
 from Agents.occurrence.graph import occurrence_graph
-from Agents.occurrence.utils import MetricsParser
-from Agents.occurrence.prompts import load_metrics
+from Agents.occurrence.utils import MetricsParser, load_metrics
+from Agents.occurrence.logger import log_request, log_final_output, log_error
 
-router = APIRouter()
+router = APIRouter(prefix="/occurrence", tags=["occurrence"])
 
 
 @router.post("/analyze", response_model=OccurrenceOutput)
@@ -41,6 +42,14 @@ async def analyze_occurrence(
                 parsed_similar_cases = json.loads(similar_cases_json)
             except json.JSONDecodeError:
                 raise HTTPException(status_code=400, detail="Invalid JSON format for similar_cases_json")
+
+        log_request(
+            complaint_id=complaint_id,
+            product=product,
+            source=source,
+            date=date,
+            num_similar_cases=len(parsed_similar_cases)
+        )
 
         # 2. Parse metrics file (JSON only — defines the scoring rubric)
         metrics_data_str = None
@@ -81,7 +90,22 @@ async def analyze_occurrence(
             metrics_data=metrics_data_str  # None = use default metrics.json
         )
 
-        initial_state = {"input": input_data}
+        # DO #6: Guard state transitions — validate required fields before invoking graph
+        if not input_data.description.strip():
+            raise HTTPException(status_code=400, detail="description cannot be empty.")
+        if not input_data.date.strip():
+            raise HTTPException(status_code=400, detail="date cannot be empty.")
+        if not input_data.product.strip():
+            raise HTTPException(status_code=400, detail="product cannot be empty.")
+
+        # DO #1: Initialize all state keys before execution starts
+        initial_state = {
+            "input": input_data,
+            "iteration": 0,
+            "evidence_summary": None,
+            "raw_scores": None,
+            "final_output": None
+        }
 
         # 6. Invoke Graph
         result = occurrence_graph.invoke(initial_state)
@@ -90,9 +114,21 @@ async def analyze_occurrence(
         if not final_output:
             raise ValueError("Agent failed to produce a final output.")
 
-        return final_output
+        log_final_output(
+            complaint_id=complaint_id,
+            weighted_score=final_output.weighted_score,
+            rating=final_output.rating
+        )
+
+        breakdown = final_output.breakdown.model_dump()
+        return JSONResponse(content={
+            "weighted_score": int(final_output.weighted_score),
+            "rating": final_output.rating,
+            "breakdown": breakdown
+        })
 
     except HTTPException:
         raise
     except Exception as e:
+        log_error("router", str(e))
         raise HTTPException(status_code=500, detail=f"Error processing occurrence analysis: {str(e)}")
