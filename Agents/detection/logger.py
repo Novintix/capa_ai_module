@@ -7,8 +7,8 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-# Create logs directory in agent root (parent of detection)
-log_dir = Path(__file__).parent.parent / "logs"
+# Create logs directory inside detection folder
+log_dir = Path(__file__).parent / "logs"
 log_dir.mkdir(exist_ok=True)
 
 # Configure logger

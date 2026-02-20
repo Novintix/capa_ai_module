@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from Agents.detection.router import api_router as detection_router
 from Agents.severity.router import router as severity_router
+from Agents.regulatory.router import api_router as regulatory_router
 
 
 def register_routes(app: FastAPI):
@@ -13,7 +14,7 @@ def register_routes(app: FastAPI):
     
     # Include agent routers
     app.include_router(detection_router)
-    app.include_router(severity_router)
+    app.include_router(regulatory_router)
     
     @app.get("/")
     def root():
@@ -23,11 +24,14 @@ def register_routes(app: FastAPI):
             "service": "Centralized Agent Repository",
             "version": "1.0.0",
             "agents": {
-                "detection": "Policy-Driven Detection Score Agent"
+                "detection": "Policy-Driven Detection Score Agent",
+                "regulatory": "Policy-Driven Regulatory Compliance Agent"
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
                 "GET /detection/health": "Detection agent health check",
+                "POST /regulatory/": "Evaluate regulatory compliance with optional policy",
+                "GET /regulatory/health": "Regulatory agent health check",
                 "GET /health": "Global health check"
             }
         }

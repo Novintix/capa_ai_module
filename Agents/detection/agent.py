@@ -3,12 +3,12 @@ Detection Agent
 Main agent class that uses the LangGraph workflow.
 """
 
-import os
 from typing import Dict, Any, Optional
 
 from .graph import create_detection_graph
 from .state import AgentState
 from .schemas import ComplaintData
+from config.aws_bedrock_config import get_llm
 
 
 class DetectionAgentLangGraph:
@@ -19,9 +19,11 @@ class DetectionAgentLangGraph:
     
     def __init__(self):
         """Initialize the agent."""
-        # Verify API key
-        if not os.getenv("GOOGLE_API_KEY"):
-            raise ValueError("GOOGLE_API_KEY environment variable not set")
+        # Verify AWS Bedrock is available
+        try:
+            get_llm()
+        except Exception as e:
+            raise ValueError(f"AWS Bedrock initialization failed: {str(e)}")
         
         # Create graph
         self.graph = create_detection_graph()

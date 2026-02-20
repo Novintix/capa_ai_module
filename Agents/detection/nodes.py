@@ -5,12 +5,10 @@ All node functions for the Detection Agent.
 
 import os
 import json
+import re
 from pathlib import Path
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import SystemMessage, HumanMessage
 
 from .state import AgentState
-from config.gemini_model_config import MODEL_NAME, TEMPERATURE, MAX_TOKENS, TIMEOUT, DEFAULT_SCORE_ON_ERROR
 from .prompt import (
     POLICY_EXTRACTION_SYSTEM_PROMPT,
     POLICY_EXTRACTION_USER_PROMPT_TEMPLATE,
@@ -23,6 +21,37 @@ from .tools.word_extractor import extract_text_from_word
 from .tools.excel_extractor import extract_text_from_excel
 from .tools.ocr_extractor import extract_text_from_image
 from .logger import log_node_entry, log_node_exit, log_routing_decision, log_error
+from config.aws_bedrock_config import get_llm
+
+
+def clean_llm_response(response_text: str) -> str:
+    """Clean LLM response by removing reasoning tags and markdown"""
+    # Strip reasoning tags if present (including content between them)
+    if "<reasoning>" in response_text and "</reasoning>" in response_text:
+        response_text = re.sub(r'<reasoning>.*?</reasoning>\s*', '', response_text, flags=re.DOTALL).strip()
+    
+    # Remove markdown code blocks
+    response_text = response_text.replace('```json', '').replace('```', '').strip()
+    
+    # Extract JSON object - find first { and last }
+    start_idx = response_text.find('{')
+    end_idx = response_text.rfind('}')
+    
+    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+        response_text = response_text[start_idx:end_idx+1]
+    elif start_idx != -1:
+        # JSON started but didn't close - likely truncated
+        # Try to find where it was cut off and close it
+        response_text = response_text[start_idx:]
+        # If it ends with incomplete string, try to close it
+        if response_text.count('"') % 2 != 0:
+            response_text += '"'
+        # Close the JSON object
+        response_text += '}'
+    else:
+        raise ValueError(f"No valid JSON object found in response")
+    
+    return response_text
 
 
 def initialize_state_node(state: AgentState) -> AgentState:
@@ -161,33 +190,19 @@ def parse_policy_node(state: AgentState) -> AgentState:
     
     try:
         # Initialize LLM
-        llm = ChatGoogleGenerativeAI(
-            model=MODEL_NAME,
-            temperature=0,
-            max_tokens=MAX_TOKENS,
-            timeout=TIMEOUT
-        )
+        llm = get_llm()
         
         # Build prompt from template
         user_prompt = POLICY_EXTRACTION_USER_PROMPT_TEMPLATE.format(
             document_text=state["policy_text"]
         )
         
-        messages = [
-            SystemMessage(content=POLICY_EXTRACTION_SYSTEM_PROMPT),
-            HumanMessage(content=user_prompt)
-        ]
+        # Combine system and user prompt
+        full_prompt = POLICY_EXTRACTION_SYSTEM_PROMPT + "\n\n" + user_prompt
         
         # Call LLM
-        response = llm.invoke(messages)
-        response_text = response.content.strip()
-        
-        # Clean and parse JSON
-        response_text = response_text.replace('```json', '').replace('```', '').strip()
-        if '{' in response_text:
-            response_text = response_text[response_text.index('{'):]
-        if '}' in response_text:
-            response_text = response_text[:response_text.rindex('}')+1]
+        response = llm.invoke(full_prompt)
+        response_text = clean_llm_response(response.content)
         
         policy_data = json.loads(response_text)
         rules = policy_data.get('detection_matrix', [])
@@ -232,12 +247,7 @@ def score_with_policy_node(state: AgentState) -> AgentState:
     
     try:
         # Initialize LLM
-        llm = ChatGoogleGenerativeAI(
-            model=MODEL_NAME,
-            temperature=0,
-            max_tokens=MAX_TOKENS,
-            timeout=TIMEOUT
-        )
+        llm = get_llm()
         
         # Build policy rules text
         policy_rules_text = ""
@@ -257,21 +267,12 @@ def score_with_policy_node(state: AgentState) -> AgentState:
             policy_rules_text=policy_rules_text
         )
         
-        messages = [
-            SystemMessage(content=DETECTION_SYSTEM_PROMPT),
-            HumanMessage(content=user_prompt)
-        ]
+        # Combine system and user prompt
+        full_prompt = DETECTION_SYSTEM_PROMPT + "\n\n" + user_prompt
         
         # Call LLM
-        response = llm.invoke(messages)
-        response_text = response.content.strip()
-        
-        # Clean and parse JSON
-        response_text = response_text.replace('```json', '').replace('```', '').strip()
-        if '{' in response_text:
-            response_text = response_text[response_text.index('{'):]
-        if '}' in response_text:
-            response_text = response_text[:response_text.rindex('}')+1]
+        response = llm.invoke(full_prompt)
+        response_text = clean_llm_response(response.content)
         
         result = json.loads(response_text)
         
@@ -320,12 +321,7 @@ def score_with_defaults_node(state: AgentState) -> AgentState:
     
     try:
         # Initialize LLM
-        llm = ChatGoogleGenerativeAI(
-            model=MODEL_NAME,
-            temperature=0,
-            max_tokens=MAX_TOKENS,
-            timeout=TIMEOUT
-        )
+        llm = get_llm()
         
         # Build prompt from template
         user_prompt = DETECTION_DEFAULT_USER_PROMPT_TEMPLATE.format(
@@ -333,26 +329,17 @@ def score_with_defaults_node(state: AgentState) -> AgentState:
             complaint_description=state["complaint_description"]
         )
         
-        messages = [
-            SystemMessage(content=DETECTION_SYSTEM_PROMPT),
-            HumanMessage(content=user_prompt)
-        ]
+        # Combine system and user prompt
+        full_prompt = DETECTION_SYSTEM_PROMPT + "\n\n" + user_prompt
         
         # Call LLM
-        response = llm.invoke(messages)
-        response_text = response.content.strip()
-        
-        # Clean and parse JSON
-        response_text = response_text.replace('```json', '').replace('```', '').strip()
-        if '{' in response_text:
-            response_text = response_text[response_text.index('{'):]
-        if '}' in response_text:
-            response_text = response_text[:response_text.rindex('}')+1]
+        response = llm.invoke(full_prompt)
+        response_text = clean_llm_response(response.content)
         
         result = json.loads(response_text)
         
         updates = {
-            "detection_score": result.get("detection_score", DEFAULT_SCORE_ON_ERROR),
+            "detection_score": result.get("detection_score", 10),
             "confidence": result.get("confidence", 0.5),
             "rule_reference": result.get("rule_reference", "Default FMEA Rules"),
             "explanation": result.get("explanation", "Scored using default rules"),
@@ -367,7 +354,7 @@ def score_with_defaults_node(state: AgentState) -> AgentState:
         error_msg = f"Scoring with defaults failed: {str(e)}"
         log_error("score_with_defaults", error_msg)
         updates = {
-            "detection_score": DEFAULT_SCORE_ON_ERROR,
+            "detection_score": 10,
             "confidence": 0.0,
             "rule_reference": "Error Fallback",
             "explanation": f"Error: {str(e)}",
