@@ -13,7 +13,7 @@ from .agent import RegulatoryAgentLangGraph
 
 
 # Create API router
-api_router = APIRouter(prefix="/regulatory", tags=["regulatory"])
+router = APIRouter(prefix="/regulatory", tags=["regulatory"])
 
 # Lazy initialization of regulatory agent
 _regulatory_agent = None
@@ -27,7 +27,7 @@ def get_regulatory_agent():
     return _regulatory_agent
 
 
-@api_router.post("/", response_model=RegulatoryDecision)
+@router.post("/", response_model=RegulatoryDecision)
 def evaluate_regulatory_compliance(
     complaint: ComplaintInput,
     policy: Optional[RegulatoryPolicy] = None
@@ -80,7 +80,7 @@ def evaluate_regulatory_compliance(
         )
 
 
-@api_router.get("/health")
+@router.get("/health")
 def regulatory_health():
     """Regulatory agent health check"""
     # Check credentials without initializing agent
