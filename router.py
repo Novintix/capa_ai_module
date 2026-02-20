@@ -18,6 +18,8 @@ def register_routes(app: FastAPI):
     app.include_router(detection_router)
     app.include_router(occurrence_router)
     app.include_router(aireasoning_router)
+    app.include_router(severity_router)
+    app.include_router(regulatory_router)
     
     @app.get("/")
     def root():
@@ -29,14 +31,16 @@ def register_routes(app: FastAPI):
             "agents": {
                 "detection": "Policy-Driven Detection Score Agent",
                 "occurrence": "Occurrence Rating Agent",
-                "aireasoning": "AI Reasoning Agent"
+                "aireasoning": "AI Reasoning Agent",
+                "severity": "Severity Classification Agent",
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
                 "GET /detection/health": "Detection agent health check",
                 "POST /occurrence/analyze": "Analyze occurrence rating for a complaint",
                 "POST /aireasoning/analyze": "Generate AI reasoning for risk assessment",
-                "GET /health": "Global health check"
+                "GET /health": "Global health check",
+                "POST /severity": "Evaluate severity of a complaint issue",
             }
         }
     
