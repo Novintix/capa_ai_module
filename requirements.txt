@@ -9,6 +9,10 @@ python-dotenv
 boto3
 botocore
 
+# Redis (Why Question Agent — session memory)
+redis
+langgraph-checkpoint-redis
+
 # Embeddings (Open Source)
 sentence-transformers
 torch
