@@ -5,80 +5,131 @@ from fastapi import UploadFile
 import PyPDF2
 from docx import Document
 import os
+from langchain_core.tools import tool
 
 # Default metrics file path
 DEFAULT_METRICS_PATH = os.path.join(os.path.dirname(__file__), "metrics.json")
 
+
+# ─────────────────────────────────────────────────────────────
+# FILE PARSING TOOLS
+# @tool — explicitly called by router, NOT via LLM/ReAct
+# ─────────────────────────────────────────────────────────────
+
+@tool
+def parse_json_file(content: bytes) -> str:
+    """Parse a JSON file and return a pretty-printed JSON string."""
+    data = json.loads(content)
+    return json.dumps(data, indent=2)
+
+
+@tool
+def parse_csv_file(content: bytes) -> str:
+    """Parse a CSV file and return a markdown table string."""
+    df = pd.read_csv(io.BytesIO(content))
+    return df.to_markdown(index=False)
+
+
+@tool
+def parse_excel_file(content: bytes) -> str:
+    """Parse an Excel (.xlsx/.xls) file and return a markdown table string."""
+    df = pd.read_excel(io.BytesIO(content))
+    return df.to_markdown(index=False)
+
+
+@tool
+def parse_pdf_file(content: bytes) -> str:
+    """Parse a PDF file and return extracted text."""
+    pdf_reader = PyPDF2.PdfReader(io.BytesIO(content))
+    text = ""
+    for page in pdf_reader.pages:
+        text += page.extract_text() + "\n"
+    return text
+
+
+@tool
+def parse_docx_file(content: bytes) -> str:
+    """Parse a .docx Word file and return extracted paragraph text."""
+    doc = Document(io.BytesIO(content))
+    return "\n".join([para.text for para in doc.paragraphs])
+
+
+@tool
+def parse_txt_file(content: bytes) -> str:
+    """Parse a plain text file and return its UTF-8 decoded content."""
+    return content.decode("utf-8")
+
+
+# ─────────────────────────────────────────────────────────────
+# DISPATCHER — routes to the correct @tool based on filename
+# Called by router.py; keeps FastAPI async compatibility
+# ─────────────────────────────────────────────────────────────
+
 class MetricsParser:
+    # Maps file extension to the @tool function
+    _TOOL_MAP = {
+        ".json": parse_json_file,
+        ".csv":  parse_csv_file,
+        ".xlsx": parse_excel_file,
+        ".xls":  parse_excel_file,
+        ".pdf":  parse_pdf_file,
+        ".docx": parse_docx_file,
+        ".txt":  parse_txt_file,
+    }
+
     @staticmethod
     async def parse_file(file: UploadFile) -> str:
         """
-        Parses text/data from an uploaded file (JSON, Excel, CSV, PDF, Docx).
-        Returns a string representation of the data.
+        Dispatcher: reads the uploaded file and routes to the correct @tool
+        based on the file extension. Called explicitly — not via LLM/ReAct.
         """
         content = await file.read()
         filename = file.filename.lower()
-        
-        try:
-            if filename.endswith(".json"):
-                data = json.loads(content)
-                return json.dumps(data, indent=2)
-                
-            elif filename.endswith(".csv"):
-                df = pd.read_csv(io.BytesIO(content))
-                return df.to_markdown(index=False)
-                
-            elif filename.endswith(".xlsx") or filename.endswith(".xls"):
-                df = pd.read_excel(io.BytesIO(content))
-                return df.to_markdown(index=False)
-                
-            elif filename.endswith(".pdf"):
-                pdf_reader = PyPDF2.PdfReader(io.BytesIO(content))
-                text = ""
-                for page in pdf_reader.pages:
-                    text += page.extract_text() + "\n"
-                return text
-                
-            elif filename.endswith(".docx"):
-                doc = Document(io.BytesIO(content))
-                text = "\n".join([para.text for para in doc.paragraphs])
-                return text
-                
-            elif filename.endswith(".txt"):
-                return content.decode("utf-8")
-                
-            # TODO: Add Image OCR support if needed (requires Azure or Vision Model)
-            elif filename.endswith((".png", ".jpg", ".jpeg")):
-                return f"[Image File Provided: {filename} - Content Extraction Not Implemented without OCR Service]"
-                
-            else:
-                return f"[Unsupported file format: {filename}]"
-                
-        except Exception as e:
-            return f"Error parsing file {filename}: {str(e)}"
+
+        # TODO: Add Image OCR support if needed (requires Azure or Vision Model)
+        if filename.endswith((".png", ".jpg", ".jpeg")):
+            return f"[Image File Provided: {filename} - Content Extraction Not Implemented without OCR Service]"
+
+        for ext, parse_tool in MetricsParser._TOOL_MAP.items():
+            if filename.endswith(ext):
+                try:
+                    return parse_tool.invoke({"content": content})
+                except Exception as e:
+                    return f"Error parsing file {filename}: {str(e)}"
+
+        return f"[Unsupported file format: {filename}]"
 
 
+# ─────────────────────────────────────────────────────────────
+# METRICS TOOLS
+# @tool — explicitly called by nodes/router via .invoke(), NOT via LLM/ReAct
+# ─────────────────────────────────────────────────────────────
+
+@tool
 def load_metrics(metrics_path: str = None) -> dict:
-    """Load metrics from a JSON file. Falls back to default metrics.json."""
+    """Load metrics definition from a JSON file. Falls back to default metrics.json."""
     path = metrics_path or DEFAULT_METRICS_PATH
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
-        # Fallback to empty if default file missing (though it should be there)
         print(f"Warning: Could not load metrics from {path}: {e}")
         return {}
 
 
+@tool
 def get_weights(metrics: dict = None) -> dict:
-    """Extract weights dict from metrics definition."""
-    if metrics is None:
-        metrics = load_metrics()
+    """Extract parameter weights dict from a metrics definition. Loads default if metrics is None."""
+    resolved = load_metrics.invoke({}) if metrics is None else metrics
     return {
         code: param["weight"]
-        for code, param in metrics.get("parameters", {}).items()
+        for code, param in resolved.get("parameters", {}).items()
     }
 
+
+# ─────────────────────────────────────────────────────────────
+# UTILITY FUNCTIONS (non-tool — internal graph helpers)
+# ─────────────────────────────────────────────────────────────
 
 def build_evidence_summary(similar_cases: list, param_factor_keys: dict) -> dict:
     """
@@ -86,7 +137,6 @@ def build_evidence_summary(similar_cases: list, param_factor_keys: dict) -> dict
     highest-similarity case. This ensures the LLM receives exactly one
     evidence string per parameter — no conflict, no random selection.
     """
-    # Sort cases by similarity_score descending — highest similarity first
     sorted_cases = sorted(
         similar_cases,
         key=lambda c: float(c.get("similarity_score", 0)),
@@ -95,7 +145,6 @@ def build_evidence_summary(similar_cases: list, param_factor_keys: dict) -> dict
 
     evidence = {}
     for code, factor_key in param_factor_keys.items():
-        # Find the first (highest-similarity) case that has this factor
         found = False
         for case in sorted_cases:
             val = case.get("occurrence_factors", {}).get(factor_key, "").strip()
@@ -111,9 +160,8 @@ def build_evidence_summary(similar_cases: list, param_factor_keys: dict) -> dict
     return evidence
 
 
-
 def build_prompt(description: str, product: str, date: str,
-                 similar_cases: str, context: str,
+                 context: str,
                  metrics: dict = None,
                  evidence_summary: dict = None) -> str:
     """
@@ -121,7 +169,7 @@ def build_prompt(description: str, product: str, date: str,
     If evidence_summary is provided, injects pre-computed per-parameter evidence.
     """
     if metrics is None:
-        metrics = load_metrics()
+        metrics = load_metrics.invoke({})
 
     parameters = metrics.get("parameters", {})
 
@@ -139,7 +187,6 @@ def build_prompt(description: str, product: str, date: str,
 
         weights_block += f"| {code} | {name} | {int(weight * 100)}% |\n"
 
-    # Build pre-computed evidence block
     evidence_block = ""
     if evidence_summary:
         evidence_block = "\n### PRE-COMPUTED EVIDENCE FROM SIMILAR CASES\n"
@@ -153,10 +200,8 @@ def build_prompt(description: str, product: str, date: str,
         description=description,
         product=product,
         date=date,
-        similar_cases=similar_cases,
         context=context,
         param_guide=param_guide,
         weights_block=weights_block,
         evidence_block=evidence_block
     )
-

@@ -14,7 +14,24 @@ workflow.add_node("calculate_weighted_score", calculate_weighted_score)
 # Define edges — routing is explicit and readable (DO #3)
 workflow.set_entry_point("prepare_evidence")
 workflow.add_edge("prepare_evidence", "generate_scores")
-workflow.add_edge("generate_scores", "calculate_weighted_score")
+
+def should_retry(state: OccurrenceState):
+    """
+    Check if we have scores. If yes, proceed. 
+    If no (LLM failure), retry generate_scores (up to MAX_RETRIES handled in node).
+    """
+    if state.raw_scores:
+        return "calculate_weighted_score"
+    return "generate_scores"
+
+workflow.add_conditional_edges(
+    "generate_scores",
+    should_retry,
+    {
+        "calculate_weighted_score": "calculate_weighted_score",
+        "generate_scores": "generate_scores"
+    }
+)
 workflow.add_edge("calculate_weighted_score", END)
 
 # Compile graph

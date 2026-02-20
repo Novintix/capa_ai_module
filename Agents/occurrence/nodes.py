@@ -23,26 +23,24 @@ PARAM_FACTOR_KEYS = {
     "AU": "Audit / Compliance Findings",
 }
 
-# DO #4: Maximum iteration limit — agent must stop
-MAX_ITERATIONS = 3
 
 
 # ─────────────────────────────────────────────────────────────
 # NODE 1: prepare_evidence
 # DO #2: Single responsibility — only builds evidence summary
 # DO #5: Separated from LLM call (orchestration vs processing)
-# ─────────────────────────────────────────────────────────────
 def prepare_evidence(state: OccurrenceState) -> dict:
     """
     Node 1: Pre-computes a deterministic evidence summary per parameter
     from similar cases. Separated from LLM call (DO #2, DO #5).
     """
-    log_node_start("prepare_evidence")
+    # Auto-reset logs at the very start of a fresh run (iteration 0)
+    # This ensures log file reflects only the current execution
+    if state.iteration == 0:
+        from Agents.occurrence.logger import clear_logs
+        clear_logs()
 
-    # DO #4: Guard against runaway loops
-    if state.iteration >= MAX_ITERATIONS:
-        log_node_end("prepare_evidence", "MAX_ITERATIONS reached — aborting")
-        raise RuntimeError(f"Max iteration limit ({MAX_ITERATIONS}) reached.")
+    log_node_start("prepare_evidence")
 
     input_data = state.input
 
@@ -64,6 +62,9 @@ def prepare_evidence(state: OccurrenceState) -> dict:
     }
 
 
+# DO #4: Max Retries for LLM calls (handling network/parsing failures)
+MAX_RETRIES = 3
+
 # ─────────────────────────────────────────────────────────────
 # NODE 2: generate_scores
 # DO #2: Single responsibility — only calls LLM and parses scores
@@ -72,10 +73,17 @@ def generate_scores(state: OccurrenceState) -> dict:
     """
     Node 2: Calls LLM once with pre-computed evidence and parses scores.
     Uses evidence-first chain-of-thought anchoring for consistent scoring.
+    Retries up to MAX_RETRIES if LLM fails or returns invalid JSON.
     """
     log_node_start("generate_scores")
 
     input_data = state.input
+
+    # Check for max retries
+    if state.iteration > MAX_RETRIES:
+        error_msg = f"Max retries ({MAX_RETRIES}) reached for generate_scores. Aborting."
+        log_error("generate_scores", error_msg)
+        raise RuntimeError(error_msg)
 
     metrics = None
     if hasattr(input_data, "metrics_data") and input_data.metrics_data:
@@ -95,17 +103,10 @@ def generate_scores(state: OccurrenceState) -> dict:
             param_factor_keys=PARAM_FACTOR_KEYS
         )
 
-    similar_cases_str = (
-        json.dumps(input_data.similar_cases, indent=2)
-        if input_data.similar_cases
-        else "None"
-    )
-
     prompt = build_prompt(
         description=input_data.description,
         product=input_data.product,
         date=input_data.date,
-        similar_cases=similar_cases_str,
         context=input_data.additional_context or "None",
         metrics=metrics,
         evidence_summary=evidence_summary
@@ -117,7 +118,7 @@ def generate_scores(state: OccurrenceState) -> dict:
         llm = get_llm()
         response = llm.invoke(prompt)
 
-        log_raw_response(response.raw_content)
+        log_raw_response(response.raw_content, run_number=state.iteration + 1)
 
         # Robust JSON extraction
         raw_content = response.content
@@ -133,12 +134,17 @@ def generate_scores(state: OccurrenceState) -> dict:
 
         log_node_end("generate_scores", f"Scores parsed for 10 parameters")
 
-        # DON'T #1: Return dict — let LangGraph merge state
+        # Success! Return scores (and keep iteration same or increment?
+        # Does not matter much, but let's just return scores)
+        # We DO NOT increment iteration on success to avoid triggering retry logic if checks depend on it
+        # But actually we track attempts via iteration.
         return {"raw_scores": scores}
 
     except Exception as e:
-        log_error("generate_scores", str(e))
-        raise RuntimeError(f"Error generating scores: {str(e)}")
+        log_error("generate_scores", f"Attempt {state.iteration + 1} failed: {str(e)}")
+        # RETRY LOGIC: Increment iteration count and return (no scores)
+        # The conditional edge in graph.py will see raw_scores is None and route back here.
+        return {"iteration": state.iteration + 1}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -167,7 +173,7 @@ def calculate_weighted_score(state: OccurrenceState) -> dict:
         except Exception:
             metrics = None
 
-    weights = get_weights(metrics)
+    weights = get_weights.invoke({"metrics": metrics} if metrics is not None else {})
 
     score_dict = {
         "HF": scores.HF,
