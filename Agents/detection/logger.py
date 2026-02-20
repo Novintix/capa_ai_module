@@ -1,22 +1,22 @@
 """
 Logging utility for Detection Agent
-Logs all operations to logs/process.log
+Logs all operations to Agents/logs/detection.log
 """
 
 import logging
 from datetime import datetime
 from pathlib import Path
 
-# Create logs directory inside detection folder
-log_dir = Path(__file__).parent / "logs"
+# Create logs directory at Agents level
+log_dir = Path(__file__).parent.parent / "logs"
 log_dir.mkdir(exist_ok=True)
 
 # Configure logger
 logger = logging.getLogger("detection_agent")
 logger.setLevel(logging.INFO)
 
-# File handler
-log_file = log_dir / "process.log"
+# File handler - detection.log in Agents/logs/
+log_file = log_dir / "detection.log"
 file_handler = logging.FileHandler(log_file, encoding='utf-8')
 file_handler.setLevel(logging.INFO)
 
