@@ -1,5 +1,6 @@
 import pandas as pd
 import json
+import re
 import io
 from fastapi import UploadFile
 import PyPDF2
@@ -102,7 +103,12 @@ def build_evidence_summary(similar_cases: list, param_factor_keys: dict) -> dict
             if val:
                 case_id = case.get("case_id", "?")
                 sim = case.get("similarity_score", "?")
-                evidence[code] = f"{case_id} (similarity {sim}): {val}"
+                # Aggressive sanitization: remove ALL special characters that could break JSON
+                # Keep only alphanumeric, spaces, basic punctuation
+                val_sanitized = re.sub(r'[^\w\s\.\,-]', '', val)
+                # Replace multiple whitespace with single space
+                val_sanitized = re.sub(r'\s+', ' ', val_sanitized).strip()
+                evidence[code] = f"{case_id} (similarity {sim}): {val_sanitized}"
                 found = True
                 break
         if not found:
