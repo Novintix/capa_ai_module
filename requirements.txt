@@ -8,6 +8,10 @@ python-dotenv
 # AWS Bedrock
 boto3
 
+# Redis (Why Question Agent — session memory)
+redis
+langgraph-checkpoint-redis
+
 # Embeddings (Open Source)
 sentence-transformers
 torch
