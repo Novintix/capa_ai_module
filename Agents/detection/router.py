@@ -12,7 +12,7 @@ from .agent import DetectionAgentLangGraph
 
 
 # Create API router
-api_router = APIRouter(prefix="/detection", tags=["detection"])
+router = APIRouter(prefix="/detection", tags=["detection"])
 
 # Lazy initialization of detection agent
 _detection_agent = None
@@ -26,7 +26,7 @@ def get_detection_agent():
     return _detection_agent
 
 
-@api_router.post("/", response_model=DetectionScore)
+@router.post("/", response_model=DetectionScore)
 def detect_score(complaint: ComplaintData, policy_path: str = None):
     """
     Calculate detection score with optional policy document.
@@ -76,7 +76,7 @@ def detect_score(complaint: ComplaintData, policy_path: str = None):
         )
 
 
-@api_router.get("/health")
+@router.get("/health")
 def detection_health():
     """Detection agent health check"""
     detection_agent = get_detection_agent()

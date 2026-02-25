@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-from Agents.detection.router import api_router as detection_router
+from Agents.detection.router import router as detection_router
 from Agents.severity.router import router as severity_router
-from Agents.regulatory.router import api_router as regulatory_router
+from Agents.regulatory.router import router as regulatory_router
 from Agents.occurrence.router import router as occurrence_router
 from Agents.aireasoning.router import router as aireasoning_router
 from Agents.categorize.router import router as categorize_router
+from Agents.cause_generation.router import router as cause_generation_router
 
 
 def register_routes(app: FastAPI):
@@ -17,6 +18,8 @@ def register_routes(app: FastAPI):
     
     # Include agent routers
     app.include_router(detection_router)
+    app.include_router(regulatory_router)
+    app.include_router(cause_generation_router)
     app.include_router(occurrence_router)
     app.include_router(aireasoning_router)
     app.include_router(categorize_router)
@@ -30,6 +33,8 @@ def register_routes(app: FastAPI):
             "version": "1.0.0",
             "agents": {
                 "detection": "Policy-Driven Detection Score Agent",
+                "regulatory": "Regulatory Compliance Agent",
+                "cause_generation": "FMEA-Based Cause Generation Agent",
                 "occurrence": "Occurrence Rating Agent",
                 "aireasoning": "AI Reasoning Agent",
                 "categorize": "6M Categorization Agent (Fishbone)"
@@ -37,6 +42,10 @@ def register_routes(app: FastAPI):
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
                 "GET /detection/health": "Detection agent health check",
+                "POST /regulatory/": "Evaluate regulatory compliance and reporting requirements",
+                "GET /regulatory/health": "Regulatory agent health check",
+                "POST /cause-generation/": "Generate causes from FMEA document",
+                "GET /cause-generation/health": "Cause generation agent health check",
                 "POST /occurrence/analyze": "Analyze occurrence rating for a complaint",
                 "POST /aireasoning/analyze": "Generate AI reasoning for risk assessment",
                 "POST /categorize/analyze": "Categorize causes into 6M categories (Fishbone)",
