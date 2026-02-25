@@ -25,7 +25,7 @@ from pathlib import Path
 log_dir = Path(__file__).parent.parent / "logs"
 log_dir.mkdir(exist_ok=True)
 
-log_file = log_dir / "process.log"
+log_file = log_dir / "severity.log"
 
 
 # --------------------------------------------------

@@ -7,6 +7,7 @@ from Agents.aireasoning.router import router as aireasoning_router
 from Agents.categorize.router import router as categorize_router
 from Agents.cause_generation.router import router as cause_generation_router
 
+from Agents.action_plan.router import router as action_plan_router
 
 def register_routes(app: FastAPI):
     """
@@ -23,6 +24,9 @@ def register_routes(app: FastAPI):
     app.include_router(occurrence_router)
     app.include_router(aireasoning_router)
     app.include_router(categorize_router)
+    app.include_router(severity_router)
+    app.include_router(regulatory_router)
+    app.include_router(action_plan_router)
     
     @app.get("/")
     def root():
@@ -38,6 +42,8 @@ def register_routes(app: FastAPI):
                 "occurrence": "Occurrence Rating Agent",
                 "aireasoning": "AI Reasoning Agent",
                 "categorize": "6M Categorization Agent (Fishbone)"
+                "severity": "Severity Classification Agent",
+                "action_plan": "CAPA Action Plan Generator",
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
@@ -50,6 +56,9 @@ def register_routes(app: FastAPI):
                 "POST /aireasoning/analyze": "Generate AI reasoning for risk assessment",
                 "POST /categorize/analyze": "Categorize causes into 6M categories (Fishbone)",
                 "GET /health": "Global health check"
+                "GET /health": "Global health check",
+                "POST /severity": "Evaluate severity of a complaint issue",
+                "POST /action_plan": "Generate FDA-compliant CAPA action plan",
             }
         }
     

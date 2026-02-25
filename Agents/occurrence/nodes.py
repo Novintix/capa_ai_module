@@ -120,15 +120,40 @@ def generate_scores(state: OccurrenceState) -> dict:
 
         log_raw_response(response.raw_content, run_number=state.iteration + 1)
 
-        # Robust JSON extraction
+        # Advanced JSON extraction with multiple fallback strategies
         raw_content = response.content
-        json_match = re.search(r'({.*})', raw_content, re.DOTALL)
-        if json_match:
-            json_str = json_match.group(1)
-        else:
-            json_str = raw_content
-
-        content = json.loads(json_str)
+        json_str = None
+        
+        # Strategy 1: Try to find JSON object (greedy from first { to last })
+        first_brace = raw_content.find('{')
+        last_brace = raw_content.rfind('}')
+        if first_brace >= 0 and last_brace > first_brace:
+            potential_json = raw_content[first_brace:last_brace + 1]
+            try:
+                content = json.loads(potential_json)
+                json_str = potential_json
+            except json.JSONDecodeError:
+                # Strategy 2: Try to extract from code blocks
+                code_block_match = re.search(r'```(?:json)?\s*({.*?})\s*```', raw_content, re.DOTALL)
+                if code_block_match:
+                    try:
+                        content = json.loads(code_block_match.group(1))
+                        json_str = code_block_match.group(1)
+                    except json.JSONDecodeError:
+                        pass
+        
+        if json_str is None:
+            # Strategy 3: Try entire response as JSON
+            try:
+                content = json.loads(raw_content)
+                json_str = raw_content
+            except json.JSONDecodeError as e:
+                log_error("generate_scores", 
+                    f"JSON extraction failed (tried 3 strategies):\n"
+                    f"Error: {str(e)}\n"
+                    f"Raw response:\n{raw_content}")
+                raise RuntimeError(f"Could not extract valid JSON from LLM response: {str(e)}")
+        
         scores = OccurrenceScoreResponse(**content)
         log_score_audit(content, input_data.similar_cases or [])
 
