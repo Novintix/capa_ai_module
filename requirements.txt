@@ -1,16 +1,27 @@
 # Core Dependencies
-langchain-google-genai
-langchain-core
-langgraph
-pydantic
 python-dotenv
+pydantic
 
-# AWS Bedrock
-boto3
+# API Server
+fastapi
+uvicorn
+python-multipart
+httpx
 
-# Redis (Why Question Agent — session memory)
-redis
+# LLM & AI Frameworks
+langchain
+langchain-core
+langchain-google-genai
+groq
+
+# Graph Orchestration & State Management
+langgraph
+langgraph-checkpoint
 langgraph-checkpoint-redis
+
+# Cloud & Infrastructure
+boto3
+redis
 
 # Embeddings (Open Source)
 sentence-transformers
@@ -27,12 +38,7 @@ Pillow
 azure-cognitiveservices-vision-computervision
 msrest
 
-# API Server (Optional)
-fastapi
-uvicorn
-python-multipart
-
-# Testing (Optional)
+# Testing
 pytest
 pytest-asyncio
 
