@@ -48,36 +48,61 @@ from .tools.tools import (
 # Enforces strict JSON output validation using Pydantic model.
 # ----------------------------------------
 
+def _clean_llm_response(content: str) -> str:
+    """Removes markdown fences and leading/trailing whitespace."""
+    content = content.strip()
+    if content.startswith("```json"):
+        content = content[7:]
+    if content.startswith("```"):
+        content = content[3:]
+    if content.endswith("```"):
+        content = content[:-3]
+    return content.strip()
+
+
 # -------------------------
 # NODE 1 —  Score Classification
 # -------------------------
 def severity_classification_node(state: SeverityState) -> SeverityState:
     log_node_entry("severity_llm_node", state)
 
-    try:
-        matrix_data = load_matrix()
-        llm = get_llm()
+    max_retries = 3
+    last_error = None
 
-        prompt = build_severity_prompt(
-            state["issue"],
-            matrix_data["SEVERITY_MATRIX"]
-        )
+    for attempt in range(max_retries):
+        try:
+            matrix_data = load_matrix()
+            llm = get_llm()
 
-        response = llm.invoke(prompt)
-        parsed = SeverityLLMOutput(**json.loads(response.content))
+            prompt = build_severity_prompt(
+                state["issue"],
+                matrix_data["SEVERITY_MATRIX"]
+            )
 
+            # If it's a retry, append a nudge
+            if attempt > 0:
+                prompt += f"\n\nERROR IN PREVIOUS ATTEMPT: {last_error}\nReturn ONLY the JSON object."
 
-        state["clinical_score"] = parsed.clinical_score
-        state["reversibility_score"] = parsed.reversibility_score
-        state["medical_score"] = parsed.medical_score
-        state["duration_score"] = parsed.duration_score
+            response = llm.invoke(prompt)
+            clean_content = _clean_llm_response(response.content)
+            
+            parsed = SeverityLLMOutput(**json.loads(clean_content))
 
-        log_node_exit("severity_llm_node", state)
-        return state
+            state["clinical_score"] = parsed.clinical_score
+            state["reversibility_score"] = parsed.reversibility_score
+            state["medical_score"] = parsed.medical_score
+            state["duration_score"] = parsed.duration_score
 
-    except Exception as e:
-        log_error("severity_llm_node", str(e))
-        raise
+            log_node_exit("severity_llm_node", state)
+            return state
+
+        except Exception as e:
+            last_error = str(e)
+            log_error("severity_llm_node", f"Attempt {attempt+1} failed: {last_error}")
+            if attempt == max_retries - 1:
+                raise
+
+    return state
 
 
 # ----------------------------------------

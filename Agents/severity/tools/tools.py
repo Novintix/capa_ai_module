@@ -68,6 +68,11 @@ def get_severity_label(score: int, matrix_data: Dict) -> str:
     return labels[str(score)]
 
 
+def clamp_score(value: int) -> int:
+    """Ensures score stays within 1–10."""
+    return max(1, min(10, value))
+
+
 # --------------------------------------------------
 # Weighted Severity Calculation
 # --------------------------------------------------
@@ -99,7 +104,4 @@ def calculate_weighted_severity(
 
     final_score = round(weighted_score)
 
-    # Ensure final score stays within 1–10
-    final_score = max(1, min(10, final_score))
-
-    return final_score
+    return clamp_score(final_score)
