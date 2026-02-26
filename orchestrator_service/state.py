@@ -9,47 +9,43 @@ def merge_dicts(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]
 
 class RiskAssessmentState(TypedDict):
     """
-    Single shared state passed through every node in the LangGraph graph.
-    Each node reads what it needs and writes back only its results.
+    True Orchestrator State.
+    Uses reducers to handle merging results from dynamic parallel workers.
     """
 
     # ── Inputs from the API request ─────────────────────────────────────────
     complaint_id: str                   # Unique complaint ID
     complaint_description: str          # Full description text
-
-    # Occurrence + Detection specific inputs
     source: str                         # e.g. "Customer", "Supplier Audit"
     date: str                           # e.g. "2024-01-15"
     product: str                        # Product name/model
     additional_context: str             # Extra context string
     similar_cases: List[Dict[str, Any]] # Historical similar cases
 
-    # Extra metadata for conflict detection
-    structured_metadata: Dict[str, Any]
-    policy_path: Optional[str]           # Path to policy document for detection
+    # ── Execution Plan (from Orchestrator Brain) ────────────────────────────
+    execution_plan: Dict[str, Any]      # Dynamic plan decided by LLM
+    
+    # ── Accumulators (with Reducers) ────────────────────────────────────────
+    worker_results: Annotated[List[Dict[str, Any]], operator.add]
+    orchestrator_log: Annotated[List[str], operator.add]
+    errors: Annotated[List[str], operator.add]
+    retry_counts: Annotated[Dict[str, int], merge_dicts]
 
-    # ── Invocation flags ─────────────────────────────────────────────────────
-    severity_invoked: bool
-    occurrence_invoked: bool
-    detection_invoked: bool
-
-    # ── Scores written by each node ──────────────────────────────────────────
+    # ── Flags & Status ───────────────────────────────────────────────────────
+    interrupt_signal: bool              # Signal to stop workers early
+    replan_triggered: bool              # Signal to re-run orchestrator brain
+    workflow_status: Optional[Literal["completed", "escalated", "halted"]]
+    
+    # ── Final Outputs ────────────────────────────────────────────────────────
     scores_valid: bool
+    rpn_value: Optional[int]
+    escalation_required: bool
+    escalation_reason: str
+    final_reasoning: str               # Synthesizer's intelligent explanation
+
+    # Legacy fields (kept for backward compatibility during transition)
     severity_score: Optional[int]
     occurrence_score: Optional[int]
     detection_score: Optional[int]
-
-    # ── RPN ──────────────────────────────────────────────────────────────────
-    rpn_computed: bool
-    rpn_value: Optional[int]
-
-    # ── Control flags ─────────────────────────────────────────────────────────
-    conflict_detected: bool
-    escalation_required: bool
-    escalation_reason: str
-    workflow_status: Optional[Literal["completed", "escalated", "halted"]]
-
-    # ── Internal audit ────────────────────────────────────────────────────────
-    retry_counts: Annotated[Dict[str, int], merge_dicts]        # {"severity": 0, "occurrence": 0, "detection": 0}
-    errors: Annotated[List[str], operator.add]
-    agent_outputs: Annotated[Dict[str, Any], merge_dicts]       # Full raw outputs stored for audit
+    agent_outputs: Annotated[Dict[str, Any], merge_dicts]
+    policy_path: Optional[str]

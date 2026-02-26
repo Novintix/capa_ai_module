@@ -103,287 +103,273 @@ def _validate_agent_output(output: Dict[str, Any]) -> str:
     return None
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# NODE: Input Validation
-# ─────────────────────────────────────────────────────────────────────────────
+import json
+import httpx
+from config.aws_bedrock_config import get_llm
+from langgraph.types import Command
+from langgraph.constants import Send
 
-def input_validation_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
+# ─────────────────────────────────────────────────────────────────────────────
+# NODE: Input Validator
+# ─────────────────────────────────────────────────────────────────────────────
+def input_validator_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
     thread_id = config["configurable"].get("thread_id")
-    log_node_entry("input_validation_node", state, thread_id=thread_id)
+    log_node_entry("input_validator_node", state, thread_id=thread_id)
 
     errors = []
     if not state.get("complaint_description"):
         errors.append("Missing complaint_description")
     if not state.get("complaint_id"):
         errors.append("Missing complaint_id")
-    if not state.get("source"):
-        errors.append("Missing source")
-    if not state.get("product"):
-        errors.append("Missing product")
-
+    
     update = {}
     if errors:
         update["workflow_status"] = "halted"
-        update["errors"] = state.get("errors", []) + errors
-        update["scores_valid"] = False
+        update["errors"] = errors
     else:
-        if "retry_counts" not in state:
-            update["retry_counts"] = {"severity": 0, "occurrence": 0, "detection": 0}
-
-    log_node_exit("input_validation_node", update, thread_id=thread_id)
+        update["orchestrator_log"] = ["Input validated successfully."]
+        
+    log_node_exit("input_validator_node", update, thread_id=thread_id)
     return update
 
-
 # ─────────────────────────────────────────────────────────────────────────────
-# NODE: Severity Agent
-# Maps state → {"issue": complaint_description} → POST to severity service
+# NODE: Orchestrator Brain (Bedrock)
 # ─────────────────────────────────────────────────────────────────────────────
-def severity_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
+def orchestrator_brain_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
     thread_id = config["configurable"].get("thread_id")
-    log_node_entry("severity_node", state, thread_id=thread_id)
+    log_node_entry("orchestrator_brain_node", state, thread_id=thread_id)
 
-    if state.get("workflow_status") == "halted":
-        return {}
-
-    # ── Build severity-specific payload ──────────────────────────────────────
+    llm = get_llm()
+    prompt = f"""
+    You are the Lead Orchestrator for a Risk Assessment System.
+    Analyze the following complaint and decide which specialized workers are needed.
+    
+    COMPLAINT:
+    ID: {state['complaint_id']}
+    Description: {state['complaint_description']}
+    Metadata: {state.get('product', 'N/A')}, {state.get('source', 'N/A')}
+    
+    AVAILABLE WORKERS:
+    - severity_worker: Analyzes clinical severity and impact on patient safety.
+    - occurrence_worker: Analyzes how often this issue happens based on history.
+    - detection_worker: Analyzes how easy/hard it is to detect this issue before it causes harm.
+    - historical_pattern_worker: Looks for specific historical trends or clusters (useful for complex patterns).
+    - regulatory_impact_worker: Checks if this triggers specific regulatory reporting (FDA, MDR, etc.).
+    
+    RULES:
+    - ALWAYS include occurrence_worker.
+    - If the complaint mentions "death", "injury", or "critical", include regulatory_impact_worker.
+    - If there are similar cases provided, include historical_pattern_worker.
+    
+    Return ONLY a JSON object:
+    {{
+        "complaint_type": "string",
+        "workers_needed": ["list", "of", "worker_names"],
+        "reasoning": "brief explanation of the plan"
+    }}
+    """
+    
     try:
-        response = call_severity_agent(issue=state["complaint_description"])
+        response = llm.invoke(prompt)
+        plan = json.loads(response.content)
+        update = {
+            "execution_plan": plan,
+            "orchestrator_log": [f"Brain generated plan: {plan['reasoning']}"]
+        }
     except Exception as e:
-        log_error("severity_node", e, thread_id=thread_id)
-        return {"errors": [str(e)], "workflow_status": "halted"}
+        log_error("orchestrator_brain_node", e, thread_id=thread_id)
+        update = {"errors": [f"Orchestrator Brain Error: {str(e)}"], "workflow_status": "halted"}
 
-    # ── Map fields to standardized format ──
-    mapped_response = {
-        "score": response.get("severity_score"),
-        "confidence": 1.0,
-        "reasoning": response.get("severity_label")
-    }
-
-    validation_error = _validate_agent_output(mapped_response)
-
-    update = {
-        "severity_invoked": True,
-        "agent_outputs": {"severity": response},
-    }
-
-    if validation_error:
-        current_retries = state.get("retry_counts", {}).get("severity", 0)
-        if current_retries < 1:
-            update["retry_counts"] = {"severity": current_retries + 1}
-        else:
-            update["escalation_required"] = True
-            update["escalation_reason"] = f"Severity Agent Validation Failed: {validation_error}"
-            update["workflow_status"] = "escalated"
-    else:
-        update["severity_score"] = mapped_response["score"]
-
-        if mapped_response["score"] >= POLICY_CRITICAL_SEVERITY:
-            update["escalation_required"] = True
-            update["escalation_reason"] = (
-                f"Severity Score {mapped_response['score']} >= Critical Threshold {POLICY_CRITICAL_SEVERITY}"
-            )
-            update["workflow_status"] = "escalated"
-
-        if mapped_response["confidence"] < POLICY_CONFIDENCE_THRESHOLD:
-            update["escalation_required"] = True
-            update["escalation_reason"] = (
-                f"Severity Confidence {mapped_response['confidence']} < Threshold {POLICY_CONFIDENCE_THRESHOLD}"
-            )
-            update["workflow_status"] = "escalated"
-
-    log_node_exit("severity_node", update, thread_id=thread_id)
+    log_node_exit("orchestrator_brain_node", update, thread_id=thread_id)
     return update
 
+# ─────────────────────────────────────────────────────────────────────────────
+# WORKER NODES (Dynamic Dispatch to Real Services)
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ─────────────────────────────────────────────────────────────────────────────
-# NODE: Occurrence Agent
-# Maps state → occurrence agent payload format
-# ─────────────────────────────────────────────────────────────────────────────
-def occurrence_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
+def severity_worker(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
     thread_id = config["configurable"].get("thread_id")
-    log_node_entry("occurrence_node", state, thread_id=thread_id)
+    payload = {"issue": state["complaint_description"]}
+    
+    try:
+        with httpx.Client(timeout=120.0) as client:
+            response = client.post("http://localhost:8000/severity", json=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            result = {
+                "worker_name": "severity_worker",
+                "score": data.get("severity_score"),
+                "confidence": 1.0,
+                "rationale": data.get("severity_label"),
+                "flags": []
+            }
+            if data.get("severity_score", 0) >= 7:
+                result["flags"].append("critical")
+                
+            return {"worker_results": [result]}
+    except Exception as e:
+        log_error("severity_worker", e, thread_id=thread_id)
+        return {"errors": [f"Severity Worker Error: {str(e)}"]}
 
-    if state.get("workflow_status") in ["halted", "escalated"]:
-        return {}
-
-    # ── Build occurrence-specific payload ─────────────────────────────────────
+def occurrence_worker(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
+    thread_id = config["configurable"].get("thread_id")
+    
+    # Occurrence Agent expects Form Data (multipart/form-data or application/x-www-form-urlencoded)
+    # similar_cases must be a JSON string
+    similar_cases_json = json.dumps(state.get("similar_cases", []))
+    
     payload = {
-        "complaint_id": state.get("complaint_id"),
-        "description": state.get("complaint_description"),
-        "source": state.get("source"),
-        "date": state.get("date"),
-        "product": state.get("product"),
+        "complaint_id": state["complaint_id"],
+        "description": state["complaint_description"],
+        "source": state.get("source", ""),
+        "date": state.get("date", ""),
+        "product": state.get("product", ""),
         "additional_context": state.get("additional_context", ""),
-        "similar_cases": state.get("similar_cases", []),
+        "similar_cases_json": similar_cases_json
     }
+    
     try:
-        response = call_occurrence_agent(payload)
+        with httpx.Client(timeout=120.0) as client:
+            response = client.post("http://localhost:8000/occurrence/analyze", data=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            breakdown = data.get("breakdown", {})
+            result = {
+                "worker_name": "occurrence_worker",
+                "score": data.get("weighted_score", data.get("score")),
+                "confidence": 0.85,
+                "rationale": breakdown.get("reasoning", data.get("rating", "Occurrence analyzed.")),
+                "flags": []
+            }
+            return {"worker_results": [result]}
     except Exception as e:
-        log_error("occurrence_node", e, thread_id=thread_id)
-        return {"errors": [str(e)], "workflow_status": "halted"}
+        log_error("occurrence_worker", e, thread_id=thread_id)
+        return {"errors": [f"Occurrence Worker Error: {str(e)}"]}
 
-    # ── Map fields to standardized format ──
-    breakdown = response.get("breakdown", {})
-    mapped_response = {
-        "score": response.get("weighted_score"),
-        "confidence": 0.85,
-        "reasoning": breakdown.get("reasoning", response.get("rating"))
-    }
-
-    validation_error = _validate_agent_output(mapped_response)
-
-    update = {
-        "occurrence_invoked": True,
-        "agent_outputs": {"occurrence": response},
-    }
-
-    if validation_error:
-        current_retries = state.get("retry_counts", {}).get("occurrence", 0)
-        if current_retries < 1:
-            update["retry_counts"] = {"occurrence": current_retries + 1}
-        else:
-            update["escalation_required"] = True
-            update["escalation_reason"] = f"Occurrence Agent Validation Failed: {validation_error}"
-            update["workflow_status"] = "escalated"
-    else:
-        update["occurrence_score"] = mapped_response["score"]
-        if mapped_response["confidence"] < POLICY_CONFIDENCE_THRESHOLD:
-            update["escalation_required"] = True
-            update["escalation_reason"] = (
-                f"Occurrence Confidence {mapped_response['confidence']} < Threshold {POLICY_CONFIDENCE_THRESHOLD}"
-            )
-            update["workflow_status"] = "escalated"
-
-    log_node_exit("occurrence_node", update, thread_id=thread_id)
-    return update
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# NODE: Detection Agent
-# Maps state → detection agent payload format
-# ─────────────────────────────────────────────────────────────────────────────
-def detection_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
+def detection_worker(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
     thread_id = config["configurable"].get("thread_id")
-    log_node_entry("detection_node", state, thread_id=thread_id)
-
-    if state.get("workflow_status") in ["halted", "escalated"]:
-        return {}
-
-    # ── Build detection-specific payload ──────────────────────────────────────
+    
+    # Detection Agent expects complaint object in root but as JSON
+    # policy_path is a query parameter
     payload = {
-        "complaint_id": state.get("complaint_id"),
-        "source": state.get("source"),
-        "description": state.get("complaint_description"),
+        "complaint_id": state["complaint_id"],
+        "source": state.get("source", ""),
+        "description": state["complaint_description"]
     }
+    
+    params = {}
+    if state.get("policy_path"):
+        params["policy_path"] = state["policy_path"]
+        
     try:
-        response = call_detection_agent(payload, policy_path=state.get("policy_path"))
+        with httpx.Client(timeout=120.0) as client:
+            response = client.post("http://localhost:8000/detection/", json=payload, params=params)
+            response.raise_for_status()
+            data = response.json()
+            
+            result = {
+                "worker_name": "detection_worker",
+                "score": data.get("detection_score", data.get("score")),
+                "confidence": data.get("confidence", 0.95),
+                "rationale": data.get("explanation", data.get("reasoning", "Detection analyzed.")),
+                "flags": []
+            }
+            return {"worker_results": [result]}
     except Exception as e:
-        log_error("detection_node", e, thread_id=thread_id)
-        return {"errors": [str(e)], "workflow_status": "halted"}
+        log_error("detection_worker", e, thread_id=thread_id)
+        return {"errors": [f"Detection Worker Error: {str(e)}"]}
 
-    # ── Map fields to standardized format ──
-    mapped_response = {
-        "score": response.get("detection_score"),
-        "confidence": response.get("confidence"),
-        "reasoning": response.get("explanation")
-    }
+def historical_pattern_worker(state: RiskAssessmentState, config: RunnableConfig):
+    # Mockup for now as requested
+    return _worker_template(state, "historical_pattern_worker", config)
 
-    validation_error = _validate_agent_output(mapped_response)
+def regulatory_impact_worker(state: RiskAssessmentState, config: RunnableConfig):
+    # Mockup for now as requested
+    return _worker_template(state, "regulatory_impact_worker", config)
 
+def _worker_template(state: RiskAssessmentState, worker_name: str, config: RunnableConfig) -> Dict[str, Any]:
+    # Keeping template for mock workers
     update = {
-        "detection_invoked": True,
-        "agent_outputs": {"detection": response},
+        "worker_results": [{
+            "worker_name": worker_name,
+            "score": 5,
+            "confidence": 0.9,
+            "rationale": f"{worker_name.capitalize()} completed analysis.",
+            "flags": []
+        }]
     }
-
-    if validation_error:
-        current_retries = state.get("retry_counts", {}).get("detection", 0)
-        if current_retries < 1:
-            update["retry_counts"] = {"detection": current_retries + 1}
-        else:
-            update["escalation_required"] = True
-            update["escalation_reason"] = f"Detection Agent Validation Failed: {validation_error}"
-            update["workflow_status"] = "escalated"
-    else:
-        update["detection_score"] = mapped_response["score"]
-        if mapped_response["confidence"] < POLICY_CONFIDENCE_THRESHOLD:
-            update["escalation_required"] = True
-            update["escalation_reason"] = (
-                f"Detection Confidence {mapped_response['confidence']} < Threshold {POLICY_CONFIDENCE_THRESHOLD}"
-            )
-            update["workflow_status"] = "escalated"
-
-    log_node_exit("detection_node", update, thread_id=thread_id)
     return update
 
-
 # ─────────────────────────────────────────────────────────────────────────────
-# NODE: Aggregation (RPN = Severity × Occurrence × Detection)
+# NODE: Orchestrator Monitor
 # ─────────────────────────────────────────────────────────────────────────────
-def aggregation_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
+def orchestrator_monitor_node(state: RiskAssessmentState, config: RunnableConfig) -> Command:
     thread_id = config["configurable"].get("thread_id")
-    log_node_entry("aggregation_node", state, thread_id=thread_id)
-
-    if state.get("workflow_status") in ["halted", "escalated"]:
-        return {}
-
-    sev = state.get("severity_score")
-    occ = state.get("occurrence_score")
-    det = state.get("detection_score")
-
-    update = {}
-
-    if None in [sev, occ, det]:
-        update["escalation_required"] = True
-        update["escalation_reason"] = "Missing one or more scores during aggregation"
-        update["workflow_status"] = "escalated"
-        update["scores_valid"] = False
-    else:
-        rpn = sev * occ * det
-        update["rpn_computed"] = True
-        update["rpn_value"] = rpn
-        update["scores_valid"] = True
-
-        if rpn >= POLICY_RPN_THRESHOLD:
-            update["escalation_required"] = True
-            update["escalation_reason"] = f"RPN {rpn} >= Threshold {POLICY_RPN_THRESHOLD}"
-            update["workflow_status"] = "escalated"
-        else:
-            update["workflow_status"] = "completed"
-
-    log_node_exit("aggregation_node", update, thread_id=thread_id)
-    return update
-
+    log_node_entry("orchestrator_monitor_node", state, thread_id=thread_id)
+    
+    # Logic to check if we need to re-plan or cancel
+    critical_worker = next((r for r in state['worker_results'] if "critical" in r['rationale'].lower()), None)
+    
+    if critical_worker and not state.get('replan_triggered'):
+        # Dynamic re-routing using Command
+        log_node_exit("orchestrator_monitor_node (Triggering Replan)", {}, thread_id=thread_id)
+        return Command(
+            goto="orchestrator_brain",
+            update={
+                "replan_triggered": True,
+                "orchestrator_log": ["Critical findings detected. Triggering re-orchestration."]
+            }
+        )
+    
+    log_node_exit("orchestrator_monitor_node", {}, thread_id=thread_id)
+    return Command(goto="synthesizer_brain")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# NODE: Conflict Detection
-# Checks if agent outputs are logically inconsistent with description
+# NODE: Synthesizer Brain (Bedrock)
 # ─────────────────────────────────────────────────────────────────────────────
-def conflict_detection_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
+def synthesizer_brain_node(state: RiskAssessmentState, config: RunnableConfig) -> Dict[str, Any]:
     thread_id = config["configurable"].get("thread_id")
-    log_node_entry("conflict_detection_node", state, thread_id=thread_id)
+    log_node_entry("synthesizer_brain_node", state, thread_id=thread_id)
 
-    if state.get("workflow_status") in ["halted", "escalated"]:
-        return {}
+    llm = get_llm()
+    results_json = json.dumps(state['worker_results'], indent=2)
+    prompt = f"""
+    You are the Final Synthesizer for a Risk Assessment System.
+    Review all worker results and make the final, intelligent risk decision.
+    
+    COMPLAINT: {state['complaint_description']}
+    WORKER RESULTS:
+    {results_json}
+    
+    TASKS:
+    1. Calculate the final RPN (Risk Priority Number). Base it on scores (1-10) from severity, occurrence, and detection if available.
+    2. Provide a high-level reasoning trail explaining why this risk score was assigned.
+    3. Decide if immediate escalation is required.
+    
+    Return ONLY a JSON object:
+    {{
+        "rpn": number,
+        "escalation_required": boolean,
+        "reasoning": "full intelligent analysis",
+        "status": "completed | escalated"
+    }}
+    """
+    
+    try:
+        response = llm.invoke(prompt)
+        final_decision = json.loads(response.content)
+        update = {
+            "rpn_value": final_decision['rpn'],
+            "escalation_required": final_decision['escalation_required'],
+            "final_reasoning": final_decision['reasoning'],
+            "workflow_status": final_decision['status'],
+            "scores_valid": True
+        }
+    except Exception as e:
+        log_error("synthesizer_brain_node", e, thread_id=thread_id)
+        update = {"errors": [f"Synthesizer Brain Error: {str(e)}"], "workflow_status": "halted"}
 
-    sev_score = state.get("severity_score")
-    description = state.get("complaint_description", "").lower()
-
-    conflict = False
-    reason = ""
-
-    # Rule: low severity but fatal keywords in description
-    if sev_score and sev_score < 5:
-        if "death" in description or "fatality" in description:
-            conflict = True
-            reason = f"Severity {sev_score} inconsistent with keyword 'death/fatality' in description"
-
-    update = {"conflict_detected": conflict}
-    if conflict:
-        update.update({
-            "escalation_required": True,
-            "escalation_reason": reason,
-            "workflow_status": "escalated",
-        })
-
-    log_node_exit("conflict_detection_node", update, thread_id=thread_id)
+    log_node_exit("synthesizer_brain_node", update, thread_id=thread_id)
     return update
