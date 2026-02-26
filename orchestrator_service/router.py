@@ -31,6 +31,10 @@ async def analyze_risk(request: Request, risk_request: RiskRequest):
             "similar_cases":         [c.model_dump() for c in risk_request.similar_cases],
             "structured_metadata":   risk_request.structured_metadata,
             "policy_path":          risk_request.policy_path,
+            # legacy score fields start as None
+            "severity_score":        None,
+            "occurrence_score":      None,
+            "detection_score":       None,
             "errors":                [],
             "retry_counts":          {"severity": 0, "occurrence": 0, "detection": 0},
             "agent_outputs":         {},

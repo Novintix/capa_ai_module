@@ -141,7 +141,7 @@ def orchestrator_brain_node(state: RiskAssessmentState, config: RunnableConfig) 
 
     llm = get_llm()
     prompt = f"""
-    You are the Lead Orchestrator for a Risk Assessment System.
+    You are the Lead Orchestrator for a Risk Score Assessment System which needs to evaluate complaints and assign appropriate specialized workers.
     Analyze the following complaint and decide which specialized workers are needed.
     
     COMPLAINT:
@@ -157,7 +157,6 @@ def orchestrator_brain_node(state: RiskAssessmentState, config: RunnableConfig) 
     - regulatory_impact_worker: Checks if this triggers specific regulatory reporting (FDA, MDR, etc.).
     
     RULES:
-    - ALWAYS include occurrence_worker.
     - If the complaint mentions "death", "injury", or "critical", include regulatory_impact_worker.
     - If there are similar cases provided, include historical_pattern_worker.
     
@@ -207,7 +206,8 @@ def severity_worker(state: RiskAssessmentState, config: RunnableConfig) -> Dict[
             if data.get("severity_score", 0) >= 7:
                 result["flags"].append("critical")
                 
-            return {"worker_results": [result]}
+            # push raw output into agent_outputs for later inspection
+            return {"worker_results": [result], "agent_outputs": {"severity": data}}
     except Exception as e:
         log_error("severity_worker", e, thread_id=thread_id)
         return {"errors": [f"Severity Worker Error: {str(e)}"]}
@@ -243,7 +243,8 @@ def occurrence_worker(state: RiskAssessmentState, config: RunnableConfig) -> Dic
                 "rationale": breakdown.get("reasoning", data.get("rating", "Occurrence analyzed.")),
                 "flags": []
             }
-            return {"worker_results": [result]}
+            # push raw occurrence response into agent_outputs
+            return {"worker_results": [result], "agent_outputs": {"occurrence": data}}
     except Exception as e:
         log_error("occurrence_worker", e, thread_id=thread_id)
         return {"errors": [f"Occurrence Worker Error: {str(e)}"]}
@@ -276,7 +277,8 @@ def detection_worker(state: RiskAssessmentState, config: RunnableConfig) -> Dict
                 "rationale": data.get("explanation", data.get("reasoning", "Detection analyzed.")),
                 "flags": []
             }
-            return {"worker_results": [result]}
+            # store detection response for debugging
+            return {"worker_results": [result], "agent_outputs": {"detection": data}}
     except Exception as e:
         log_error("detection_worker", e, thread_id=thread_id)
         return {"errors": [f"Detection Worker Error: {str(e)}"]}
@@ -358,6 +360,20 @@ def synthesizer_brain_node(state: RiskAssessmentState, config: RunnableConfig) -
     """
     
     try:
+        # pull legacy individual scores from worker_results so they are
+        # available in the flattened state returned by the router.
+        sev_score = None
+        occ_score = None
+        det_score = None
+        for wr in state.get("worker_results", []):
+            name = wr.get("worker_name", "")
+            if name == "severity_worker":
+                sev_score = wr.get("score")
+            elif name == "occurrence_worker":
+                occ_score = wr.get("score")
+            elif name == "detection_worker":
+                det_score = wr.get("score")
+
         response = llm.invoke(prompt)
         final_decision = json.loads(response.content)
         update = {
@@ -365,7 +381,11 @@ def synthesizer_brain_node(state: RiskAssessmentState, config: RunnableConfig) -
             "escalation_required": final_decision['escalation_required'],
             "final_reasoning": final_decision['reasoning'],
             "workflow_status": final_decision['status'],
-            "scores_valid": True
+            "scores_valid": True,
+            # legacy fields for compatibility / router mapping
+            "severity_score": sev_score,
+            "occurrence_score": occ_score,
+            "detection_score": det_score,
         }
     except Exception as e:
         log_error("synthesizer_brain_node", e, thread_id=thread_id)
