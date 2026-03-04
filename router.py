@@ -7,6 +7,7 @@ from Agents.aireasoning.router import router as aireasoning_router
 from Agents.categorize.router import router as categorize_router
 from Agents.cause_generation.router import router as cause_generation_router
 from Agents.question.router import router as why_question_router
+from Agents.pattern.router import router as pattern_router
 
 from Agents.action_plan.router import router as action_plan_router
 
@@ -29,6 +30,7 @@ def register_routes(app: FastAPI):
     app.include_router(regulatory_router)
     app.include_router(action_plan_router)
     app.include_router(why_question_router)
+    app.include_router(pattern_router)
     
     @app.get("/")
     def root():
@@ -46,7 +48,8 @@ def register_routes(app: FastAPI):
                 "categorize": "6M Categorization Agent (Fishbone)",
                 "severity": "Severity Classification Agent",
                 "action_plan": "CAPA Action Plan Generator",
-                "why_question": "Why Question Agent (5 Whys)"
+                "why_question": "Why Question Agent (5 Whys)",
+                "pattern": "Pattern Analysis and Trend Recognition Agent"
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
@@ -64,6 +67,7 @@ def register_routes(app: FastAPI):
                 "GET /health": "Global health check",
                 "POST /severity": "Evaluate severity of a complaint issue",
                 "POST /action_plan": "Generate FDA-compliant CAPA action plan",
+                "POST /pattern/": "Analyze trends and patterns in historical complaint data"
             }
         }
     
