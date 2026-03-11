@@ -17,7 +17,7 @@ logger.setLevel(logging.INFO)
 
 # File handler - regulatory.log in Agents/logs/
 log_file = log_dir / "regulatory.log"
-file_handler = logging.FileHandler(log_file)
+file_handler = logging.FileHandler(log_file, encoding='utf-8')
 file_handler.setLevel(logging.INFO)
 
 # Formatter

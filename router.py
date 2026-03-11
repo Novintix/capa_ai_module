@@ -11,6 +11,8 @@ from Agents.pattern.router import router as pattern_router
 
 from Agents.action_plan.router import router as action_plan_router
 
+# # ── Orchestrator ──────────────────────────────────────────────────────────────
+# from orchestrator_service.router import router as orchestrator_router
 def register_routes(app: FastAPI):
     """
     Register all agent routes to the FastAPI app.
@@ -27,10 +29,12 @@ def register_routes(app: FastAPI):
     app.include_router(aireasoning_router)
     app.include_router(categorize_router)
     app.include_router(severity_router)
-    app.include_router(regulatory_router)
     app.include_router(action_plan_router)
     app.include_router(why_question_router)
     app.include_router(pattern_router)
+
+    # # ── Orchestrator router ───────────────────────────────────────────────────
+    # app.include_router(orchestrator_router)  # exposes POST /capa/analyze
     
     @app.get("/")
     def root():
@@ -50,6 +54,7 @@ def register_routes(app: FastAPI):
                 "action_plan": "CAPA Action Plan Generator",
                 "why_question": "Why Question Agent (5 Whys)",
                 "pattern": "Pattern Analysis and Trend Recognition Agent"
+                
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
