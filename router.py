@@ -7,7 +7,7 @@ from Agents.aireasoning.router import router as aireasoning_router
 from Agents.categorize.router import router as categorize_router
 from Agents.cause_generation.router import router as cause_generation_router
 from Agents.question.router import router as why_question_router
-
+from Agents.ingestion.router import router as ingestion_router
 from Agents.action_plan.router import router as action_plan_router
 
 def register_routes(app: FastAPI):
@@ -22,6 +22,9 @@ def register_routes(app: FastAPI):
     app.include_router(detection_router)
     app.include_router(regulatory_router)
     app.include_router(cause_generation_router)
+    app.include_router(ingestion_router)
+    app.include_router(occurrence_router)
+    app.include_router(aireasoning_router)
     app.include_router(occurrence_router)
     app.include_router(aireasoning_router)
     app.include_router(categorize_router)
@@ -43,7 +46,7 @@ def register_routes(app: FastAPI):
                 "cause_generation": "FMEA-Based Cause Generation Agent",
                 "occurrence": "Occurrence Rating Agent",
                 "aireasoning": "AI Reasoning Agent",
-                "categorize": "6M Categorization Agent (Fishbone)"
+                "categorize": "6M Categorization Agent (Fishbone)",
                 "severity": "Severity Classification Agent",
                 "action_plan": "CAPA Action Plan Generator",
                 "why_question": "Why Question Agent (5 Whys)"
@@ -61,7 +64,6 @@ def register_routes(app: FastAPI):
                 "POST /why/start": "Start a new 5 Whys chain (stores context in Redis)",
                 "POST /why/continue": "Continue an existing Why chain (complaint_id + answer only)",
                 "GET /why/health": "Why Question agent health check",
-                "GET /health": "Global health check"
                 "GET /health": "Global health check",
                 "POST /severity": "Evaluate severity of a complaint issue",
                 "POST /action_plan": "Generate FDA-compliant CAPA action plan",
