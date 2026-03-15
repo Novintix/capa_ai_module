@@ -16,6 +16,9 @@ langgraph-checkpoint-redis
 sentence-transformers
 torch
 
+# MongoDB (Similar Cases Agent)
+pymongo
+
 # Document Processing
 PyPDF2
 python-docx
