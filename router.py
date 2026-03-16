@@ -10,6 +10,7 @@ from Agents.question.router import router as why_question_router
 from Agents.ingestion.router import router as ingestion_router
 from Agents.action_plan.router import router as action_plan_router
 from Agents.zero_evidence_agent.router import router as zero_evidence_router
+from Agents.why_analysis_orchestrator.router import router as why_analysis_router
 
 def register_routes(app: FastAPI):
     """
@@ -34,6 +35,7 @@ def register_routes(app: FastAPI):
     app.include_router(action_plan_router)
     app.include_router(why_question_router)
     app.include_router(zero_evidence_router)
+    app.include_router(why_analysis_router)
     
     @app.get("/")
     def root():
@@ -52,7 +54,8 @@ def register_routes(app: FastAPI):
                 "severity": "Severity Classification Agent",
                 "action_plan": "CAPA Action Plan Generator",
                 "why_question": "Why Question Agent (5 Whys)",
-                "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)"
+                "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)",
+                "why_analysis": "Why Analysis Orchestrator (Question → Cause Gen → Zero Evidence Pipeline)"
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
@@ -72,6 +75,8 @@ def register_routes(app: FastAPI):
                 "POST /action_plan": "Generate FDA-compliant CAPA action plan",
                 "POST /zero-evidence/": "Select Most Critical Functional Cause (Zero Evidence Mode)",
                 "GET /zero-evidence/health": "Zero Evidence Agent health check",
+                "POST /why-analysis/": "Run full Why Analysis pipeline (Question → Cause Gen → Zero Evidence)",
+                "GET /why-analysis/health": "Why Analysis Orchestrator health check",
             }
         }
     

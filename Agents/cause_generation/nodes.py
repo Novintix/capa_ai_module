@@ -149,15 +149,35 @@ def parse_question_node(state: AgentState) -> AgentState:
         question_clean = re.sub(r'\bwhy\b', '', question, flags=re.IGNORECASE)
         question_clean = question_clean.replace('?', '').strip()
         
-        # Extract keywords (remove common words)
-        stop_words = {'is', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'did', 'does', 'do'}
-        keywords = [word for word in question_clean.split() if word not in stop_words and len(word) > 2]
+        # Extract keywords (remove common words but keep important technical terms)
+        stop_words = {'is', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'did', 'does', 'do', 'was', 'were', 'been', 'be', 'have', 'has', 'had'}
+        
+        # Split into words
+        words = question_clean.split()
+        
+        # Extract single keywords
+        keywords = [word for word in words if word not in stop_words and len(word) > 2]
+        
+        # Also extract 2-word and 3-word phrases for better matching
+        for i in range(len(words) - 1):
+            if words[i] not in stop_words or words[i+1] not in stop_words:
+                bigram = f"{words[i]} {words[i+1]}"
+                if len(bigram) > 5:  # Avoid very short phrases
+                    keywords.append(bigram)
+        
+        for i in range(len(words) - 2):
+            if any(word not in stop_words for word in [words[i], words[i+1], words[i+2]]):
+                trigram = f"{words[i]} {words[i+1]} {words[i+2]}"
+                if len(trigram) > 8:  # Avoid very short phrases
+                    keywords.append(trigram)
         
         updates = {
             "question_keywords": keywords,
             "next_step": "match_fmea"
         }
         log_routing_decision("parse_question", "match_fmea", f"Extracted {len(keywords)} keywords")
+        log_node_exit("parse_question", {"next_step": "match_fmea", "keywords": keywords})
+        return updates
         log_node_exit("parse_question", {"next_step": "match_fmea", "keywords": keywords})
         return updates
         
@@ -211,7 +231,7 @@ def match_fmea_node(state: AgentState) -> AgentState:
                 semantic_ranked = rank_fmea_by_semantic_similarity(
                     question, 
                     keyword_matched_rows,
-                    threshold=0.2  # Lower threshold since already keyword-filtered
+                    threshold=0.1  # Very low threshold since already keyword-filtered
                 )
                 matched_rows = semantic_ranked if semantic_ranked else keyword_matched_rows
                 matching_method = "keyword + semantic"
@@ -226,7 +246,7 @@ def match_fmea_node(state: AgentState) -> AgentState:
                 semantic_ranked = rank_fmea_by_semantic_similarity(
                     question,
                     fmea_data,
-                    threshold=0.4  # Higher threshold for pure semantic - be more selective
+                    threshold=0.25  # Lower threshold for better semantic matching
                 )
                 matched_rows = semantic_ranked
                 matching_method = "semantic only"
@@ -356,7 +376,7 @@ def extract_causes_node(state: AgentState) -> AgentState:
                 "total_causes": 0,
                 "next_step": "process_with_llm"
             }
-            log_routing_decision("extract_causes", "process_with_llm", "No causes extracted")
+            log_routing_decision("extract_causes", "process_with_llm", "No causes extracted - will generate with LLM")
             log_node_exit("extract_causes", updates)
             return updates
         
@@ -493,7 +513,7 @@ def process_with_llm_node(state: AgentState) -> AgentState:
                 return updates
                 
         else:
-            # GENERATION MODE: Generate causes when no FMEA
+            # GENERATION MODE: Generate causes when no FMEA or FMEA extraction failed
             prompt = get_unified_cause_prompt(question)
             
             # Call LLM
