@@ -10,6 +10,9 @@ from Agents.question.router import router as why_question_router
 from Agents.ingestion.router import router as ingestion_router
 from Agents.action_plan.router import router as action_plan_router
 from Agents.zero_evidence_agent.router import router as zero_evidence_router
+from Agents.action_plan.router import router as action_plan_router
+from Agents.similar_cases.router import router as similar_cases_router
+from Agents.ranking.router import router as ranking_router
 
 def register_routes(app: FastAPI):
     """
@@ -25,7 +28,7 @@ def register_routes(app: FastAPI):
     app.include_router(cause_generation_router)
     app.include_router(ingestion_router)
     app.include_router(occurrence_router)
-    app.include_router(aireasoning_router)
+    # app.include_router(aireasoning_router)
     app.include_router(occurrence_router)
     app.include_router(aireasoning_router)
     app.include_router(categorize_router)
@@ -34,6 +37,8 @@ def register_routes(app: FastAPI):
     app.include_router(action_plan_router)
     app.include_router(why_question_router)
     app.include_router(zero_evidence_router)
+    app.include_router(similar_cases_router)
+    app.include_router(ranking_router)
     
     @app.get("/")
     def root():
@@ -52,7 +57,9 @@ def register_routes(app: FastAPI):
                 "severity": "Severity Classification Agent",
                 "action_plan": "CAPA Action Plan Generator",
                 "why_question": "Why Question Agent (5 Whys)",
-                "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)"
+                "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)",
+                "similar_cases": "Similar Cases Search Agent (Vector Search)",
+                "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
@@ -68,10 +75,13 @@ def register_routes(app: FastAPI):
                 "POST /why/continue": "Continue an existing Why chain (complaint_id + answer only)",
                 "GET /why/health": "Why Question agent health check",
                 "GET /health": "Global health check",
+                # "GET /health": "Global health check",
                 "POST /severity": "Evaluate severity of a complaint issue",
                 "POST /action_plan": "Generate FDA-compliant CAPA action plan",
-                "POST /zero-evidence/": "Select Most Critical Functional Cause (Zero Evidence Mode)",
-                "GET /zero-evidence/health": "Zero Evidence Agent health check",
+                "POST /similar-cases/": "Find similar complaint cases using vector search",
+                "GET /similar-cases/health": "Similar cases agent health check",
+                "POST /ranking/": "Rank candidate root causes using RCPS methodology",
+                "GET /ranking/health": "Ranking agent health check",
             }
         }
     
