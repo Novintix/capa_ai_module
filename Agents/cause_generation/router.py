@@ -27,32 +27,31 @@ def get_cause_agent():
 
 
 @router.post("/", response_model=CauseGenerationResult)
-def generate_causes(question: QuestionInput, fmea_path: str):
+def generate_causes(question: QuestionInput, fmea_path: str = None):
     """
-    Generate list of all possible causes from FMEA document based on "why" question
+    Generate list of all possible causes based on "why" question
     
-    This endpoint:
-    - Parses the FMEA document
-    - Extracts keywords from the why question
-    - Matches question to relevant FMEA entries
-    - Returns ALL possible causes from matched entries
+    This endpoint can work in two modes:
+    1. **With FMEA Document**: Extracts causes from FMEA and validates with LLM
+    2. **Without FMEA Document**: Generates causes using LLM expert knowledge
     
-    Does NOT:
-    - Rank or validate causes (handled by downstream agents)
-    - Calculate occurrence/detection/RPN
-    - Use historical data
+    Features:
+    - LLM validation to filter irrelevant causes
+    - Fallback generation when FMEA not available
+    - Semantic matching for better accuracy
+    - Reusable across different environments
     
     Example questions:
     - "Why did the bike stop?"
     - "Why is tablet strength incorrect?"
-    - "Why is there content uniformity failure?"
+    - "Why was the syringe marking incorrect?"
     
     Args:
         question: Question input with why question
-        fmea_path: Path to FMEA Excel document
+        fmea_path: Optional path to FMEA Excel document (if not provided, uses LLM generation)
         
     Returns:
-        CauseGenerationResult with list of all possible causes
+        CauseGenerationResult with list of validated possible causes
     """
     
     try:
@@ -62,14 +61,7 @@ def generate_causes(question: QuestionInput, fmea_path: str):
         # Log request
         log_api_request("/cause-generation", question.question_id, has_fmea=bool(fmea_path))
         
-        # Check if FMEA file exists
-        if not os.path.exists(fmea_path):
-            raise HTTPException(
-                status_code=404,
-                detail=f"FMEA document not found: {fmea_path}"
-            )
-        
-        # Process question
+        # Process question (agent handles missing FMEA internally)
         result = cause_agent.process_question(question, fmea_path)
         
         # Log response

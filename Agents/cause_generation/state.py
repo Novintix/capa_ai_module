@@ -21,6 +21,7 @@ class AgentState(TypedDict, total=False):
     fmea_data: List[Dict[str, Any]]  # Parsed FMEA rows
     matched_rows: List[Dict[str, Any]]  # Matched FMEA rows
     extracted_causes: List[Dict[str, Any]]  # Extracted causes
+    fmea_available: bool  # Whether FMEA document is available
     
     # Output fields
     causes: List[Dict[str, Any]]  # Final list of causes
@@ -28,6 +29,7 @@ class AgentState(TypedDict, total=False):
     matched_entries: int
     confidence: float
     notes: Optional[str]
+    fmea_document_used: Optional[str]
     
     # Control fields
     iteration: int

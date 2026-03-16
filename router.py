@@ -7,13 +7,18 @@ from Agents.aireasoning.router import router as aireasoning_router
 from Agents.categorize.router import router as categorize_router
 from Agents.cause_generation.router import router as cause_generation_router
 from Agents.question.router import router as why_question_router
+from Agents.ingestion.router import router as ingestion_router
 from Agents.pattern.router import router as pattern_router
 
 from Agents.action_plan.router import router as action_plan_router
+from Agents.zero_evidence_agent.router import router as zero_evidence_router
+from Agents.action_plan.router import router as action_plan_router
+from Agents.similar_cases.router import router as similar_cases_router
+from Agents.ranking.router import router as ranking_router
 from Agents.effectiveness.router import router as effectiveness_router
 
 # # ── Orchestrator ──────────────────────────────────────────────────────────────
-from orchestrator_service.router import router as orchestrator_router
+from risk_analysis_orchestrator_service.router import router as orchestrator_router
 def register_routes(app: FastAPI):
     """
     Register all agent routes to the FastAPI app.
@@ -26,12 +31,18 @@ def register_routes(app: FastAPI):
     app.include_router(detection_router)
     app.include_router(regulatory_router)
     app.include_router(cause_generation_router)
+    app.include_router(ingestion_router)
+    app.include_router(occurrence_router)
+    # app.include_router(aireasoning_router)
     app.include_router(occurrence_router)
     app.include_router(aireasoning_router)
     app.include_router(categorize_router)
     app.include_router(severity_router)
     app.include_router(action_plan_router)
     app.include_router(why_question_router)
+    app.include_router(zero_evidence_router)
+    app.include_router(similar_cases_router)
+    app.include_router(ranking_router)
     app.include_router(pattern_router)
     app.include_router(effectiveness_router)
 
@@ -55,6 +66,9 @@ def register_routes(app: FastAPI):
                 "severity": "Severity Classification Agent",
                 "action_plan": "CAPA Action Plan Generator",
                 "why_question": "Why Question Agent (5 Whys)",
+                "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)",
+                "similar_cases": "Similar Cases Search Agent (Vector Search)",
+                "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
                 "pattern": "Pattern Analysis and Trend Recognition Agent",
                 "effectiveness": "Effectiveness Evaluation Agent",
                 "orchestrator": "CAPA Analysis and Recommendation Orchestrator"
@@ -74,8 +88,13 @@ def register_routes(app: FastAPI):
                 "POST /why/continue": "Continue an existing Why chain (complaint_id + answer only)",
                 "GET /why/health": "Why Question agent health check",
                 "GET /health": "Global health check",
+                # "GET /health": "Global health check",
                 "POST /severity": "Evaluate severity of a complaint issue",
                 "POST /action_plan": "Generate FDA-compliant CAPA action plan",
+                "POST /similar-cases/": "Find similar complaint cases using vector search",
+                "GET /similar-cases/health": "Similar cases agent health check",
+                "POST /ranking/": "Rank candidate root causes using RCPS methodology",
+                "GET /ranking/health": "Ranking agent health check",
                 "POST /pattern/": "Analyze trends and patterns in historical complaint data",
                 "POST /effectiveness": "Evaluate effectiveness of CAPA actions",
                 "POST /capa/analyze": "Orchestrator endpoint to analyze a complaint and generate CAPA recommendations"

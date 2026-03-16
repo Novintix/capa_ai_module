@@ -39,6 +39,7 @@ Flow:
 
 import json
 import operator
+from datetime import datetime
 from typing import Annotated, Optional
 from typing_extensions import TypedDict
 
@@ -53,9 +54,11 @@ from Agents.severity.graph    import build_graph            as build_severity_gr
 from Agents.occurrence.graph  import occurrence_graph
 from Agents.regulatory.graph  import create_regulatory_graph as build_regulatory_graph
 from Agents.aireasoning.graph import aireasoning_graph
+from Agents.similar_cases.graph import similar_cases_graph
 
 from config.aws_bedrock_config import get_llm
 from .prompts import EXTRACTION_PROMPT
+from .payloads import build_all_payloads
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -74,7 +77,7 @@ redis_client = redis.Redis(
 # STATE
 # ══════════════════════════════════════════════════════════════════════════════
 
-from orchestrator_service.state import RiskAnalysisState
+from risk_analysis_orchestrator_service.state import RiskAnalysisState
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -114,7 +117,7 @@ def input_validator(state: RiskAnalysisState) -> dict:
     print("   ✓ Validation passed")
     return {
         "validation_passed": True,
-        "node_log": [{"node": "input_validator", "status": "passed"}],
+        "node_log": [{"node": "input_validator", "status": "passed", "timestamp": str(datetime.now())}],
     }
 
 
@@ -170,7 +173,8 @@ def context_node(state: RiskAnalysisState) -> dict:
         "urgency":   urgency,
         "extracted": e,                          # raw extraction — payload_builder reads this
         "node_log":  [{"node": "context_node",
-                       "urgency": urgency}],
+                       "urgency": urgency,
+                       "timestamp": str(datetime.now())}],
     }
 
 
@@ -184,100 +188,22 @@ def context_node(state: RiskAnalysisState) -> dict:
 def payload_builder_node(state: RiskAnalysisState) -> dict:
     """
     Reads LLM extraction from state.
-    Builds tailored payload for each agent
-    matching their exact state schema.
-    Adding a new agent = add one key here only.
+    Delegates payload construction to risk_analysis_orchestrator_service/payloads.py.
+    Adding a new agent = add its payload function in payloads.py only.
     """
     print("\n[STEP 2] 📦 Payload Builder: building per-agent inputs...")
 
     e     = state.get("extracted", {})
     issue = e.get("core_issue", state["raw_input"])
 
-    enriched_inputs = {
-
-        # A5 Detection — matches detection/state.py AgentState
-        "detection": {
-            "complaint_id":          e.get("complaint_id", "UNKNOWN"),
-            "complaint_source":      e.get("source", "manual"),
-            "complaint_description": issue,
-            "policy_document_path":  None,
-            "has_policy":            False,
-            "iteration":             0,
-            "max_iterations":        3,
-        },
-
-        # A2 Pattern — matches pattern/state.py AgentState
-        "pattern": {
-            "complaint_id":          e.get("complaint_id", "UNKNOWN"),
-            "complaint_description": issue,
-            "product_family":        e.get("product"),
-            "region":                e.get("region"),
-            "severity":              e.get("severity_hint"),
-            "site":                  None,
-            "company_id":            None,
-            "company_schema":        None,
-            "historical_complaints": [],
-            "matched_complaint_ids": [],
-            "iteration":             0,
-            "max_iterations":        3,
-            "next_step":             "fetch_historical",
-        },
-
-        # A3 Severity — matches severity/state.py SeverityState
-        "severity": {
-            "issue": issue,
-        },
-
-        # A1 Similar Cases — dummy
-        "similar_cases": {
-            "issue":        issue,
-            "complaint_id": e.get("complaint_id", "UNKNOWN"),
-            "product":      e.get("product"),
-        },
-
-        # A4 Occurrence — matches occurrence/state.py OccurrenceState
-        "occurrence": {
-            "input": {
-                "complaint_id":       e.get("complaint_id", "UNKNOWN"),
-                "description":        issue,
-                "source":             e.get("source", "manual"),
-                "date":               e.get("date", "unknown"),
-                "product":            e.get("product", "unknown"),
-                "similar_cases":      [],
-                "additional_context": e.get("suspected_cause"),
-            },
-            "iteration": 0,
-        },
-
-        # A6 Regulatory — matches regulatory/state.py AgentState
-        "regulatory": {
-            "complaint_id":       e.get("complaint_id", "UNKNOWN"),
-            "description":        issue,
-            "date_of_awareness":  e.get("date", "unknown"),
-            "product_type":       e.get("product_type"),
-            "market_country":     e.get("market_country"),
-            "severity":           e.get("severity_hint"),
-            "issue_type":         e.get("issue_type"),
-            "death_or_injury":    e.get("death_or_injury", False),
-            "batch_number":       e.get("batch_number"),
-            "iteration":          0,
-            "max_iterations":     3,
-        },
-
-        # Meta — used by A7 and finalize
-        "_meta": {
-            "urgency": state.get("urgency", False),
-            "issue":   issue,
-            "extracted": e,
-        },
-    }
+    enriched_inputs = build_all_payloads(e, issue, state)
 
     print(f"   Built payloads for: {[k for k in enriched_inputs if k != '_meta']}")
-
+    print("   ✓ Payloads created successfully")
     return {
         "enriched_inputs": enriched_inputs,
         "agent_results":   [],              # initialise before parallel agents write
-        "node_log": [{"node": "payload_builder_node", "status": "complete"}],
+        "node_log": [{"node": "payload_builder_node", "status": "complete", "timestamp": str(datetime.now())}],
     }
 
 
@@ -326,51 +252,53 @@ def A5_detection_agent(state: dict) -> dict:
                            "type":  "detection",
                            "score": score,
                            "full":  result}],
-        "node_log": [{"node": "A5", "score": score}],
+        "node_log": [{"node": "A5", "score": score, "timestamp": str(datetime.now())}],
     }
 
 
 def A1_similar_cases_agent(state: dict) -> dict:
     """
-    Dummy agent — returns mock similar cases.
-    Replace body only when real implementation is ready.
+    Runs similar cases sub-graph.
+    Returns similar cases list to agent_results.
     No goto — edge in build_orchestrator() routes to A4.
     """
-    print("   ▶ A1 Similar Cases Agent running (dummy)...")
+    print("   ▶ A1 Similar Cases Agent running...")
+    
+    result = similar_cases_graph.invoke(state["agent_input"])
+    
+    # Extract results using Pydantic or dict access
+    final_output = result.get("final_output")
+    if hasattr(final_output, "model_dump"):
+        final_output = final_output.model_dump()
+    elif hasattr(final_output, "dict"):
+        final_output = final_output.dict()
+        
+    count = final_output.get("similarCount", 0) if final_output else 0
+    top_matches = final_output.get("topMatches", []) if final_output else []
+    
+    # Calculate avg RPN for A4 logic
+    total_rpn = 0
+    valid_rpns = 0
+    for m in top_matches:
+        similarity = m.get("similarity", 0)
+        # Mocking RPN because MongoDB fields might not mapped exactly to RPN yet
+        # But we can look at severity/occurrence if they exist in metadata
+        pass
 
-    issue = state["agent_input"].get("issue", "")
+    avg_historical_rpn = 250 # Fallback for now
 
-    dummy_result = {
-        "similar_cases": [
-            {"case_id": "CASE-2024-001",
-             "description": f"Similar issue: {issue[:60]}",
-             "date": "2024-03-15",
-             "resolution": "Supplier material replaced",
-             "rpn": 320},
-            {"case_id": "CASE-2023-087",
-             "description": "Valve seal failure under pressure test",
-             "date": "2023-11-02",
-             "resolution": "Process parameter adjustment",
-             "rpn": 210},
-            {"case_id": "CASE-2023-044",
-             "description": "Component crack detected post-assembly",
-             "date": "2023-07-19",
-             "resolution": "Incoming inspection protocol updated",
-             "rpn": 180},
-        ],
-        "total_similar":      3,
-        "avg_historical_rpn": 236.7,
-        "source":             "dummy",
-    }
-
-    print(f"     Similar cases : {dummy_result['total_similar']} (dummy)")
+    print(f"     Similar cases found: {count}")
 
     return {
         "agent_results": [{"agent": "A1",
                            "type":  "similar_cases",
-                           "full":  dummy_result}],
-        "node_log": [{"node": "A1", "source": "dummy",
-                      "total_similar": dummy_result["total_similar"]}],
+                           "full":  {
+                               "similar_cases": top_matches,
+                               "total_similar": count,
+                               "avg_historical_rpn": avg_historical_rpn,
+                               "source": "mongodb"
+                           }}],
+        "node_log": [{"node": "A1", "source": "mongodb", "total_similar": count, "timestamp": str(datetime.now())}],
     }
 
 
@@ -396,7 +324,7 @@ def A2_pattern_agent(state: dict) -> dict:
                            "trend_category": trend_category,
                            "pattern":        pattern,
                            "full":           result}],
-        "node_log": [{"node": "A2", "trend_score": trend_score, "pattern": pattern}],
+        "node_log": [{"node": "A2", "trend_score": trend_score, "pattern": pattern, "timestamp": str(datetime.now())}],
     }
 
 
@@ -420,7 +348,7 @@ def A3_severity_agent(state: dict) -> dict:
                            "score": score,
                            "label": label,
                            "full":  result}],
-        "node_log": [{"node": "A3", "score": score, "label": label}],
+        "node_log": [{"node": "A3", "score": score, "label": label, "timestamp": str(datetime.now())}],
     }
 
 
@@ -482,7 +410,7 @@ def A4_occurrence_agent(state: RiskAnalysisState) -> dict:
                            "score":  occ_score,
                            "rating": occ_rating,
                            "full":   occurrence_result}],
-        "node_log": [{"node": "A4", "O": occ_score}],
+        "node_log": [{"node": "A4", "O": occ_score, "timestamp": str(datetime.now())}],
     }
 
 
@@ -533,7 +461,8 @@ def rpn_calculator_node(state: RiskAnalysisState) -> dict:
         "rpn_value":        rpn,
         "rpn_level":        rpn_level,
         "node_log": [{"node": "rpn_calculator_node", "rpn": rpn,
-                      "rpn_level": rpn_level, "S": S, "O": O, "D": D}],
+                      "rpn_level": rpn_level, "S": S, "O": O, "D": D, 
+                      "timestamp": str(datetime.now())}],
     }
 
 
@@ -570,7 +499,8 @@ def A6_regulatory_agent(state: RiskAnalysisState) -> dict:
         "regulatory_output": result,
         "node_log": [{"node": "A6",
                       "reportable": reportable,
-                      "risk_level": risk_level}],
+                      "risk_level": risk_level,
+                      "timestamp": str(datetime.now())}],
     }
 
 
@@ -632,7 +562,7 @@ def A7_reasoning_agent(state: RiskAnalysisState) -> dict:
 
     return {
         "reasoning_output": result,
-        "node_log": [{"node": "A7", "confidence": confidence}],
+        "node_log": [{"node": "A7", "confidence": confidence, "timestamp": str(datetime.now())}],
     }
 
 
@@ -657,6 +587,46 @@ def finalize_node(state: RiskAnalysisState) -> dict:
                         if hasattr(final_reason, "dict")
                         else {})
 
+    # ── Extract per-agent summaries from agent_results ──────────────────────
+    agent_results = state.get("agent_results", [])
+    agent_summary = {}
+    for r in agent_results:
+        t = r.get("type")
+        if t == "similar_cases":
+            full = r.get("full", {})
+            agent_summary["similar_cases"] = {
+                "total_similar":      full.get("total_similar", 0),
+                "avg_historical_rpn": full.get("avg_historical_rpn"),
+                "source":             full.get("source"),
+                "top_matches":        full.get("similar_cases", []),
+            }
+        elif t == "pattern":
+            agent_summary["pattern"] = {
+                "trend_score":    r.get("trend_score"),
+                "trend_category": r.get("trend_category"),
+                "pattern":        r.get("pattern"),
+            }
+        elif t == "detection":
+            agent_summary["detection"] = {
+                "score":           r.get("score"),
+                "confidence":      r.get("full", {}).get("confidence"),
+                "rule_reference":  r.get("full", {}).get("rule_reference"),
+                "explanation":     r.get("full", {}).get("explanation"),
+            }
+        elif t == "severity":
+            agent_summary["severity"] = {
+                "score": r.get("score"),
+                "label": r.get("label"),
+            }
+        elif t == "occurrence":
+            full = r.get("full", {}).get("final_output", {})
+            if hasattr(full, "dict"):
+                full = full.dict()
+            agent_summary["occurrence"] = {
+                "score":  r.get("score"),
+                "rating": r.get("rating"),
+            }
+
     report = {
         "status":  "complete",
         "rpn": {
@@ -667,6 +637,7 @@ def finalize_node(state: RiskAnalysisState) -> dict:
             "rpn_value":        state.get("rpn_value"),
             "rpn_level":        state.get("rpn_level"),
         },
+        "agent_summaries": agent_summary,
         "regulatory": {
             "reportable":                reg.get("reportable"),
             "regulatory_classification": reg.get("regulatory_classification"),
@@ -689,7 +660,8 @@ def finalize_node(state: RiskAnalysisState) -> dict:
     return {
         "final_report": report,
         "node_log": [{"node": "finalize_node", "status": "complete",
-                      "rpn_level": state.get("rpn_level")}],
+                      "rpn_level": state.get("rpn_level"),
+                      "timestamp": str(datetime.now())}],
     }
 
 

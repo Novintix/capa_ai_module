@@ -34,14 +34,14 @@ class CauseGenerationAgent:
     def process_question(
         self, 
         question_input: QuestionInput, 
-        fmea_document_path: str
+        fmea_document_path: str = None
     ) -> Dict[str, Any]:
         """
-        Process why question and generate list of causes from FMEA
+        Process why question and generate list of causes
         
         Args:
             question_input: Question input data (e.g., "Why did the bike stop?")
-            fmea_document_path: Path to FMEA Excel document
+            fmea_document_path: Optional path to FMEA Excel document
             
         Returns:
             Dictionary with list of all possible causes
@@ -66,7 +66,7 @@ class CauseGenerationAgent:
                     "question": question_input.question,
                     "causes": [],
                     "total_causes": 0,
-                    "fmea_document_used": fmea_document_path,
+                    "fmea_document_used": final_state.get("fmea_document_used", fmea_document_path or "Not Available"),
                     "matched_entries": 0,
                     "confidence": 0.0,
                     "notes": f"Error: {final_state['error']}"
@@ -78,7 +78,7 @@ class CauseGenerationAgent:
                 "question": final_state.get("question"),
                 "causes": final_state.get("causes", []),
                 "total_causes": final_state.get("total_causes", 0),
-                "fmea_document_used": fmea_document_path,
+                "fmea_document_used": final_state.get("fmea_document_used", fmea_document_path or "Not Available"),
                 "matched_entries": final_state.get("matched_entries", 0),
                 "confidence": final_state.get("confidence", 0.0),
                 "notes": final_state.get("notes")
@@ -93,7 +93,7 @@ class CauseGenerationAgent:
                 "question": question_input.question,
                 "causes": [],
                 "total_causes": 0,
-                "fmea_document_used": fmea_document_path,
+                "fmea_document_used": fmea_document_path or "Not Available",
                 "matched_entries": 0,
                 "confidence": 0.0,
                 "notes": f"Agent error: {str(e)}"

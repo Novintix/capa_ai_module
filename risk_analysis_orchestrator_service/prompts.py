@@ -1,5 +1,5 @@
 """
-orchestrator_service/prompts.py
+risk_analysis_orchestrator_service/prompts.py
 Prompts for the O2 Risk Analysis Orchestrator.
 """
 

@@ -1,67 +1,34 @@
 # Cause Generation Agent
 
-## Purpose
-Generates list of all possible causes for "why" questions by parsing FMEA documents and using hybrid matching (keywords + semantic embeddings).
+## What This Agent Does
+Generates a list of possible causes for "why" questions by analyzing FMEA documents or using expert knowledge when FMEA is unavailable. The agent filters out irrelevant causes using LLM validation to ensure only relevant causes are returned.
 
-## Agent Type
-Deterministic, document-driven agent with optional semantic matching. No LLM usage.
+## Architecture Flow
 
-## Responsibilities
-- Parse FMEA Excel documents
-- Extract keywords from "why" questions
-- Match questions to FMEA entries using hybrid approach:
-  - Keyword matching (fast, exact)
-  - Semantic similarity using embeddings (intelligent, fuzzy)
-- Return ALL possible causes from matched entries
-- Provide causes with full FMEA metadata for downstream validation/ranking
+```
+Input: "Why was the syringe marking incorrect?"
+   ↓
+1. Initialize → Set up processing state
+   ↓
+2. Validate FMEA → Check if FMEA document exists
+   ↓                    ↓
+   FMEA Available       FMEA Not Available
+   ↓                    ↓
+3. Parse FMEA          7. Process with LLM
+   ↓                      (Generate causes)
+4. Parse Question          ↓
+   ↓                    8. Finalize
+5. Match FMEA             ↓
+   ↓                   Output: Generated causes
+6. Extract Causes
+   ↓
+7. Process with LLM
+   (Validate/filter causes)
+   ↓
+8. Finalize
+   ↓
+Output: Validated relevant causes
+```
 
-
-## Flow
-1. **Initialize**: Set up state
-2. **Validate FMEA**: Check if FMEA document exists
-3. **Parse FMEA**: Extract structured data from Excel
-4. **Parse Question**: Extract keywords from why question
-5. **Match FMEA**: Hybrid matching (keyword + semantic similarity)
-6. **Extract Causes**: Retrieve all causes from matched rows
-7. **Finalize**: Return structured result with cause list
-
-## Matching Strategy
-1. **Keyword Matching**: Fast exact/partial text matching
-2. **Semantic Matching**: Uses sentence-transformers embeddings for semantic similarity
-3. **Hybrid**: Combines both for best results
-4. **Fallback**: Returns all FMEA causes if no match found
-
-## Input
-- `question_id`: Unique identifier
-- `question`: Why question (e.g., "Why did the bike stop?", "Why is tablet strength incorrect?")
-- `context`: Optional context from previous 5-Why analysis
-- `fmea_path`: Path to FMEA Excel document
-
-## Output
-- `question`: Original why question
-- `causes`: List of all possible causes with:
-  - `cause_id`: Unique identifier
-  - `cause_text`: Cause description
-  - `process_step`: Associated process
-  - `failure_mode`: Associated failure
-  - `potential_effects`: Effects from FMEA
-  - `severity`, `occurrence`, `detection`: FMEA ratings
-  - `current_controls`: Existing controls
-  - `source`: "FMEA"
-- `total_causes`: Count of causes
-- `matched_entries`: Number of FMEA rows matched
-- `confidence`: Match confidence (0-1)
-- `notes`: Matching method used
-
-## FMEA Format
-Expected Excel columns:
-- Process Step / Risk Identification
-- Potential Failure Mode
-- Potential Effects
-- Potential Causes
-- Severity
-- Occurrence
-- Detection / Detection Level
-- Current Process Control
-
+**Single LLM Call**: The agent now uses LLM only once - either for validation (when FMEA exists) or generation (when FMEA doesn't exist).
 

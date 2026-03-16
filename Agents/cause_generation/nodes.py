@@ -5,15 +5,22 @@ All node functions for the Cause Generation Agent
 
 import os
 import re
+import json
 from typing import List, Dict, Any
 
 from .state import AgentState
 from .tools.excel_extractor import extract_fmea_from_excel, normalize_column_names
 from .tools.semantic_matcher import rank_fmea_by_semantic_similarity
+from .prompts import (
+    get_unified_cause_prompt,
+    format_causes_for_validation,
+    validate_prompt_inputs
+)
 from .logger import (
     log_node_entry, log_node_exit, log_routing_decision, 
     log_error, log_fmea_parsing, log_matching, logger
 )
+from config.aws_bedrock_config import get_llm
 
 
 def initialize_node(state: AgentState) -> AgentState:
@@ -51,28 +58,27 @@ def validate_fmea_node(state: AgentState) -> AgentState:
     fmea_path = state.get("fmea_document_path")
     
     if not fmea_path:
-        error_msg = "FMEA document path not provided"
-        log_error("validate_fmea", error_msg)
+        # No FMEA path provided - this is OK, route to LLM generation
         updates = {
-            "error": error_msg,
-            "next_step": "finalize"
+            "fmea_available": False,
+            "next_step": "process_with_llm"
         }
-        log_routing_decision("validate_fmea", "finalize", "No FMEA path")
+        log_routing_decision("validate_fmea", "process_with_llm", "No FMEA path - will generate causes")
         log_node_exit("validate_fmea", updates)
         return updates
     
     if not os.path.exists(fmea_path):
-        error_msg = f"FMEA document not found: {fmea_path}"
-        log_error("validate_fmea", error_msg)
+        # FMEA path provided but file doesn't exist - route to LLM generation
         updates = {
-            "error": error_msg,
-            "next_step": "finalize"
+            "fmea_available": False,
+            "next_step": "process_with_llm"
         }
-        log_routing_decision("validate_fmea", "finalize", "FMEA file not found")
+        log_routing_decision("validate_fmea", "process_with_llm", "FMEA file not found - will generate causes")
         log_node_exit("validate_fmea", updates)
         return updates
     
     updates = {
+        "fmea_available": True,
         "next_step": "parse_fmea"
     }
     log_routing_decision("validate_fmea", "parse_fmea", "FMEA file exists")
@@ -241,9 +247,10 @@ def match_fmea_node(state: AgentState) -> AgentState:
                 "matched_entries": 0,
                 "confidence": 0.0,
                 "notes": "No matching FMEA entries found for the question.",
-                "next_step": "finalize"
+                "fmea_document_used": state.get("fmea_document_path", "Unknown"),
+                "next_step": "process_with_llm"
             }
-            log_routing_decision("match_fmea", "finalize", "No matches found")
+            log_routing_decision("match_fmea", "process_with_llm", "No matches found")
             log_node_exit("match_fmea", updates)
             return updates
         
@@ -261,6 +268,7 @@ def match_fmea_node(state: AgentState) -> AgentState:
             "matched_entries": len(matched_rows),
             "confidence": confidence,
             "notes": notes,
+            "fmea_document_used": state.get("fmea_document_path", "Unknown"),
             "next_step": "extract_causes"
         }
         log_routing_decision("match_fmea", "extract_causes", f"Found {len(matched_rows)} matches")
@@ -346,19 +354,19 @@ def extract_causes_node(state: AgentState) -> AgentState:
                 "error": error_msg,
                 "causes": [],
                 "total_causes": 0,
-                "next_step": "finalize"
+                "next_step": "process_with_llm"
             }
-            log_routing_decision("extract_causes", "finalize", "No causes extracted")
+            log_routing_decision("extract_causes", "process_with_llm", "No causes extracted")
             log_node_exit("extract_causes", updates)
             return updates
         
         updates = {
             "causes": causes_list,
             "total_causes": len(causes_list),
-            "next_step": "finalize"
+            "next_step": "process_with_llm"
         }
-        log_routing_decision("extract_causes", "finalize", f"Extracted {len(causes_list)} causes")
-        log_node_exit("extract_causes", {"next_step": "finalize", "causes_count": len(causes_list)})
+        log_routing_decision("extract_causes", "process_with_llm", f"Extracted {len(causes_list)} causes")
+        log_node_exit("extract_causes", {"next_step": "process_with_llm", "causes_count": len(causes_list)})
         return updates
         
     except Exception as e:
@@ -388,3 +396,177 @@ def finalize_node(state: AgentState) -> AgentState:
     log_routing_decision("finalize", "END", "Process complete")
     log_node_exit("finalize", updates)
     return updates
+
+
+def clean_llm_response(response_text: str) -> str:
+    """Clean LLM response by removing reasoning tags and markdown"""
+    # Strip reasoning tags if present
+    if "<reasoning>" in response_text and "</reasoning>" in response_text:
+        response_text = re.sub(r'<reasoning>.*?</reasoning>\s*', '', response_text, flags=re.DOTALL).strip()
+    
+    # Remove markdown code blocks
+    response_text = response_text.replace('```json', '').replace('```', '').strip()
+    
+    # Extract JSON object - find first { and last }
+    start_idx = response_text.find('{')
+    end_idx = response_text.rfind('}')
+    
+    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+        response_text = response_text[start_idx:end_idx+1]
+    else:
+        raise ValueError(f"No valid JSON object found in response")
+    
+    return response_text
+
+
+def process_with_llm_node(state: AgentState) -> AgentState:
+    """
+    Node: Process causes with LLM (validation or generation)
+    Single responsibility: Either validate FMEA causes or generate causes when no FMEA
+    """
+    log_node_entry("process_with_llm", state)
+    
+    try:
+        question = state["question"]
+        causes = state.get("causes", [])
+        fmea_available = state.get("fmea_available", False)
+        
+        # Validate inputs
+        if not validate_prompt_inputs(question):
+            error_msg = "Invalid question for LLM processing"
+            log_error("process_with_llm", error_msg)
+            updates = {
+                "notes": f"LLM processing failed: {error_msg}",
+                "next_step": "finalize"
+            }
+            log_routing_decision("process_with_llm", "finalize", "Invalid inputs")
+            log_node_exit("process_with_llm", updates)
+            return updates
+        
+        # Initialize LLM
+        llm = get_llm()
+        
+        if fmea_available and causes:
+            # VALIDATION MODE: Filter FMEA causes
+            causes_text = format_causes_for_validation(causes)
+            prompt = get_unified_cause_prompt(question, causes_text)
+            
+            # Call LLM
+            response = llm.invoke(prompt)
+            response_text = clean_llm_response(response.content)
+            
+            # Parse JSON response
+            result = json.loads(response_text)
+            
+            if result.get("mode") == "validation":
+                relevant_numbers = result.get("relevant_cause_numbers", [])
+                reasoning = result.get("reasoning", "LLM validation applied")
+                
+                # Filter causes based on LLM validation
+                filtered_causes = []
+                for i, cause in enumerate(causes, 1):
+                    if i in relevant_numbers:
+                        filtered_causes.append(cause)
+                
+                # Update cause IDs to be sequential
+                for i, cause in enumerate(filtered_causes, 1):
+                    cause["cause_id"] = f"C{i:03d}"
+                
+                updates = {
+                    "causes": filtered_causes,
+                    "total_causes": len(filtered_causes),
+                    "notes": f"LLM filtered {len(causes)} causes to {len(filtered_causes)} relevant causes. {reasoning}",
+                    "next_step": "finalize"
+                }
+                
+                log_routing_decision("process_with_llm", "finalize", f"Filtered to {len(filtered_causes)} relevant causes")
+                log_node_exit("process_with_llm", {"next_step": "finalize", "filtered_count": len(filtered_causes)})
+                return updates
+            else:
+                # Unexpected response format, continue with unfiltered causes
+                updates = {
+                    "notes": "LLM validation returned unexpected format, returning all causes",
+                    "next_step": "finalize"
+                }
+                log_routing_decision("process_with_llm", "finalize", "Unexpected LLM response")
+                log_node_exit("process_with_llm", updates)
+                return updates
+                
+        else:
+            # GENERATION MODE: Generate causes when no FMEA
+            prompt = get_unified_cause_prompt(question)
+            
+            # Call LLM
+            response = llm.invoke(prompt)
+            response_text = clean_llm_response(response.content)
+            
+            # Parse JSON response
+            result = json.loads(response_text)
+            
+            if result.get("mode") == "generation":
+                generated_causes = result.get("causes", [])
+                
+                # Add cause IDs and ensure proper format
+                for i, cause in enumerate(generated_causes, 1):
+                    cause["cause_id"] = f"C{i:03d}"
+                    if "source" not in cause:
+                        cause["source"] = "Generated"
+                
+                updates = {
+                    "causes": generated_causes,
+                    "total_causes": len(generated_causes),
+                    "matched_entries": 0,
+                    "confidence": 0.7,  # Medium confidence for generated causes
+                    "notes": "FMEA document not available. Generated possible causes using expert knowledge.",
+                    "fmea_document_used": "Not Available",
+                    "next_step": "finalize"
+                }
+                
+                log_routing_decision("process_with_llm", "finalize", f"Generated {len(generated_causes)} causes")
+                log_node_exit("process_with_llm", {"next_step": "finalize", "generated_count": len(generated_causes)})
+                return updates
+            else:
+                # Unexpected response format
+                error_msg = "LLM generation returned unexpected format"
+                log_error("process_with_llm", error_msg)
+                updates = {
+                    "causes": [],
+                    "total_causes": 0,
+                    "matched_entries": 0,
+                    "confidence": 0.0,
+                    "notes": f"Unable to generate causes: {error_msg}",
+                    "fmea_document_used": "Not Available",
+                    "error": error_msg,
+                    "next_step": "finalize"
+                }
+                log_routing_decision("process_with_llm", "finalize", "LLM generation failed")
+                log_node_exit("process_with_llm", updates)
+                return updates
+        
+    except Exception as e:
+        error_msg = f"LLM processing failed: {str(e)}"
+        log_error("process_with_llm", error_msg)
+        
+        # Return appropriate fallback based on mode
+        if state.get("fmea_available", False) and state.get("causes"):
+            # Had FMEA causes, return them unfiltered
+            updates = {
+                "notes": f"LLM validation failed, returning all causes: {error_msg}",
+                "next_step": "finalize"
+            }
+        else:
+            # No FMEA, return empty
+            updates = {
+                "causes": [],
+                "total_causes": 0,
+                "matched_entries": 0,
+                "confidence": 0.0,
+                "notes": f"Unable to generate causes: {error_msg}",
+                "fmea_document_used": "Not Available",
+                "error": error_msg,
+                "next_step": "finalize"
+            }
+        
+        log_routing_decision("process_with_llm", "finalize", "LLM processing failed")
+        log_node_exit("process_with_llm", updates)
+        return updates
