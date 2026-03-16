@@ -10,9 +10,10 @@ from Agents.question.router import router as why_question_router
 from Agents.pattern.router import router as pattern_router
 
 from Agents.action_plan.router import router as action_plan_router
+from Agents.effectiveness.router import router as effectiveness_router
 
 # # ── Orchestrator ──────────────────────────────────────────────────────────────
-# from orchestrator_service.router import router as orchestrator_router
+from orchestrator_service.router import router as orchestrator_router
 def register_routes(app: FastAPI):
     """
     Register all agent routes to the FastAPI app.
@@ -32,9 +33,10 @@ def register_routes(app: FastAPI):
     app.include_router(action_plan_router)
     app.include_router(why_question_router)
     app.include_router(pattern_router)
+    app.include_router(effectiveness_router)
 
     # # ── Orchestrator router ───────────────────────────────────────────────────
-    # app.include_router(orchestrator_router)  # exposes POST /capa/analyze
+    app.include_router(orchestrator_router)  # exposes POST /capa/analyze
     
     @app.get("/")
     def root():
@@ -53,7 +55,9 @@ def register_routes(app: FastAPI):
                 "severity": "Severity Classification Agent",
                 "action_plan": "CAPA Action Plan Generator",
                 "why_question": "Why Question Agent (5 Whys)",
-                "pattern": "Pattern Analysis and Trend Recognition Agent"
+                "pattern": "Pattern Analysis and Trend Recognition Agent",
+                "effectiveness": "Effectiveness Evaluation Agent",
+                "orchestrator": "CAPA Analysis and Recommendation Orchestrator"
                 
             },
             "endpoints": {
@@ -72,7 +76,9 @@ def register_routes(app: FastAPI):
                 "GET /health": "Global health check",
                 "POST /severity": "Evaluate severity of a complaint issue",
                 "POST /action_plan": "Generate FDA-compliant CAPA action plan",
-                "POST /pattern/": "Analyze trends and patterns in historical complaint data"
+                "POST /pattern/": "Analyze trends and patterns in historical complaint data",
+                "POST /effectiveness": "Evaluate effectiveness of CAPA actions",
+                "POST /capa/analyze": "Orchestrator endpoint to analyze a complaint and generate CAPA recommendations"
             }
         }
     

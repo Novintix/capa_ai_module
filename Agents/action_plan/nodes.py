@@ -8,6 +8,8 @@ Includes:
 """
 
 import json
+import re
+import json_repair
 from .state import ActionPlanState
 from config.aws_bedrock_config import get_llm
 from .prompts import build_capa_action_plan_prompt
@@ -38,8 +40,13 @@ def generate_actions_node(state: ActionPlanState) -> ActionPlanState:
         # Invoke LLM
         response = llm.invoke(prompt)
         
-        # Parse JSON response
-        parsed_json = json.loads(response.content)
+        # Parse JSON response reliably using json_repair
+        content = response.content
+        parsed_json = json_repair.loads(content)
+        
+        # If json_repair returns a string (e.g., if it double wraps), try to parse again or handle
+        if isinstance(parsed_json, str):
+            parsed_json = json_repair.loads(parsed_json)
         
         # Validate using Pydantic
         validated_response = CapaActionPlanResponse(**parsed_json)
