@@ -16,9 +16,10 @@ from Agents.why_analysis_orchestrator.router import router as why_analysis_route
 from Agents.action_plan.router import router as action_plan_router
 from Agents.similar_cases.router import router as similar_cases_router
 from Agents.ranking.router import router as ranking_router
+from Agents.effectiveness.router import router as effectiveness_router
 
 # # ── Orchestrator ──────────────────────────────────────────────────────────────
-# from orchestrator_service.router import router as orchestrator_router
+from risk_analysis_orchestrator_service.router import router as orchestrator_router
 def register_routes(app: FastAPI):
     """
     Register all agent routes to the FastAPI app.
@@ -45,9 +46,10 @@ def register_routes(app: FastAPI):
     app.include_router(similar_cases_router)
     app.include_router(ranking_router)
     app.include_router(pattern_router)
+    app.include_router(effectiveness_router)
 
     # # ── Orchestrator router ───────────────────────────────────────────────────
-    # app.include_router(orchestrator_router)  # exposes POST /capa/analyze
+    app.include_router(orchestrator_router)  # exposes POST /capa/analyze
     
     @app.get("/")
     def root():
@@ -70,7 +72,9 @@ def register_routes(app: FastAPI):
                 "why_analysis": "Why Analysis Orchestrator (Question → Cause Gen → Zero Evidence Pipeline)",
                 "similar_cases": "Similar Cases Search Agent (Vector Search)",
                 "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
-                "pattern": "Pattern Analysis and Trend Recognition Agent"
+                "pattern": "Pattern Analysis and Trend Recognition Agent",
+                "effectiveness": "Effectiveness Evaluation Agent",
+                "orchestrator": "CAPA Analysis and Recommendation Orchestrator"
                 
             },
             "endpoints": {
@@ -98,7 +102,9 @@ def register_routes(app: FastAPI):
                 "GET /similar-cases/health": "Similar cases agent health check",
                 "POST /ranking/": "Rank candidate root causes using RCPS methodology",
                 "GET /ranking/health": "Ranking agent health check",
-                "POST /pattern/": "Analyze trends and patterns in historical complaint data"
+                "POST /pattern/": "Analyze trends and patterns in historical complaint data",
+                "POST /effectiveness": "Evaluate effectiveness of CAPA actions",
+                "POST /capa/analyze": "Orchestrator endpoint to analyze a complaint and generate CAPA recommendations"
             }
         }
     

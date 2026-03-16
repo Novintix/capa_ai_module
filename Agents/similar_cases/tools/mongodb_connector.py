@@ -33,7 +33,7 @@ class MongoDBConnector:
     def _connect(self):
         """Establish MongoDB connection."""
         try:
-            mongodb_uri = os.getenv("MONGODB_URI")
+            mongodb_uri = os.getenv("MONGODB_URI_SIMILAR_CASES")
             database_name = os.getenv("DATABASE_NAME", "Capa")
             collection_name = os.getenv("COLLECTION_NAME", "Complaints")
             

@@ -64,13 +64,43 @@ def severity_classification_node(state: SeverityState) -> SeverityState:
         )
 
         response = llm.invoke(prompt)
-        parsed = SeverityLLMOutput(**json.loads(response.content))
+        raw = response.content.strip()
 
+        # ── Robust JSON extraction ────────────────────────────────────────────
+        # Strip markdown code fences if LLM wraps output
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
 
-        state["clinical_score"] = parsed.clinical_score
+        # Extract first {...} block in case LLM added preamble text
+        start = raw.find("{")
+        end   = raw.rfind("}") + 1
+        if start != -1 and end > start:
+            raw = raw[start:end]
+
+        parsed = SeverityLLMOutput(**json.loads(raw))
+
+        # ── Log LLM reasoning for traceability ───────────────────────────────
+        if parsed.reasoning:
+            log_node_exit("severity_llm_node — reasoning", {
+                "clinical":      parsed.reasoning.clinical,
+                "reversibility": parsed.reasoning.reversibility,
+                "medical":       parsed.reasoning.medical,
+                "duration":      parsed.reasoning.duration,
+            })
+
+        print(f"     Severity sub-scores → "
+              f"C:{parsed.clinical_score} "
+              f"R:{parsed.reversibility_score} "
+              f"M:{parsed.medical_score} "
+              f"D:{parsed.duration_score}")
+
+        state["clinical_score"]      = parsed.clinical_score
         state["reversibility_score"] = parsed.reversibility_score
-        state["medical_score"] = parsed.medical_score
-        state["duration_score"] = parsed.duration_score
+        state["medical_score"]       = parsed.medical_score
+        state["duration_score"]      = parsed.duration_score
 
         log_node_exit("severity_llm_node", state)
         return state

@@ -112,6 +112,7 @@ Return ONLY valid JSON. No explanations, no reasoning, no markdown.
   "notes": "<audit-relevant notes or null>"
 }}
 
+Return ONLY valid JSON. No explanations, no reasoning, no markdown formatting. Ensure that all string values have their internal double quotes properly escaped (e.g. \\").
 -----------------------------------
 CRITICAL RULES
 -----------------------------------
@@ -121,5 +122,5 @@ CRITICAL RULES
 • All assignments must use departments, NEVER individual names
 • All verification plans must be measurable
 • Confidence score must reflect audit readiness (0.85+ = audit-ready)
-• Return ONLY JSON, nothing else
+• Make sure the JSON syntax is perfectly valid. Do not forget commas or wrap it in code blocks.
 """
