@@ -4,6 +4,7 @@ langchain-core
 langgraph
 pydantic
 python-dotenv
+pymongo
 
 # AWS Bedrock
 boto3
@@ -15,6 +16,9 @@ langgraph-checkpoint-redis
 # Embeddings (Open Source)
 sentence-transformers
 torch
+
+# MongoDB (Similar Cases Agent)
+pymongo
 
 # Document Processing
 PyPDF2

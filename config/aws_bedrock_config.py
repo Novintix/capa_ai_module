@@ -105,7 +105,20 @@ class BedrockLLM:
             json_match = re.search(r"\{.*\}", original_content, re.DOTALL)
 
         if not json_match:
-            raise ValueError(f"No JSON found in model response: {original_content}")
+            # For simple numeric responses (like our ranking prompts), return the cleaned content
+            # Also check for numeric values in the original content if cleaning removed everything
+            content_to_check = content if content.strip() else original_content
+            
+            # Extract numeric value from text
+            numeric_match = re.search(r'\b([0-9]*\.?[0-9]+)\b', content_to_check)
+            if numeric_match:
+                numeric_value = numeric_match.group(1)
+                return type("LLMResponse", (), {
+                    "content": numeric_value,
+                    "raw_content": original_content
+                })()
+            else:
+                raise ValueError(f"No JSON or numeric value found in model response: {original_content}")
 
         clean_json = json_match.group()
 
