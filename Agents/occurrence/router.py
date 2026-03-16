@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from typing import Optional
 import json
-from Agents.occurrence.state import ComplaintData, OccurrenceOutput
+from Agents.occurrence.state import ComplaintData, OccurrenceOutput, PatternData, SimilarCasesData
 from Agents.occurrence.graph import occurrence_graph
 from Agents.occurrence.utils import MetricsParser, load_metrics
 from Agents.occurrence.logger import log_request, log_final_output, log_error
@@ -18,7 +18,9 @@ async def analyze_occurrence(
     date: str = Form(...),
     product: str = Form(...),
     additional_context: Optional[str] = Form(None),
-    similar_cases_json: Optional[str] = Form(None),
+    pattern_data_json: Optional[str] = Form(None),
+    similar_cases_data_json: Optional[str] = Form(None),
+    similar_cases_json: Optional[str] = Form(None),  # Legacy support
     metrics_file: Optional[UploadFile] = File(None),
     data_file: Optional[UploadFile] = File(None)
 ):
@@ -27,7 +29,9 @@ async def analyze_occurrence(
 
     Accepts:
     - Form Data: complaint details.
-    - similar_cases_json: Optional JSON string of similar cases list.
+    - pattern_data_json: Optional JSON string of pattern analysis results.
+    - similar_cases_data_json: Optional JSON string of similar cases analysis results.
+    - similar_cases_json: Optional JSON string of similar cases list (legacy format).
     - metrics_file: Optional metrics definition file (JSON). Overrides default metrics.json.
     - data_file: Optional historical data file (Excel, CSV, PDF, Docx) appended as context.
 
@@ -35,7 +39,25 @@ async def analyze_occurrence(
     - Weighted Occurrence Score (1-10) with rating and parameter breakdown.
     """
     try:
-        # 1. Parse similar cases from JSON string
+        # Parse pattern data from JSON string
+        parsed_pattern_data = None
+        if pattern_data_json:
+            try:
+                pattern_dict = json.loads(pattern_data_json)
+                parsed_pattern_data = PatternData(**pattern_dict)
+            except (json.JSONDecodeError, ValueError) as e:
+                raise HTTPException(status_code=400, detail=f"Invalid JSON format for pattern_data_json: {str(e)}")
+
+        # Parse similar cases data from JSON string
+        parsed_similar_cases_data = None
+        if similar_cases_data_json:
+            try:
+                similar_cases_dict = json.loads(similar_cases_data_json)
+                parsed_similar_cases_data = SimilarCasesData(**similar_cases_dict)
+            except (json.JSONDecodeError, ValueError) as e:
+                raise HTTPException(status_code=400, detail=f"Invalid JSON format for similar_cases_data_json: {str(e)}")
+
+        # Parse legacy similar cases from JSON string
         parsed_similar_cases = []
         if similar_cases_json:
             try:
@@ -48,7 +70,8 @@ async def analyze_occurrence(
             product=product,
             source=source,
             date=date,
-            num_similar_cases=len(parsed_similar_cases)
+            num_similar_cases=len(parsed_similar_cases_data.topMatches) if parsed_similar_cases_data else len(parsed_similar_cases),
+            has_pattern_data=parsed_pattern_data is not None
         )
 
         # 2. Parse metrics file (JSON only — defines the scoring rubric)
@@ -85,7 +108,9 @@ async def analyze_occurrence(
             source=source,
             date=date,
             product=product,
-            similar_cases=parsed_similar_cases,
+            pattern_data=parsed_pattern_data,
+            similar_cases_data=parsed_similar_cases_data,
+            similar_cases=parsed_similar_cases,  # Legacy support
             additional_context=full_context,
             metrics_data=metrics_data_str  # None = use default metrics.json
         )
