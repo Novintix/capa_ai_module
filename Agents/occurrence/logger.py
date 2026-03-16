@@ -81,7 +81,7 @@ def _check_consistency(code: str, score: int, evidence: str) -> str:
 # STEP 1 — API Request (Truncates file!)
 # -------------------------------------------------------
 def log_request(complaint_id: str, product: str, source: str,
-                date: str, num_similar_cases: int):
+                date: str, num_similar_cases: int, has_pattern_data: bool = False):
     # FORCE OVERWRITE MODE ('w') for the first step
     _log("=" * 80, mode="w")
     _log("[STEP 1] API REQUEST RECEIVED", mode="a")
@@ -90,6 +90,7 @@ def log_request(complaint_id: str, product: str, source: str,
     _log(f"  Source            : {source}")
     _log(f"  Date              : {date}")
     _log(f"  Similar Cases     : {num_similar_cases} case(s) provided")
+    _log(f"  Pattern Data      : {'Yes' if has_pattern_data else 'No'}")
     _log(f"  Timestamp         : {datetime.now().isoformat()}")
 
 

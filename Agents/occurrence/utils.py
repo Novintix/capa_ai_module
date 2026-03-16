@@ -120,48 +120,147 @@ def load_metrics(metrics_path: str = None) -> dict:
 
 @tool
 def get_weights(metrics: dict = None) -> dict:
-    """Extract parameter weights dict from a metrics definition. Loads default if metrics is None."""
+    """Extract parameter weights dict from a metrics definition. Loads default if metrics is None.
+    Returns normalized weights that always sum to 1.0 for consistency."""
     resolved = load_metrics.invoke({}) if metrics is None else metrics
-    return {
-        code: param["weight"]
+    
+    # Get raw weights
+    raw_weights = {
+        code: param.get("weight", 0.1)  # Default weight if missing
         for code, param in resolved.get("parameters", {}).items()
     }
+    
+    # Ensure all 10 parameters exist with default weights
+    default_weights = {
+        "HF": 0.18, "TR": 0.12, "PS": 0.10, "PC": 0.12, "DM": 0.10,
+        "SY": 0.12, "OE": 0.08, "CA": 0.08, "SU": 0.05, "AU": 0.05
+    }
+    
+    # Merge with defaults
+    final_weights = {**default_weights, **raw_weights}
+    
+    # Normalize to sum to 1.0 for consistency
+    total = sum(final_weights.values())
+    if total > 0:
+        final_weights = {k: v/total for k, v in final_weights.items()}
+    
+    return final_weights
 
 
 # ─────────────────────────────────────────────────────────────
 # UTILITY FUNCTIONS (non-tool — internal graph helpers)
 # ─────────────────────────────────────────────────────────────
 
-def build_evidence_summary(similar_cases: list, param_factor_keys: dict) -> dict:
+def build_evidence_summary(similar_cases: list, param_factor_keys: dict, pattern_data=None) -> dict:
     """
-    Builds a deterministic evidence string per parameter using only the
-    highest-similarity case. This ensures the LLM receives exactly one
-    evidence string per parameter — no conflict, no random selection.
+    Builds a deterministic evidence string per parameter using pattern data
+    and similar cases. Now fully dynamic - works with ANY parameter set.
     """
     sorted_cases = sorted(
         similar_cases,
-        key=lambda c: float(c.get("similarity_score", 0)),
+        key=lambda c: float(c.get("similarity_score", c.get("similarity", 0))),
         reverse=True
     )
 
     evidence = {}
     for code, factor_key in param_factor_keys.items():
-        found = False
-        for case in sorted_cases:
+        evidence_parts = []
+        
+        # Add pattern-specific evidence first (higher priority) - DYNAMIC
+        if pattern_data:
+            # Generic pattern evidence that works for any parameter
+            if "trend" in factor_key.lower() or "pattern" in factor_key.lower() or code.upper() in ["TR", "TREND"]:
+                # Trend-related parameters
+                if hasattr(pattern_data, 'trend_category') and pattern_data.trend_category:
+                    trend_cat = pattern_data.trend_category
+                    if "uncontrolled exponential" in trend_cat.lower():
+                        evidence_parts.append("TREND: Uncontrolled exponential trend (score 10)")
+                    elif "exponential" in trend_cat.lower():
+                        evidence_parts.append("TREND: Exponential trend (score 9)")
+                    elif "increasing" in trend_cat.lower():
+                        evidence_parts.append("TREND: Increasing trend (score 8)")
+                    else:
+                        trend_score = getattr(pattern_data, 'trend_score', 5)
+                        evidence_parts.append(f"TREND: {trend_cat} (score {trend_score})")
+            
+            elif "frequency" in factor_key.lower() or "historical" in factor_key.lower() or code.upper() in ["HF", "FREQ"]:
+                # Frequency-related parameters
+                matched_ids = getattr(pattern_data, 'matched_complaint_ids', [])
+                count = len(matched_ids) if matched_ids else 0
+                if count >= 10:
+                    evidence_parts.append(f"FREQUENCY: {count} historical cases (high frequency, score 8-9)")
+                elif count >= 5:
+                    evidence_parts.append(f"FREQUENCY: {count} historical cases (medium frequency, score 5-6)")
+                elif count >= 2:
+                    evidence_parts.append(f"FREQUENCY: {count} historical cases (low frequency, score 3-4)")
+                else:
+                    evidence_parts.append(f"FREQUENCY: {count} historical cases (rare, score 1-2)")
+            
+            elif "systemic" in factor_key.lower() or "scope" in factor_key.lower() or code.upper() in ["SY", "SCOPE", "IMPACT"]:
+                # Systemic/scope-related parameters
+                pattern_text = getattr(pattern_data, 'identified_pattern', "")
+                matched_ids = getattr(pattern_data, 'matched_complaint_ids', [])
+                if "across" in pattern_text.lower() and ("site" in pattern_text.lower() or "region" in pattern_text.lower()):
+                    evidence_parts.append("SYSTEMIC: Multi-site/region pattern (score 7-8)")
+                elif len(matched_ids) > 5:
+                    evidence_parts.append("SYSTEMIC: Multiple cases pattern (score 6-7)")
+                else:
+                    evidence_parts.append("SYSTEMIC: Limited scope pattern (score 3-4)")
+            
+            elif "risk" in factor_key.lower() or "probability" in factor_key.lower() or code.upper() in ["RISK", "PROB"]:
+                # Risk/probability-related parameters
+                confidence = getattr(pattern_data, 'confidence', 0.5)
+                if confidence >= 0.9:
+                    evidence_parts.append(f"RISK: High confidence pattern ({confidence:.1%}, score 8-9)")
+                elif confidence >= 0.7:
+                    evidence_parts.append(f"RISK: Medium confidence pattern ({confidence:.1%}, score 5-6)")
+                else:
+                    evidence_parts.append(f"RISK: Low confidence pattern ({confidence:.1%}, score 2-3)")
+
+        # Add similar cases evidence - DYNAMIC extraction
+        for case in sorted_cases[:1]:  # Only use highest similarity case for consistency
             val = case.get("occurrence_factors", {}).get(factor_key, "").strip()
+            if not val:
+                # Try generic field mappings that work for any parameter type
+                if "frequency" in factor_key.lower() and case.get("repeated"):
+                    val = "REPEATED: Issue marked as repeated (score 6-7)"
+                elif "control" in factor_key.lower() and case.get("capa_needed"):
+                    val = f"CONTROLS: CAPA required - {case.get('capa_rationale', 'controls ineffective')} (score 6-8)"
+                elif "detection" in factor_key.lower() and case.get("days_open"):
+                    days = case.get("days_open", 0)
+                    if days > 90:
+                        val = f"DETECTION: {days} days open (poor detection, score 7-8)"
+                    elif days > 30:
+                        val = f"DETECTION: {days} days open (moderate detection, score 5-6)"
+                    else:
+                        val = f"DETECTION: {days} days open (good detection, score 2-3)"
+                elif ("systemic" in factor_key.lower() or "scope" in factor_key.lower()) and case.get("site"):
+                    val = f"SCOPE: Affects site {case.get('site')} (score 4-5)"
+                elif "severity" in factor_key.lower() and case.get("severity"):
+                    severity = case.get("severity", "").lower()
+                    if "critical" in severity:
+                        val = f"SEVERITY: Critical level (score 8-9)"
+                    elif "high" in severity:
+                        val = f"SEVERITY: High level (score 6-7)"
+                    elif "medium" in severity:
+                        val = f"SEVERITY: Medium level (score 4-5)"
+                    else:
+                        val = f"SEVERITY: {case.get('severity')} level (score 2-3)"
+            
             if val:
-                case_id = case.get("case_id", "?")
-                sim = case.get("similarity_score", "?")
-                # Aggressive sanitization: remove ALL special characters that could break JSON
-                # Keep only alphanumeric, spaces, basic punctuation
-                val_sanitized = re.sub(r'[^\w\s\.\,-]', '', val)
-                # Replace multiple whitespace with single space
-                val_sanitized = re.sub(r'\s+', ' ', val_sanitized).strip()
-                evidence[code] = f"{case_id} (similarity {sim}): {val_sanitized}"
-                found = True
-                break
-        if not found:
-            evidence[code] = "No historical evidence available."
+                case_id = case.get("case_id", case.get("complaint_id", case.get("complaintId", "?")))
+                sim = case.get("similarity_score", case.get("similarity", "?"))
+                # Clean and standardize evidence text
+                val_clean = re.sub(r'[^\w\s\.\,\-\:\(\)]', '', str(val))
+                val_clean = re.sub(r'\s+', ' ', val_clean).strip()
+                evidence_parts.append(f"CASE {case_id} (sim {sim}): {val_clean}")
+                break  # Only use first matching case for determinism
+        
+        # Combine all evidence parts - DETERMINISTIC order
+        if evidence_parts:
+            evidence[code] = " | ".join(evidence_parts)
+        else:
+            evidence[code] = "NO EVIDENCE: Default score 1"
 
     return evidence
 
