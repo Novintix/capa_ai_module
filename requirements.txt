@@ -4,6 +4,7 @@ langchain-core
 langgraph
 pydantic
 python-dotenv
+pymongo
 
 # AWS Bedrock
 boto3

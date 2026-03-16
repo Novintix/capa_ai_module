@@ -10,7 +10,7 @@ logger = logging.getLogger("aireasoning")
 logger.setLevel(logging.INFO)
 
 if not logger.handlers:
-    handler = logging.FileHandler(log_file, mode='a')
+    handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
     formatter = logging.Formatter(
         "%(asctime)s | %(levelname)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
@@ -25,9 +25,9 @@ def reset_log():
         h.close()
         logger.removeHandler(h)
     # Truncate file
-    open(log_file, 'w').close()
+    open(log_file, 'w', encoding='utf-8').close()
     # Re-attach handler in append mode
-    handler = logging.FileHandler(log_file, mode='a')
+    handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
     formatter = logging.Formatter(
         "%(asctime)s | %(levelname)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"

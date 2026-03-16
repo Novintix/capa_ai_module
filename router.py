@@ -8,12 +8,16 @@ from Agents.categorize.router import router as categorize_router
 from Agents.cause_generation.router import router as cause_generation_router
 from Agents.question.router import router as why_question_router
 from Agents.ingestion.router import router as ingestion_router
+from Agents.pattern.router import router as pattern_router
+
 from Agents.action_plan.router import router as action_plan_router
 from Agents.zero_evidence_agent.router import router as zero_evidence_router
 from Agents.action_plan.router import router as action_plan_router
 from Agents.similar_cases.router import router as similar_cases_router
 from Agents.ranking.router import router as ranking_router
 
+# # ── Orchestrator ──────────────────────────────────────────────────────────────
+# from orchestrator_service.router import router as orchestrator_router
 def register_routes(app: FastAPI):
     """
     Register all agent routes to the FastAPI app.
@@ -33,12 +37,15 @@ def register_routes(app: FastAPI):
     app.include_router(aireasoning_router)
     app.include_router(categorize_router)
     app.include_router(severity_router)
-    app.include_router(regulatory_router)
     app.include_router(action_plan_router)
     app.include_router(why_question_router)
     app.include_router(zero_evidence_router)
     app.include_router(similar_cases_router)
     app.include_router(ranking_router)
+    app.include_router(pattern_router)
+
+    # # ── Orchestrator router ───────────────────────────────────────────────────
+    # app.include_router(orchestrator_router)  # exposes POST /capa/analyze
     
     @app.get("/")
     def root():
@@ -60,6 +67,8 @@ def register_routes(app: FastAPI):
                 "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)",
                 "similar_cases": "Similar Cases Search Agent (Vector Search)",
                 "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
+                "pattern": "Pattern Analysis and Trend Recognition Agent"
+                
             },
             "endpoints": {
                 "POST /detection/": "Calculate detection score with optional policy document",
@@ -82,6 +91,7 @@ def register_routes(app: FastAPI):
                 "GET /similar-cases/health": "Similar cases agent health check",
                 "POST /ranking/": "Rank candidate root causes using RCPS methodology",
                 "GET /ranking/health": "Ranking agent health check",
+                "POST /pattern/": "Analyze trends and patterns in historical complaint data"
             }
         }
     
