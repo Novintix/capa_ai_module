@@ -75,7 +75,12 @@ def run_why_analysis_json(input_data: WhyAnalysisInput):
         # Check for complete failure
         if result.get("error") and result.get("root_cause") is None and result.get("analysis_depth", 0) == 0:
             log_error("router /why-analysis", result["error"])
-            raise HTTPException(status_code=500, detail=result["error"])
+            
+            # Check if it's a validation error (400) vs system error (500)
+            if result.get("mode") == "VALIDATION_ERROR":
+                raise HTTPException(status_code=400, detail=result["error"])
+            else:
+                raise HTTPException(status_code=500, detail=result["error"])
         
         # Log response
         root_cause_id = None
@@ -206,7 +211,12 @@ async def run_why_analysis(
         # Check for complete failure (only if analysis didn't even start)
         if result.get("error") and result.get("root_cause") is None and result.get("analysis_depth", 0) == 0:
             log_error("router /why-analysis", result["error"])
-            raise HTTPException(status_code=500, detail=result["error"])
+            
+            # Check if it's a validation error (400) vs system error (500)
+            if result.get("mode") == "VALIDATION_ERROR":
+                raise HTTPException(status_code=400, detail=result["error"])
+            else:
+                raise HTTPException(status_code=500, detail=result["error"])
         
         # Log response
         root_cause_id = None

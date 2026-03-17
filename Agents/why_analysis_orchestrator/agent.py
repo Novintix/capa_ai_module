@@ -44,6 +44,41 @@ class WhyAnalysisOrchestrator:
         self.cause_agent = CauseGenerationAgent()
         self.zero_evidence_agent = ZeroEvidenceAgent()
     
+    def _validate_input(self, input_data: WhyAnalysisInput) -> Optional[str]:
+        """
+        Validate input to prevent hallucination on empty/invalid complaints
+        
+        Returns:
+            Error message if invalid, None if valid
+        """
+        # Check if complaint is empty or just whitespace
+        complaint = input_data.complaint.strip() if input_data.complaint else ""
+        
+        if not complaint:
+            return "Invalid input: Complaint description is required and cannot be empty. Please provide a detailed description of the problem or issue."
+        
+        # Check if complaint is too short to be meaningful
+        if len(complaint) < 10:
+            return f"Invalid input: Complaint description is too short ('{complaint}'). Please provide a detailed description of at least 10 characters explaining the problem."
+        
+        # Check if complaint contains only generic/placeholder text
+        generic_phrases = [
+            "test", "testing", "example", "sample", "placeholder", "lorem ipsum",
+            "abc", "123", "xxx", "n/a", "na", "none", "null", "undefined"
+        ]
+        
+        complaint_lower = complaint.lower()
+        if any(phrase in complaint_lower for phrase in generic_phrases) and len(complaint) < 50:
+            return f"Invalid input: Complaint appears to be placeholder text ('{complaint}'). Please provide a real problem description."
+        
+        # Check if complaint ID is meaningful
+        complaint_id = input_data.complaint_id.strip() if input_data.complaint_id else ""
+        if not complaint_id:
+            return "Invalid input: Complaint ID is required and cannot be empty."
+        
+        # All validations passed
+        return None
+    
     def analyze(self, input_data: WhyAnalysisInput) -> Dict[str, Any]:
         """
         Run complete Why Analysis with enhanced error handling
@@ -57,6 +92,24 @@ class WhyAnalysisOrchestrator:
         start_time = time.time()
         
         try:
+            # CRITICAL: Input validation to prevent hallucination
+            validation_error = self._validate_input(input_data)
+            if validation_error:
+                execution_time = time.time() - start_time
+                return {
+                    "complaint_id": input_data.complaint_id,
+                    "root_cause": None,
+                    "confidence": "LOW",
+                    "mode": "VALIDATION_ERROR",
+                    "analysis_depth": 0,
+                    "why_iterations": [],
+                    "total_causes_analyzed": 0,
+                    "fmea_document_used": input_data.fmea_document_path,
+                    "execution_time_seconds": execution_time,
+                    "stopping_reason": "invalid_input",
+                    "error": validation_error
+                }
+            
             # Initialize state
             state = {
                 "complaint_id": input_data.complaint_id,

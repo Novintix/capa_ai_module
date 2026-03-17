@@ -71,7 +71,7 @@ def initialize_node(state: OrchestratorState) -> dict:
         "has_fmea": has_fmea,
         "mode": mode,
         "current_depth": 0,
-        "max_depth": 5,
+        "max_depth": 10,
         "why_chain": [],
         "current_why_question": None,
         "current_why_reasoning": None,
