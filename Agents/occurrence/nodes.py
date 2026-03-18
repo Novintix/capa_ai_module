@@ -32,10 +32,9 @@ PARAM_FACTOR_KEYS = {
 def prepare_evidence(state: OccurrenceState) -> dict:
     """
     Node 1: Pre-computes a deterministic evidence summary per parameter
-    from similar cases. Separated from LLM call (DO #2, DO #5).
+    from pattern data and similar cases. Now fully dynamic based on metrics.
     """
     # Auto-reset logs at the very start of a fresh run (iteration 0)
-    # This ensures log file reflects only the current execution
     if state.iteration == 0:
         from Agents.occurrence.logger import clear_logs
         clear_logs()
@@ -44,18 +43,78 @@ def prepare_evidence(state: OccurrenceState) -> dict:
 
     input_data = state.input
 
+    # Get dynamic parameter mapping from metrics
+    metrics = None
+    if hasattr(input_data, "metrics_data") and input_data.metrics_data:
+        try:
+            metrics = json.loads(input_data.metrics_data)
+        except Exception:
+            metrics = None
+    
+    if metrics is None:
+        from Agents.occurrence.utils import load_metrics
+        metrics = load_metrics.invoke({})
+    
+    # Build dynamic parameter factor keys from metrics
+    param_factor_keys = {}
+    parameters = metrics.get("parameters", {})
+    
+    if parameters:
+        # Use whatever parameters are defined in metrics
+        param_factor_keys = {
+            code: param.get("name", code) 
+            for code, param in parameters.items()
+        }
+    else:
+        # Fallback to default parameters
+        param_factor_keys = PARAM_FACTOR_KEYS
+
+    # Extract similar cases from new structured format or legacy format
+    similar_cases = []
+    
+    if input_data.similar_cases_data and input_data.similar_cases_data.topMatches:
+        # Convert new format to legacy format for evidence building
+        for match in input_data.similar_cases_data.topMatches:
+            similar_case = {
+                "complaint_id": match.complaintId,
+                "record_id": match.recordId,
+                "date": match.dateReceived,
+                "source": match.source,
+                "severity": match.severity,
+                "product_family": match.productFamily,
+                "site": match.site,
+                "description": match.descriptionOfIssue,
+                "status": match.status,
+                "days_open": match.daysOpen,
+                "assigned_to": match.assignedTo,
+                "capa_needed": match.capaNeeded,
+                "capa_id": match.capaId,
+                "capa_rationale": match.capaRationale,
+                "repeated": match.repeated,
+                "workflow_stage": match.workflowStage,
+                "similarity": match.similarity,
+                "region_country": match.regionCountry,
+                "field_action": match.fieldAction,
+                "eu_reportable": match.euReportable,
+                "fda_reportable": match.fdaReportable
+            }
+            similar_cases.append(similar_case)
+    elif input_data.similar_cases:
+        # Use legacy format
+        similar_cases = input_data.similar_cases
+
+    # Build evidence summary with dynamic parameters
     evidence_summary = build_evidence_summary(
-        similar_cases=input_data.similar_cases or [],
-        param_factor_keys=PARAM_FACTOR_KEYS
+        similar_cases=similar_cases,
+        param_factor_keys=param_factor_keys,
+        pattern_data=input_data.pattern_data
     )
 
     log_node_end(
         "prepare_evidence",
-        f"Evidence built for {len(evidence_summary)} parameters from {len(input_data.similar_cases or [])} case(s)"
+        f"Evidence built for {len(evidence_summary)} parameters from {len(similar_cases)} case(s) and pattern data"
     )
 
-    # DON'T #1: Return dict — let LangGraph merge state (not in-place mutation)
-    # DON'T #7: evidence_summary is declared in OccurrenceState — no hidden state
     return {
         "iteration": state.iteration + 1,
         "evidence_summary": evidence_summary
@@ -154,7 +213,31 @@ def generate_scores(state: OccurrenceState) -> dict:
                     f"Raw response:\n{raw_content}")
                 raise RuntimeError(f"Could not extract valid JSON from LLM response: {str(e)}")
         
-        scores = OccurrenceScoreResponse(**content)
+        # Handle both old and new response formats
+        if "scores" in content and isinstance(content["scores"], dict):
+            # New dynamic format
+            scores = OccurrenceScoreResponse(scores=content["scores"], reasoning=content.get("reasoning", ""))
+        else:
+            # Legacy format or direct parameter mapping
+            # Extract parameter scores dynamically
+            param_scores = {}
+            reasoning = content.get("reasoning", "")
+            
+            # Get expected parameters from metrics
+            if metrics:
+                expected_params = list(metrics.get("parameters", {}).keys())
+            else:
+                # Fallback to legacy parameters
+                expected_params = ["HF", "TR", "PS", "PC", "DM", "SY", "OE", "CA", "SU", "AU"]
+            
+            # Extract scores for expected parameters
+            for param in expected_params:
+                if param in content:
+                    param_scores[param] = content[param]
+                else:
+                    param_scores[param] = 1  # Default score
+            
+            scores = OccurrenceScoreResponse(scores=param_scores, reasoning=reasoning)
         log_score_audit(content, input_data.similar_cases or [])
 
         log_node_end("generate_scores", f"Scores parsed for 10 parameters")
@@ -180,7 +263,7 @@ def generate_scores(state: OccurrenceState) -> dict:
 def calculate_weighted_score(state: OccurrenceState) -> dict:
     """
     Node 3: Computes the final weighted score from raw scores.
-    Guards that scores exist and are in valid range (DO #6).
+    Now handles dynamic parameter sets from any metrics configuration.
     """
     log_node_start("calculate_weighted_score")
 
@@ -200,23 +283,27 @@ def calculate_weighted_score(state: OccurrenceState) -> dict:
 
     weights = get_weights.invoke({"metrics": metrics} if metrics is not None else {})
 
-    score_dict = {
-        "HF": scores.HF,
-        "TR": scores.TR,
-        "PS": scores.PS,
-        "PC": scores.PC,
-        "DM": scores.DM,
-        "SY": scores.SY,
-        "OE": scores.OE,
-        "CA": scores.CA,
-        "SU": scores.SU,
-        "AU": scores.AU,
-    }
+    # Build score dictionary dynamically from whatever parameters exist
+    score_dict = {}
+    if hasattr(scores, 'scores') and isinstance(scores.scores, dict):
+        # New dynamic format
+        score_dict = scores.scores.copy()
+    else:
+        # Legacy format - try to extract known parameters
+        legacy_params = ['HF', 'TR', 'PS', 'PC', 'DM', 'SY', 'OE', 'CA', 'SU', 'AU']
+        for param in legacy_params:
+            if hasattr(scores, param):
+                score_dict[param] = getattr(scores, param)
+
+    # Ensure all weighted parameters have scores
+    for param_code in weights.keys():
+        if param_code not in score_dict:
+            score_dict[param_code] = 1  # Default score
 
     # DO #6: Clamp scores to valid range as a safety net
     score_dict = {k: max(1, min(10, v)) for k, v in score_dict.items()}
 
-    weighted_sum = sum(score_dict[code] * weights.get(code, 0) for code in score_dict)
+    weighted_sum = sum(score_dict.get(code, 1) * weights.get(code, 0) for code in weights.keys())
 
     log_weighted_calculation(scores, weights)
 

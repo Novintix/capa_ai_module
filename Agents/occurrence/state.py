@@ -1,29 +1,80 @@
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from pydantic import BaseModel, Field
 
+class PatternData(BaseModel):
+    complaint_id: str
+    trend_score: int
+    trend_category: str
+    confidence: float
+    matched_complaint_ids: List[str]
+    identified_pattern: str
+    explanation: str
+    error: Optional[str] = None
+
+class SimilarCaseMatch(BaseModel):
+    recordId: str
+    complaintId: str
+    dateReceived: str
+    source: str
+    regionCountry: Optional[str] = None
+    severity: str
+    productFamily: str
+    site: str
+    descriptionOfIssue: str
+    status: str
+    daysOpen: int
+    assignedTo: str
+    isNc: Optional[str] = None
+    ncId: Optional[str] = None
+    fieldAction: Optional[str] = None
+    euReportable: Optional[str] = None
+    fdaReportable: Optional[str] = None
+    capaNeeded: bool
+    capaId: Optional[str] = None
+    capaRationale: str
+    repeated: bool
+    workflowStage: str
+    similarity: float
+
+class SimilarCasesData(BaseModel):
+    query: str
+    similarityThreshold: float
+    similarCount: int
+    message: str
+    topMatches: List[SimilarCaseMatch]
+
 class ComplaintData(BaseModel):
+    # Core complaint info - always required
     complaint_id: str
     description: str
     source: str
     date: str
     product: str
-    similar_cases: List[Dict[str, Any]] = Field(default_factory=list, description="List of similar past cases with dates and details")
+    
+    # New structured inputs - pattern and similar cases analysis
+    pattern_data: Optional[PatternData] = Field(None, description="Pattern analysis results")
+    similar_cases_data: Optional[SimilarCasesData] = Field(None, description="Similar cases analysis results")
+    
+    # Legacy support for backward compatibility
+    similar_cases: List[Dict[str, Any]] = Field(default_factory=list, description="List of similar past cases (legacy format)")
     additional_context: Optional[str] = Field(None, description="Context about controls, detection, etc.")
     metrics_data: Optional[str] = Field(None, description="JSON string of metrics definition (loaded from metrics.json, Excel, PDF, etc.)")
 
 class OccurrenceScoreResponse(BaseModel):
-    # DO #6: All scores validated to be in range 1-10 (guard state transitions)
-    HF: int = Field(..., ge=1, le=10, description="Historical Frequency (1-10)")
-    TR: int = Field(..., ge=1, le=10, description="Trend Analysis (1-10)")
-    PS: int = Field(..., ge=1, le=10, description="Process Stability (1-10)")
-    PC: int = Field(..., ge=1, le=10, description="Preventive Controls (1-10)")
-    DM: int = Field(..., ge=1, le=10, description="Detection/Monitoring (1-10)")
-    SY: int = Field(..., ge=1, le=10, description="Systemic vs Isolated (1-10)")
-    OE: int = Field(..., ge=1, le=10, description="Operator/Equipment (1-10)")
-    CA: int = Field(..., ge=1, le=10, description="CAPA Effectiveness (1-10)")
-    SU: int = Field(..., ge=1, le=10, description="Supplier Factors (1-10)")
-    AU: int = Field(..., ge=1, le=10, description="Audit Findings (1-10)")
+    # Dynamic parameter scores - can handle any parameter set
+    scores: Dict[str, int] = Field(..., description="Parameter scores (1-10) with parameter codes as keys")
     reasoning: str = Field(..., description="Explanation for the scores")
+    
+    def __getattr__(self, name):
+        """Allow accessing scores as attributes for backward compatibility"""
+        if name in self.scores:
+            return self.scores[name]
+        # Provide defaults for legacy parameter access
+        legacy_defaults = {
+            'HF': 1, 'TR': 1, 'PS': 1, 'PC': 1, 'DM': 1,
+            'SY': 1, 'OE': 1, 'CA': 1, 'SU': 1, 'AU': 1
+        }
+        return legacy_defaults.get(name, 1)
 
 class OccurrenceOutput(BaseModel):
     weighted_score: int
