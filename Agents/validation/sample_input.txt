@@ -1,0 +1,216 @@
+{
+  "complaint_id": "CAPA-VAL-B202",
+  "question": "Why did the film coat peel and dissolution fail at 3-month accelerated stability?",
+  "complaint_description": "Film coat peeling observed on approximately 22% of tablets and dissolution failure at 3-month accelerated stability (40°C / 75% RH). Batch-level dissolution average 63% (spec NLT 75% at 45 min). Coat cracking and flaking noted primarily at tablet edges. Chemical stability unaffected.",
+
+  "generated_causes": [
+    {
+      "cause_id": "C001",
+      "cause_text": "Inlet air temperature exceeded upper specification limit during coating, causing rapid solvent evaporation and brittle coat formation",
+      "process_step": "Film Coating",
+      "failure_mode": "Thermal stress on wet coat film",
+      "potential_effects": "Brittle, poorly plasticized coat; coat cracking and peeling under humidity stress; dissolution failure",
+      "severity": 9,
+      "occurrence": 6,
+      "detection": 5,
+      "current_controls": "Thermocouple on coating pan inlet; HVAC auto-correction; operator monitoring every 30 minutes",
+      "source": "Operator Log + Process Data CSV",
+      "notes": "Inlet temp reached 74.2°C (spec max 60°C) for ~29 minutes at 08:28–08:57. Alarm acknowledged by operator without corrective action. Spray continued during excursion."
+    },
+    {
+      "cause_id": "C002",
+      "cause_text": "Pan speed operated below specification for nearly 6 hours, causing uneven coat deposition across the tablet bed",
+      "process_step": "Film Coating",
+      "failure_mode": "Non-uniform coat thickness",
+      "potential_effects": "Thin coat zones susceptible to peeling; localized dissolution variability",
+      "severity": 8,
+      "occurrence": 5,
+      "detection": 6,
+      "current_controls": "Pan speed set point in batch record; operator visual check; in-process monitoring log",
+      "source": "Operator Log + Process Data CSV",
+      "notes": "Pan speed manually reduced to 6 RPM at 10:15 (spec 7–10 RPM). Deviation not escalated. Shift B ran at 6 RPM for additional 2 hours due to verbal-only handover."
+    },
+    {
+      "cause_id": "C003",
+      "cause_text": "Coating solution viscosity at upper boundary of specification, reducing spreadability and compounding uneven deposition",
+      "process_step": "Coating Solution Preparation",
+      "failure_mode": "Reduced coat spreadability",
+      "potential_effects": "Thicker, less uniform coat layers; increased risk of cracking under stress",
+      "severity": 5,
+      "occurrence": 3,
+      "detection": 7,
+      "current_controls": "Viscosity check before coating start; acceptance range 250–300 cP",
+      "source": "Operator Log",
+      "notes": "Viscosity recorded at 280 cP — within spec but near upper limit. Not a standalone root cause; likely amplified impact of low pan speed deviation (C002)."
+    },
+    {
+      "cause_id": "C004",
+      "cause_text": "Verbal-only shift handover resulted in Shift B operator being unaware of ongoing pan speed and temperature deviations",
+      "process_step": "Shift Handover / Procedural",
+      "failure_mode": "Delayed detection and correction of process deviations",
+      "potential_effects": "Extended duration of sub-specification pan speed; deviations unresolved across shift boundary",
+      "severity": 7,
+      "occurrence": 4,
+      "detection": 8,
+      "current_controls": "SOP-MFG-018 requires written handover on Form MFG-HO-03; POL-QA-005 mandates documentation of open alarms at handover",
+      "source": "Operator Log + SOP + Policy",
+      "notes": "Shift A handover section in batch record left blank. Shift B did not correct pan speed until routine check at 16:03, ~2 hours into shift."
+    },
+    {
+      "cause_id": "C005",
+      "cause_text": "Ambient coating room humidity exceeded environmental limit, causing moisture uptake during coating",
+      "process_step": "Facility / HVAC",
+      "failure_mode": "Moisture-induced coat swelling and delamination",
+      "potential_effects": "Weakened coat adhesion; coat peeling during storage",
+      "severity": 7,
+      "occurrence": 2,
+      "detection": 6,
+      "current_controls": "Environmental monitoring system; HVAC with humidity control; room classification logs",
+      "source": "Hypothetical / Unverified",
+      "notes": "No humidity excursion recorded in operator log, investigation record, or process data. HVAC serviced 2025-10-15 with no faults. This cause is not supported by available evidence."
+    }
+  ],
+
+  "logs": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\coating_process_log_B-202.txt"
+  ],
+  "reports": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\stability_report_B-202.txt"
+  ],
+  "process_data": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\pan_speed_temp_B-202-process_data.csv"
+  ],
+  "historical_capa": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\historical_capa_coating.txt"
+  ],
+  "policies": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\deviation_management_policy.txt"
+  ],
+  "sop": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\film_coating_sop.txt"
+  ],
+  "investigation_records": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\investigation_record_B-202.txt"
+  ],
+
+  "supporting_system_information": {
+    "mes": "Inlet temperature alarm on CP-04 acknowledged by operator J. Thomas at 08:30 on 2025-11-10. Alarm closed without corrective action entry. No deviation form linked to alarm event. Pan speed setpoint change to 6 RPM recorded in equipment log at 10:14 with no associated authorization or escalation record."
+  }
+}
+
+
+=========================================================
+sample output: 
+
+{
+    "complaint_id": "CAPA-VAL-B202",
+    "complaint_description": "Film coat peeling observed on approximately 22% of tablets and dissolution failure at 3-month accelerated stability (40°C / 75% RH). Batch-level dissolution average 63% (spec NLT 75% at 45 min). Coat cracking and flaking noted primarily at tablet edges. Chemical stability unaffected.",
+    "total_input_causes": 5,
+    "total_validated_causes": 4,
+    "validated_causes": [
+        {
+            "cause_id": "C001",
+            "cause_text": "Inlet air temperature exceeded upper specification limit during coating, causing rapid solvent evaporation and brittle coat formation",
+            "evidence_match_status": "matched",
+            "supporting_evidence_references": [
+                "coating_process_log_B-202.txt",
+                "pan_speed_temp_B-202-process_data.csv",
+                "investigation_record_B-202.txt",
+                "film_coating_sop.txt"
+            ],
+            "confidence": 0.95,
+            "rationale": "Log and process data show inlet temperature reached 74 °C, exceeding the SOP limit of 60 °C. Investigation record links this excursion to rapid moisture loss and brittle film formation, which matches the observed coat peeling."
+        },
+        {
+            "cause_id": "C002",
+            "cause_text": "Pan speed operated below specification for nearly 6 hours, causing uneven coat deposition across the tablet bed",
+            "evidence_match_status": "matched",
+            "supporting_evidence_references": [
+                "coating_process_log_B-202.txt",
+                "pan_speed_temp_B-202-process_data.csv",
+                "investigation_record_B-202.txt"
+            ],
+            "confidence": 0.95,
+            "rationale": "Log and process data show pan speed reduced to 6 RPM (below spec 7-10 RPM) from 10:15 to 16:00 (~6 h). Investigation record confirms the duration and notes that low speed reduces tablet movement, leading to uneven coat deposition, which aligns with the cause statement."
+        },
+        {
+            "cause_id": "C003",
+            "cause_text": "Coating solution viscosity at upper boundary of specification, reducing spreadability and compounding uneven deposition",
+            "evidence_match_status": "partially_matched",
+            "supporting_evidence_references": [
+                "coating_process_log_B-202.txt"
+            ],
+            "confidence": 0.45,
+            "rationale": "Log shows viscosity measured at 280 cP, within the specified range (250-300 cP) and near the upper limit, confirming the condition described. However, no evidence links this viscosity level to reduced spreadability or uneven deposition, nor to the observed coat peeling."
+        },
+        {
+            "cause_id": "C004",
+            "cause_text": "Verbal-only shift handover resulted in Shift B operator being unaware of ongoing pan speed and temperature deviations",
+            "evidence_match_status": "matched",
+            "supporting_evidence_references": [
+                "coating_process_log_B-202.txt",
+                "investigation_record_B-202.txt"
+            ],
+            "confidence": 0.95,
+            "rationale": "Log entry documents a verbal-only handover at 13:50 with no written record of the temperature alarm or pan speed deviation; investigation record confirms the handover was verbal and that deviations were not communicated to Shift B, leading to the operator's lack of awareness."
+        }
+    ],
+    "cause_validation_results": [
+        {
+            "cause_id": "C001",
+            "cause_text": "Inlet air temperature exceeded upper specification limit during coating, causing rapid solvent evaporation and brittle coat formation",
+            "evidence_match_status": "matched",
+            "supporting_evidence_references": [
+                "coating_process_log_B-202.txt",
+                "pan_speed_temp_B-202-process_data.csv",
+                "investigation_record_B-202.txt",
+                "film_coating_sop.txt"
+            ],
+            "confidence": 0.95,
+            "rationale": "Log and process data show inlet temperature reached 74 °C, exceeding the SOP limit of 60 °C. Investigation record links this excursion to rapid moisture loss and brittle film formation, which matches the observed coat peeling."
+        },
+        {
+            "cause_id": "C002",
+            "cause_text": "Pan speed operated below specification for nearly 6 hours, causing uneven coat deposition across the tablet bed",
+            "evidence_match_status": "matched",
+            "supporting_evidence_references": [
+                "coating_process_log_B-202.txt",
+                "pan_speed_temp_B-202-process_data.csv",
+                "investigation_record_B-202.txt"
+            ],
+            "confidence": 0.95,
+            "rationale": "Log and process data show pan speed reduced to 6 RPM (below spec 7-10 RPM) from 10:15 to 16:00 (~6 h). Investigation record confirms the duration and notes that low speed reduces tablet movement, leading to uneven coat deposition, which aligns with the cause statement."
+        },
+        {
+            "cause_id": "C003",
+            "cause_text": "Coating solution viscosity at upper boundary of specification, reducing spreadability and compounding uneven deposition",
+            "evidence_match_status": "partially_matched",
+            "supporting_evidence_references": [
+                "coating_process_log_B-202.txt"
+            ],
+            "confidence": 0.45,
+            "rationale": "Log shows viscosity measured at 280 cP, within the specified range (250-300 cP) and near the upper limit, confirming the condition described. However, no evidence links this viscosity level to reduced spreadability or uneven deposition, nor to the observed coat peeling."
+        },
+        {
+            "cause_id": "C004",
+            "cause_text": "Verbal-only shift handover resulted in Shift B operator being unaware of ongoing pan speed and temperature deviations",
+            "evidence_match_status": "matched",
+            "supporting_evidence_references": [
+                "coating_process_log_B-202.txt",
+                "investigation_record_B-202.txt"
+            ],
+            "confidence": 0.95,
+            "rationale": "Log entry documents a verbal-only handover at 13:50 with no written record of the temperature alarm or pan speed deviation; investigation record confirms the handover was verbal and that deviations were not communicated to Shift B, leading to the operator's lack of awareness."
+        },
+        {
+            "cause_id": "C005",
+            "cause_text": "Ambient coating room humidity exceeded environmental limit, causing moisture uptake during coating",
+            "evidence_match_status": "no_evidence",
+            "supporting_evidence_references": [],
+            "confidence": 0.1,
+            "rationale": "None of the provided logs, reports, process data, investigation records, SOPs, policies, or system information mention ambient humidity levels or limits; therefore the claim lacks any supporting evidence."
+        }
+    ],
+    "overall_confidence": 0.825,
+    "notes": "Returning causes with grounded supporting evidence."
+}

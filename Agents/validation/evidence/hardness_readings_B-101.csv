@@ -1,0 +1,16 @@
+Timestamp,Check_No,Compression_Force_kN,Tablet_Hardness_kP,Hardness_Spec_Min_kP,Hardness_Spec_Max_kP,Tablet_Weight_mg,Result,Note,CAPA_Ref,Batch
+2026-03-01T08:15:00Z,1,5.0,7.2,6.0,9.0,401.2,PASS,In-process check #1,CAPA-VAL-003,B-101
+2026-03-01T08:25:00Z,2,4.9,6.8,6.0,9.0,400.8,PASS,In-process check #2,CAPA-VAL-003,B-101
+2026-03-01T08:35:00Z,3,4.8,6.4,6.0,9.0,400.5,PASS,Trending down,CAPA-VAL-003,B-101
+2026-03-01T08:45:00Z,4,4.6,5.8,6.0,9.0,400.1,BORDERLINE,Force at LCL; hardness below target,CAPA-VAL-003,B-101
+2026-03-01T08:55:00Z,5,4.5,5.1,6.0,9.0,399.8,FAIL,Force below LCL — alarm raised,CAPA-VAL-003,B-101
+2026-03-01T09:00:00Z,6,4.3,4.8,6.0,9.0,399.5,FAIL,Critical low alarm; operator adjusted setpoint,CAPA-VAL-003,B-101
+2026-03-01T09:05:00Z,7,4.4,4.9,6.0,9.0,399.7,FAIL,Post-adjustment — recovering,CAPA-VAL-003,B-101
+2026-03-01T09:10:00Z,8,4.6,5.2,6.0,9.0,400.0,BORDERLINE,Recovering; still below target hardness,CAPA-VAL-003,B-101
+2026-03-01T09:18:00Z,9,4.8,5.5,6.0,9.0,400.5,BORDERLINE,In-process check #3,CAPA-VAL-003,B-101
+2026-03-01T09:30:00Z,10,4.9,5.9,6.0,9.0,401.0,BORDERLINE,In-process check #4; close to spec,CAPA-VAL-003,B-101
+2026-03-01T09:40:00Z,11,5.0,6.1,6.0,9.0,401.3,PASS,In-process check #5; setpoint stabilised,CAPA-VAL-003,B-101
+2026-03-01T09:50:00Z,12,5.0,6.3,6.0,9.0,401.5,PASS,Nominal operation resumed,CAPA-VAL-003,B-101
+2026-03-01T10:00:00Z,13,5.0,6.4,6.0,9.0,400.9,PASS,In-process check #6,CAPA-VAL-003,B-101
+2026-03-01T10:15:00Z,14,5.1,6.5,6.0,9.0,401.1,PASS,Mid-run; normal,CAPA-VAL-003,B-101
+2026-03-01T10:30:00Z,15,5.0,6.5,6.0,9.0,400.8,PASS,End-of-run check,CAPA-VAL-003,B-101
