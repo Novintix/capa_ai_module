@@ -11,6 +11,7 @@ from .nodes import (
     validate_fmea_node,
     parse_fmea_node,
     parse_question_node,
+    extract_from_evidence_node,
     match_fmea_node,
     extract_causes_node,
     process_with_llm_node,
@@ -26,11 +27,12 @@ def create_cause_generation_graph():
     1. initialize -> validate_fmea (always)
     2. validate_fmea -> parse_fmea OR process_with_llm (conditional: FMEA available)
     3. parse_fmea -> parse_question OR finalize (conditional: error handling)
-    4. parse_question -> match_fmea (always)
-    5. match_fmea -> extract_causes OR process_with_llm (conditional: no matches)
-    6. extract_causes -> process_with_llm (always)
-    7. process_with_llm -> finalize (always)
-    8. finalize -> END (always)
+    4. parse_question -> extract_from_evidence (always)
+    5. extract_from_evidence -> match_fmea (always)
+    6. match_fmea -> extract_causes OR process_with_llm (conditional: no matches)
+    7. extract_causes -> process_with_llm (always)
+    8. process_with_llm -> finalize (always)
+    9. finalize -> END (always)
     """
     
     # Create graph
@@ -41,6 +43,7 @@ def create_cause_generation_graph():
     workflow.add_node("validate_fmea", validate_fmea_node)
     workflow.add_node("parse_fmea", parse_fmea_node)
     workflow.add_node("parse_question", parse_question_node)
+    workflow.add_node("extract_from_evidence", extract_from_evidence_node)
     workflow.add_node("match_fmea", match_fmea_node)
     workflow.add_node("extract_causes", extract_causes_node)
     workflow.add_node("process_with_llm", process_with_llm_node)
@@ -60,15 +63,16 @@ def create_cause_generation_graph():
     # Add edges
     # Simple edges (always same destination)
     workflow.add_edge("initialize", "validate_fmea")
-    workflow.add_edge("parse_question", "match_fmea")
     workflow.add_edge("extract_causes", "process_with_llm")
     workflow.add_edge("process_with_llm", "finalize")
     
     # Conditional edges (can go to different destinations based on state)
-    workflow.add_conditional_edges("validate_fmea", route_from_node)  # -> parse_fmea OR process_with_llm
-    workflow.add_conditional_edges("parse_fmea", route_from_node)     # -> parse_question OR finalize
-    workflow.add_conditional_edges("match_fmea", route_from_node)     # -> extract_causes OR process_with_llm
-    workflow.add_conditional_edges("finalize", route_from_node)       # -> END
+    workflow.add_conditional_edges("validate_fmea", route_from_node)        # -> parse_fmea OR process_with_llm
+    workflow.add_conditional_edges("parse_fmea", route_from_node)           # -> parse_question OR finalize
+    workflow.add_conditional_edges("parse_question", route_from_node)       # -> extract_from_evidence
+    workflow.add_conditional_edges("extract_from_evidence", route_from_node) # -> match_fmea
+    workflow.add_conditional_edges("match_fmea", route_from_node)           # -> extract_causes OR process_with_llm
+    workflow.add_conditional_edges("finalize", route_from_node)             # -> END
     
     # Compile graph
     return workflow.compile()

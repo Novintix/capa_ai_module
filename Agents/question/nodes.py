@@ -115,6 +115,8 @@ def validate_inputs_node(state: AgentState) -> AgentState:
     """
     Node: Validate that all required inputs are present and non-empty.
     Single responsibility: Guard against incomplete requests.
+    
+    Only complaint_id and complaint are required. Evidence and SOP are optional.
     """
     log_node_entry("validate_inputs", state)
 
@@ -124,10 +126,7 @@ def validate_inputs_node(state: AgentState) -> AgentState:
         missing.append("complaint_id")
     if not state.get("complaint", "").strip():
         missing.append("complaint")
-    if not state.get("evidence", "").strip():
-        missing.append("evidence")
-    if not state.get("sop", "").strip():
-        missing.append("sop")
+    # evidence and sop are optional - don't validate them
 
     if missing:
         error_msg = f"Missing or empty required fields: {', '.join(missing)}"

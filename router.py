@@ -13,6 +13,7 @@ from Agents.pattern.router import router as pattern_router
 from Agents.action_plan.router import router as action_plan_router
 from Agents.zero_evidence_agent.router import router as zero_evidence_router
 from Agents.why_analysis_orchestrator.router import router as why_analysis_router
+from Agents.rca_v2.router import router as rca_v2_router
 from Agents.action_plan.router import router as action_plan_router
 from Agents.similar_cases.router import router as similar_cases_router
 from Agents.ranking.router import router as ranking_router
@@ -34,7 +35,7 @@ def register_routes(app: FastAPI):
     app.include_router(cause_generation_router)
     app.include_router(ingestion_router)
     app.include_router(occurrence_router)
-    # app.include_router(aireasoning_router)
+    app.include_router(aireasoning_router)
     app.include_router(occurrence_router)
     app.include_router(aireasoning_router)
     app.include_router(categorize_router)
@@ -43,6 +44,7 @@ def register_routes(app: FastAPI):
     app.include_router(why_question_router)
     app.include_router(zero_evidence_router)
     app.include_router(why_analysis_router)
+    app.include_router(rca_v2_router)
     app.include_router(similar_cases_router)
     app.include_router(ranking_router)
     app.include_router(pattern_router)
@@ -70,6 +72,7 @@ def register_routes(app: FastAPI):
                 "why_question": "Why Question Agent (5 Whys)",
                 "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)",
                 "why_analysis": "Why Analysis Orchestrator (Question → Cause Gen → Zero Evidence Pipeline)",
+                "rca_v2": "RCA v2 Orchestrator (State Machine Implementation with Controlled Memory)",
                 "similar_cases": "Similar Cases Search Agent (Vector Search)",
                 "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
                 "pattern": "Pattern Analysis and Trend Recognition Agent",
@@ -98,6 +101,9 @@ def register_routes(app: FastAPI):
                 "GET /zero-evidence/health": "Zero Evidence Agent health check",
                 "POST /why-analysis/": "Run full Why Analysis pipeline (Question → Cause Gen → Zero Evidence)",
                 "GET /why-analysis/health": "Why Analysis Orchestrator health check",
+                "POST /rca-v2/": "Run RCA v2 Analysis with proper state machine (JSON input)",
+                "POST /rca-v2/upload": "Run RCA v2 Analysis with file upload support",
+                "GET /rca-v2/health": "RCA v2 Orchestrator health check",
                 "POST /similar-cases/": "Find similar complaint cases using vector search",
                 "GET /similar-cases/health": "Similar cases agent health check",
                 "POST /ranking/": "Rank candidate root causes using RCPS methodology",

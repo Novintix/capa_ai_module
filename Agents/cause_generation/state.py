@@ -16,17 +16,21 @@ class AgentState(TypedDict, total=False):
     question: str
     context: Optional[str]
     fmea_document_path: str
+    evidence_context: Optional[Dict[str, Any]]  # Evidence for cause extraction
     
     # Processing fields
     fmea_data: List[Dict[str, Any]]  # Parsed FMEA rows
     matched_rows: List[Dict[str, Any]]  # Matched FMEA rows
     extracted_causes: List[Dict[str, Any]]  # Extracted causes
+    evidence_extracted_causes: List[Dict[str, Any]]  # Causes extracted from evidence
     fmea_available: bool  # Whether FMEA document is available
+    question_keywords: List[str]  # Keywords extracted from question
     
     # Output fields
     causes: List[Dict[str, Any]]  # Final list of causes
     total_causes: int
     matched_entries: int
+    evidence_extracted: int  # Number of causes extracted from evidence
     confidence: float
     notes: Optional[str]
     fmea_document_used: Optional[str]

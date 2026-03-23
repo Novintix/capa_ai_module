@@ -53,7 +53,8 @@ class CauseGenerationAgent:
                 "question_id": question_input.question_id,
                 "question": question_input.question,
                 "context": question_input.context,
-                "fmea_document_path": fmea_document_path
+                "fmea_document_path": fmea_document_path,
+                "evidence_context": question_input.evidence_context if hasattr(question_input, 'evidence_context') else {}
             }
             
             # Run graph
@@ -80,6 +81,7 @@ class CauseGenerationAgent:
                 "total_causes": final_state.get("total_causes", 0),
                 "fmea_document_used": final_state.get("fmea_document_used", fmea_document_path or "Not Available"),
                 "matched_entries": final_state.get("matched_entries", 0),
+                "evidence_extracted": final_state.get("evidence_extracted", 0),
                 "confidence": final_state.get("confidence", 0.0),
                 "notes": final_state.get("notes")
             }

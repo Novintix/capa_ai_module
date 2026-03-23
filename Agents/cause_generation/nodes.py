@@ -173,12 +173,10 @@ def parse_question_node(state: AgentState) -> AgentState:
         
         updates = {
             "question_keywords": keywords,
-            "next_step": "match_fmea"
+            "next_step": "extract_from_evidence"
         }
-        log_routing_decision("parse_question", "match_fmea", f"Extracted {len(keywords)} keywords")
-        log_node_exit("parse_question", {"next_step": "match_fmea", "keywords": keywords})
-        return updates
-        log_node_exit("parse_question", {"next_step": "match_fmea", "keywords": keywords})
+        log_routing_decision("parse_question", "extract_from_evidence", f"Extracted {len(keywords)} keywords")
+        log_node_exit("parse_question", {"next_step": "extract_from_evidence", "keywords": keywords})
         return updates
         
     except Exception as e:
@@ -190,6 +188,181 @@ def parse_question_node(state: AgentState) -> AgentState:
         }
         log_routing_decision("parse_question", "finalize", "Exception occurred")
         log_node_exit("parse_question", updates)
+        return updates
+
+
+def extract_from_evidence_node(state: AgentState) -> AgentState:
+    """
+    Node: Extract causes directly mentioned in evidence, logs, and reports
+    Single responsibility: Find explicit cause mentions in evidence before FMEA matching
+    
+    This helps identify causes that are directly stated in investigation records,
+    which will have high validation confidence later.
+    """
+    log_node_entry("extract_from_evidence", state)
+    
+    try:
+        evidence_context = state.get("evidence_context", {})
+        question = state.get("question", "").lower()
+        
+        # Debug logging
+        logger.info(f"[extract_from_evidence] evidence_context keys: {list(evidence_context.keys()) if evidence_context else 'None'}")
+        logger.info(f"[extract_from_evidence] evidence_context type: {type(evidence_context)}")
+        if evidence_context:
+            logger.info(f"[extract_from_evidence] evidence: {evidence_context.get('evidence', 'None')[:100] if evidence_context.get('evidence') else 'None'}")
+            logger.info(f"[extract_from_evidence] logs count: {len(evidence_context.get('logs', []))}")
+            logger.info(f"[extract_from_evidence] reports count: {len(evidence_context.get('reports', []))}")
+        
+        # Skip if no evidence context provided
+        if not evidence_context:
+            updates = {"evidence_extracted_causes": [], "next_step": "match_fmea"}
+            log_routing_decision("extract_from_evidence", "match_fmea", "No evidence context provided")
+            log_node_exit("extract_from_evidence", updates)
+            return updates
+        
+        # Collect all evidence text
+        evidence_texts = []
+        
+        # Add main evidence
+        if evidence_context.get("evidence"):
+            evidence_texts.append(("evidence", evidence_context["evidence"]))
+        
+        # Add logs
+        for log_entry in evidence_context.get("logs", []):
+            if isinstance(log_entry, dict) and log_entry.get("message"):
+                evidence_texts.append(("log", log_entry["message"]))
+        
+        # Add reports
+        for report in evidence_context.get("reports", []):
+            if isinstance(report, dict) and report.get("summary"):
+                evidence_texts.append(("report", report["summary"]))
+        
+        # Add investigation records
+        for inv_record in evidence_context.get("investigation_records", []):
+            if isinstance(inv_record, dict) and inv_record.get("note"):
+                evidence_texts.append(("investigation", inv_record["note"]))
+        
+        # Add historical CAPA
+        if evidence_context.get("historical_capa"):
+            evidence_texts.append(("historical_capa", evidence_context["historical_capa"]))
+        
+        # Extract causes using LLM
+        if evidence_texts:
+            llm = get_llm()
+            
+            # Build evidence summary
+            evidence_summary = "\n\n".join([f"[{source.upper()}]: {text}" for source, text in evidence_texts])
+            
+            prompt = f"""Extract any ROOT CAUSES or CONTRIBUTING FACTORS explicitly mentioned in the evidence below.
+
+QUESTION: {state.get('question', '')}
+
+EVIDENCE:
+{evidence_summary}
+
+INSTRUCTIONS:
+1. Look for explicit mentions of causes, reasons, or contributing factors
+2. Extract ONLY causes that are directly stated or strongly implied
+3. Do NOT infer or speculate - only extract what's explicitly mentioned
+4. Return as JSON array with format: [{{"cause_text": "...", "source_reference": "evidence/log/report/investigation"}}]
+5. If no explicit causes found, return empty array: []
+
+EXAMPLES OF WHAT TO EXTRACT:
+- "Operator set compression force to 4.5 kN instead of 5.0 kN" → Extract this
+- "Calibration was skipped" → Extract this
+- "Historical CAPA identified X as root cause" → Extract this
+
+EXAMPLES OF WHAT NOT TO EXTRACT:
+- General observations without cause attribution
+- Symptoms or effects (not causes)
+- Vague statements
+
+Return ONLY the JSON array, no other text."""
+
+            try:
+                response = llm.invoke(prompt)
+                response_text = response.content.strip()
+                
+                # Clean response
+                if response_text.startswith("```json"):
+                    response_text = response_text[7:]
+                if response_text.startswith("```"):
+                    response_text = response_text[3:]
+                if response_text.endswith("```"):
+                    response_text = response_text[:-3]
+                response_text = response_text.strip()
+                
+                # Try to parse as array first
+                extracted = None
+                try:
+                    # Look for array
+                    start_idx = response_text.find('[')
+                    end_idx = response_text.rfind(']')
+                    
+                    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                        array_text = response_text[start_idx:end_idx+1]
+                        extracted = json.loads(array_text)
+                except:
+                    pass
+                
+                # If not an array, try wrapping in array
+                if extracted is None:
+                    # Wrap in array brackets
+                    if not response_text.startswith('['):
+                        response_text = '[' + response_text + ']'
+                    extracted = json.loads(response_text)
+                
+                # Convert to cause format
+                evidence_causes = []
+                for idx, item in enumerate(extracted, 1):
+                    if isinstance(item, dict) and item.get("cause_text"):
+                        evidence_causes.append({
+                            "cause_id": f"E{idx:03d}",
+                            "cause_text": item["cause_text"],
+                            "process_step": "Evidence-based",
+                            "failure_mode": "Directly mentioned in evidence",
+                            "potential_effects": None,
+                            "severity": 9,  # High severity for evidence-based causes
+                            "occurrence": 5,  # Medium occurrence (unknown)
+                            "detection": 2,  # Low detection (already occurred)
+                            "current_controls": None,
+                            "source": f"Evidence ({item.get('source_reference', 'unknown')})"
+                        })
+                
+                logger.info(f"[extract_from_evidence] Extracted {len(evidence_causes)} causes from evidence")
+                
+                updates = {
+                    "evidence_extracted_causes": evidence_causes,
+                    "next_step": "match_fmea"
+                }
+                log_routing_decision("extract_from_evidence", "match_fmea", f"Extracted {len(evidence_causes)} causes from evidence")
+                log_node_exit("extract_from_evidence", {"causes_extracted": len(evidence_causes)})
+                return updates
+                
+            except Exception as e:
+                logger.warning(f"[extract_from_evidence] LLM extraction failed: {e}")
+                # Log the response for debugging
+                if 'response_text' in locals():
+                    logger.warning(f"[extract_from_evidence] Full response: {response_text}")
+                updates = {"evidence_extracted_causes": [], "next_step": "match_fmea"}
+                log_routing_decision("extract_from_evidence", "match_fmea", "LLM extraction failed")
+                log_node_exit("extract_from_evidence", updates)
+                return updates
+        else:
+            updates = {"evidence_extracted_causes": [], "next_step": "match_fmea"}
+            log_routing_decision("extract_from_evidence", "match_fmea", "No evidence texts found")
+            log_node_exit("extract_from_evidence", updates)
+            return updates
+            
+    except Exception as e:
+        error_msg = f"Evidence extraction failed: {str(e)}"
+        log_error("extract_from_evidence", error_msg)
+        updates = {
+            "evidence_extracted_causes": [],
+            "next_step": "match_fmea"
+        }
+        log_routing_decision("extract_from_evidence", "match_fmea", "Exception occurred")
+        log_node_exit("extract_from_evidence", updates)
         return updates
 
 
@@ -309,22 +482,31 @@ def match_fmea_node(state: AgentState) -> AgentState:
 
 def extract_causes_node(state: AgentState) -> AgentState:
     """
-    Node: Extract all causes from matched rows
-    Single responsibility: Retrieve all documented FMEA causes
+    Node: Extract all causes from matched rows and combine with evidence-extracted causes
+    Single responsibility: Retrieve all documented FMEA causes and merge with evidence causes
     """
     log_node_entry("extract_causes", state)
     
     try:
         matched_rows = state["matched_rows"]
+        evidence_causes = state.get("evidence_extracted_causes", [])
         
         causes_list = []
         cause_counter = 1
+        
+        # First, add evidence-extracted causes (they have priority)
+        for evidence_cause in evidence_causes:
+            # Renumber to maintain sequence
+            evidence_cause["cause_id"] = f"C{cause_counter:03d}"
+            causes_list.append(evidence_cause)
+            cause_counter += 1
         
         # Debug: Log first matched row structure
         if matched_rows:
             logger.info(f"[DEBUG] First matched row keys: {list(matched_rows[0].keys())}")
             logger.info(f"[DEBUG] First matched row sample: {dict(list(matched_rows[0].items())[:5])}")
         
+        # Then add FMEA causes
         for idx, row in enumerate(matched_rows):
             # Try multiple possible column names for causes
             cause_text = (
@@ -342,6 +524,29 @@ def extract_causes_node(state: AgentState) -> AgentState:
                 # Skip header-like rows
                 if 'what causes' in str(cause_text).lower() or 'how could it occur' in str(cause_text).lower():
                     continue
+                
+                # Check for duplicates with evidence causes using semantic similarity
+                cause_text_normalized = str(cause_text).strip().lower()
+                is_duplicate = False
+                
+                # Simple keyword-based duplicate detection
+                for existing in causes_list:
+                    existing_text = existing["cause_text"].lower()
+                    # Check if texts are very similar (>80% word overlap)
+                    cause_words = set(cause_text_normalized.split())
+                    existing_words = set(existing_text.split())
+                    
+                    if len(cause_words) > 0 and len(existing_words) > 0:
+                        overlap = len(cause_words & existing_words)
+                        similarity = overlap / max(len(cause_words), len(existing_words))
+                        
+                        if similarity > 0.8:  # 80% similarity threshold
+                            is_duplicate = True
+                            logger.info(f"[extract_causes] Skipping FMEA cause (duplicate of evidence): {cause_text[:60]}")
+                            break
+                
+                if is_duplicate:
+                    continue  # Skip duplicate
                 
                 # Safe integer conversion
                 def safe_int(value):
@@ -368,12 +573,13 @@ def extract_causes_node(state: AgentState) -> AgentState:
                 cause_counter += 1
         
         if not causes_list:
-            error_msg = f"No causes found in {len(matched_rows)} matched FMEA rows. Check if 'Potential Causes' column has data."
+            error_msg = f"No causes found in {len(matched_rows)} matched FMEA rows and no evidence causes. Check if 'Potential Causes' column has data."
             log_error("extract_causes", error_msg)
             updates = {
                 "error": error_msg,
                 "causes": [],
                 "total_causes": 0,
+                "evidence_extracted": 0,
                 "next_step": "process_with_llm"
             }
             log_routing_decision("extract_causes", "process_with_llm", "No causes extracted - will generate with LLM")
@@ -383,10 +589,11 @@ def extract_causes_node(state: AgentState) -> AgentState:
         updates = {
             "causes": causes_list,
             "total_causes": len(causes_list),
+            "evidence_extracted": len(evidence_causes),
             "next_step": "process_with_llm"
         }
-        log_routing_decision("extract_causes", "process_with_llm", f"Extracted {len(causes_list)} causes")
-        log_node_exit("extract_causes", {"next_step": "process_with_llm", "causes_count": len(causes_list)})
+        log_routing_decision("extract_causes", "process_with_llm", f"Extracted {len(causes_list)} causes ({len(evidence_causes)} from evidence, {len(causes_list) - len(evidence_causes)} from FMEA)")
+        log_node_exit("extract_causes", {"next_step": "process_with_llm", "causes_count": len(causes_list), "evidence_count": len(evidence_causes)})
         return updates
         
     except Exception as e:
@@ -410,7 +617,8 @@ def finalize_node(state: AgentState) -> AgentState:
     
     updates = {
         "next_step": "end",
-        "iteration": state.get("iteration", 0) + 1
+        "iteration": state.get("iteration", 0) + 1,
+        "evidence_extracted": state.get("evidence_extracted", 0)
     }
     
     log_routing_decision("finalize", "END", "Process complete")

@@ -25,14 +25,14 @@ class StartWhyInput(BaseModel):
         )
     )
     evidence: str = Field(
-        ...,
-        description="Supporting facts, observations, measurements, or data relevant to the problem."
+        default="",
+        description="Supporting facts, observations, measurements, or data relevant to the problem. Optional."
     )
     sop: str = Field(
-        ...,
+        default="",
         description=(
             "Standard Operating Procedure, work instruction, or process guideline "
-            "relevant to the problem context."
+            "relevant to the problem context. Optional."
         )
     )
 

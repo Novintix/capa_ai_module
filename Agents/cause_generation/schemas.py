@@ -12,6 +12,7 @@ class QuestionInput(BaseModel):
     question_id: str = Field(..., description="Unique question identifier")
     question: str = Field(..., description="Why question (e.g., 'Why did the bike stop?', 'Why is tablet strength incorrect?')")
     context: Optional[str] = Field(None, description="Additional context or previous cause from 5-Why analysis")
+    evidence_context: Optional[dict] = Field(None, description="Evidence, logs, reports for cause extraction")
 
 
 class Cause(BaseModel):
