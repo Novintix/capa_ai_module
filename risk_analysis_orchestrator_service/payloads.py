@@ -31,9 +31,9 @@ from typing import Any
 
 def detection_payload(e: dict, issue: str) -> dict:
     return {
-        "complaint_id":          e.get("complaint_id", "UNKNOWN"),
-        "complaint_source":      e.get("source", "manual"),
-        "complaint_description": issue,
+        "complaint_id":          e.get("complaint_id") or "UNKNOWN",
+        "complaint_source":      e.get("source") or "manual",
+        "complaint_description": issue or "No description provided",
         "policy_document_path":  None,
         "has_policy":            False,
         "iteration":             0,
@@ -48,11 +48,11 @@ def detection_payload(e: dict, issue: str) -> dict:
 
 def pattern_payload(e: dict, issue: str) -> dict:
     return {
-        "complaint_id":          e.get("complaint_id", "UNKNOWN"),
-        "complaint_description": issue,
-        "product_family":        e.get("product"),
-        "region":                e.get("region"),
-        "severity":              e.get("severity_hint"),
+        "complaint_id":          e.get("complaint_id") or "UNKNOWN",
+        "complaint_description": issue or "No description provided",
+        "product_family":        e.get("product") or "unknown",
+        "region":                e.get("region") or "unknown",
+        "severity":              e.get("severity_hint") or "MODERATE",
         "site":                  None,
         "company_id":            None,
         "company_schema":        None,
@@ -71,7 +71,7 @@ def pattern_payload(e: dict, issue: str) -> dict:
 
 def severity_payload(e: dict, issue: str) -> dict:
     return {
-        "issue": issue,
+        "issue": issue or "No issue description provided",
     }
 
 
@@ -83,7 +83,7 @@ def severity_payload(e: dict, issue: str) -> dict:
 def similar_cases_payload(issue: str) -> dict:
     return {
         "input": {
-            "query": issue
+            "query": issue or "No query provided"
         },
         "iteration": 0,
     }
@@ -95,19 +95,31 @@ def similar_cases_payload(issue: str) -> dict:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def occurrence_payload(e: dict, issue: str) -> dict:
+    """
+    Base payload for A4 Occurrence Agent.
+    Matches OccurrenceState.input → ComplaintData schema exactly.
+
+    pattern_data and similar_cases_data are left None here —
+    A4_occurrence_agent fills them in after A1 and A2 complete,
+    because those results are not available at payload-build time.
+    """
     return {
         "input": {
-            "complaint_id":       e.get("complaint_id", "UNKNOWN"),
-            "description":        issue,
-            "source":             e.get("source", "manual"),
-            "date":               e.get("date", "unknown"),
-            "product":            e.get("product", "unknown"),
-            "similar_cases":      [],
-            "additional_context": e.get("suspected_cause"),
+            "complaint_id":       e.get("complaint_id") or "UNKNOWN",
+            "description":        issue or "No description provided",
+            "source":             e.get("source") or "manual",
+            "date":               e.get("date") or "unknown",
+            "product":            e.get("product") or "unknown",
+            # ── Structured fields — filled by A4 after fan-in ────────────────
+            "pattern_data":        None,   # PatternData — injected from A2 result
+            "similar_cases_data":  None,   # SimilarCasesData — injected from A1 result
+            # ── Legacy fallback ──────────────────────────────────────────────
+            "similar_cases":       [],
+            "additional_context":  e.get("suspected_cause") or None,
+            "metrics_data":        None,
         },
         "iteration": 0,
     }
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # A6 — Regulatory Agent Payload
@@ -116,15 +128,15 @@ def occurrence_payload(e: dict, issue: str) -> dict:
 
 def regulatory_payload(e: dict, issue: str) -> dict:
     return {
-        "complaint_id":       e.get("complaint_id", "UNKNOWN"),
-        "description":        issue,
-        "date_of_awareness":  e.get("date", "unknown"),
-        "product_type":       e.get("product_type"),
-        "market_country":     e.get("market_country"),
-        "severity":           e.get("severity_hint"),
-        "issue_type":         e.get("issue_type"),
-        "death_or_injury":    e.get("death_or_injury", False),
-        "batch_number":       e.get("batch_number"),
+        "complaint_id":       e.get("complaint_id") or "UNKNOWN",
+        "description":        issue or "No description provided",
+        "date_of_awareness":  e.get("date") or "unknown",
+        "product_type":       e.get("product_type") or "unknown",
+        "market_country":     e.get("market_country") or "unknown",
+        "severity":           e.get("severity_hint") or "MODERATE",
+        "issue_type":         e.get("issue_type") or "unknown",
+        "death_or_injury":    bool(e.get("death_or_injury", False)),
+        "batch_number":       e.get("batch_number") or "unknown",
         "iteration":          0,
         "max_iterations":     3,
     }

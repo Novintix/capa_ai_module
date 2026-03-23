@@ -1,43 +1,51 @@
-# Core Dependencies
+# ── Core ──────────────────────────────────────────────────────────────────────
 langchain-google-genai
 langchain-core
 langgraph
 pydantic
 python-dotenv
-pymongo
 
-# AWS Bedrock
+# ── AWS Bedrock ───────────────────────────────────────────────────────────────
 boto3
 
-# Redis (Why Question Agent — session memory)
+# ── Redis (Why Question Agent — session memory) ───────────────────────────────
 redis
 langgraph-checkpoint-redis
 
-# Embeddings (Open Source)
+# ── Embeddings (Open Source) ──────────────────────────────────────────────────
 sentence-transformers
 torch
 
-# MongoDB (Similar Cases Agent)
+# ── MongoDB (Similar Cases Agent) ─────────────────────────────────────────────
 pymongo
 
-# Document Processing
-PyPDF2
+# ── Document Processing ───────────────────────────────────────────────────────
 python-docx
 pandas
 openpyxl
 Pillow
 PyMuPDF
 
-# Azure OCR
+# ── PDF Extraction ────────────────────────────────────────────────────────────
+pdfplumber
+pypdf
+
+# ── OCR — Tesseract (for scanned PDFs) ───────────────────────────────────────
+pytesseract
+pdf2image
+
+# ── OCR — Azure Computer Vision (for images) ─────────────────────────────────
 azure-cognitiveservices-vision-computervision
 msrest
 
-# API Server (Optional)
+# ── JSON Repair ───────────────────────────────────────────────────────────────
+json-repair
+
+# ── API Server ────────────────────────────────────────────────────────────────
 fastapi
 uvicorn
 python-multipart
 
-# Testing (Optional)
+# ── Testing ───────────────────────────────────────────────────────────────────
 pytest
 pytest-asyncio
-

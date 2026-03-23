@@ -74,7 +74,9 @@ class OccurrenceScoreResponse(BaseModel):
             'HF': 1, 'TR': 1, 'PS': 1, 'PC': 1, 'DM': 1,
             'SY': 1, 'OE': 1, 'CA': 1, 'SU': 1, 'AU': 1
         }
-        return legacy_defaults.get(name, 1)
+        if name in legacy_defaults:
+            return legacy_defaults[name]
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
 class OccurrenceOutput(BaseModel):
     weighted_score: int
