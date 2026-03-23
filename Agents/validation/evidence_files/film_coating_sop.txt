@@ -1,0 +1,86 @@
+STANDARD OPERATING PROCEDURE
+Title     : Film Coating Operation for Solid Dosage Forms
+SOP No    : SOP-MFG-018
+Version   : 3.1
+Effective : 2024-06-01
+Dept      : Manufacturing
+
+-----------------------------------------------------------
+1. PURPOSE
+To define the standard operating procedure for film coating of tablet cores using
+aqueous coating systems in perforated coating pans.
+
+-----------------------------------------------------------
+2. SCOPE
+Applicable to all film coating operations on Equipment CP-01 through CP-06.
+
+-----------------------------------------------------------
+3. EQUIPMENT AND MATERIALS
+- Perforated coating pan (capacity 60-120 kg)
+- Spray gun assembly
+- Coating solution (as per product-specific batch manufacturing record)
+- Calibrated thermometer / thermocouple (calibration current within 12 months)
+
+-----------------------------------------------------------
+4. PROCESS PARAMETERS (STANDARD RANGES)
+
+Parameter                  | Specification
+---------------------------|---------------------------
+Inlet air temperature      | 55 C - 60 C
+Exhaust air temperature    | 35 C - 42 C
+Pan speed                  | 7 - 10 RPM
+Spray rate                 | 15 - 25 g/min per gun
+Atomization air pressure   | 2.0 - 3.0 bar
+Coating solution viscosity | 250 - 300 cP
+Tablet bed temp            | 38 C - 45 C
+
+All parameters must remain within specification throughout the coating cycle.
+Any deviation from specification must be recorded immediately on the Deviation Form
+(Form QA-DEV-01) and escalated to the Shift Supervisor and QA within 30 minutes.
+
+-----------------------------------------------------------
+5. OPERATING PROCEDURE
+
+5.1 Pre-Coating
+  a. Verify equipment cleanliness and line clearance.
+  b. Prepare coating solution per batch record. Check viscosity before use.
+  c. Load tablet cores. Record core weight.
+  d. Start pan rotation at low speed (5 RPM) during pre-heat only.
+  e. Pre-heat pan to target inlet temperature before starting spray.
+
+5.2 Coating
+  a. Set pan speed to target value per batch record (within 7-10 RPM range).
+  b. Begin spray. Monitor and record all parameters every 30 minutes.
+  c. If inlet temperature exceeds 60 C, immediately reduce heat supply and notify supervisor.
+  d. Do NOT continue spray during unresolved temperature excursion.
+  e. Pan speed must not be reduced below 7 RPM during active coating. If noise or
+     mechanical issue occurs, stop the pan and notify maintenance.
+
+5.3 Post-Coating
+  a. Stop spray. Continue pan rotation during drying phase at 6-8 RPM.
+  b. Discharge tablets when tablet bed temperature drops below 35 C.
+  c. Perform visual inspection. Document findings.
+  d. Complete batch record before transferring to QC.
+
+5.4 Shift Handover
+  a. Outgoing operator MUST complete written handover form (Form MFG-HO-03).
+  b. Any deviations, alarms, or parameter excursions occurring during the shift
+     MUST be documented on the handover form before shift end.
+  c. Verbal-only handovers are NOT acceptable.
+
+-----------------------------------------------------------
+6. DEVIATIONS
+Any parameter outside stated specification is a deviation and must be handled per
+SOP-QA-021 (Deviation and CAPA Management).
+
+-----------------------------------------------------------
+7. REFERENCES
+  SOP-QA-021  : Deviation and CAPA Management
+  Form QA-DEV-01 : Deviation Form
+  Form MFG-HO-03 : Shift Handover Form
+
+-----------------------------------------------------------
+Prepared by  : R. Patel (Manufacturing)
+Approved by  : Dr. A. Kumar (QA Director)
+-----------------------------------------------------------
+END OF SOP

@@ -1,0 +1,64 @@
+QUALITY POLICY
+Title     : Deviation Management and Escalation Policy
+Policy No : POL-QA-005
+Version   : 2.0
+Effective : 2023-09-01
+Approved  : Dr. A. Kumar (QA Director)
+
+-----------------------------------------------------------
+1. PURPOSE
+To define site-wide expectations for identifying, documenting, escalating, and resolving
+deviations from approved procedures, specifications, and process parameters.
+
+-----------------------------------------------------------
+2. SCOPE
+All manufacturing, quality control, and support functions at this facility.
+
+-----------------------------------------------------------
+3. POLICY STATEMENTS
+
+3.1 Any departure from an approved procedure or specified parameter range constitutes a
+    deviation and must be documented.
+
+3.2 Operators are responsible for identifying and reporting deviations in real time.
+    Deviations must not be concealed, minimized, or closed without appropriate review.
+
+3.3 Critical process parameters (CPPs) are defined in product-specific batch records.
+    Excursion beyond a CPP limit requires immediate process hold and QA notification.
+
+3.4 Equipment alarms for CPP-related sensors (temperature, pressure, speed) must not be
+    acknowledged and dismissed without investigation. Acknowledging an alarm does not
+    constitute corrective action.
+
+3.5 Shift supervisors are accountable for ensuring deviations occurring during their shift
+    are documented on Deviation Form QA-DEV-01 before shift end.
+
+3.6 Shift handover must be performed in writing using Form MFG-HO-03. Verbal handovers
+    are not permitted as the sole record for a shift. Written records must capture any
+    open alarms, parameter excursions, or pending actions.
+
+3.7 All deviations must be assigned a risk classification:
+      - Critical : Potential direct impact on product quality or patient safety
+      - Major    : Potential indirect impact; investigation mandatory
+      - Minor    : Low risk; documentation and monitoring sufficient
+
+3.8 A CAPA must be initiated for all Critical and Major deviations within 5 business days
+    of identification.
+
+-----------------------------------------------------------
+4. CONSEQUENCES OF NON-COMPLIANCE
+Failure to follow this policy may result in:
+  - Batch rejection or quarantine
+  - Regulatory reporting obligations
+  - Personnel retraining or disciplinary action
+  - Repeat audit findings
+
+-----------------------------------------------------------
+5. REFERENCES
+  SOP-QA-021  : Deviation and CAPA Management
+  SOP-MFG-018 : Film Coating Operation
+  Form QA-DEV-01 : Deviation Form
+  Form MFG-HO-03 : Shift Handover Form
+
+-----------------------------------------------------------
+END OF POLICY
