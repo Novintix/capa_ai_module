@@ -12,8 +12,8 @@ from Agents.pattern.router import router as pattern_router
 
 from Agents.action_plan.router import router as action_plan_router
 from Agents.zero_evidence_agent.router import router as zero_evidence_router
-from Agents.why_analysis_orchestrator.router import router as why_analysis_router
-from Agents.rca_v2.router import router as rca_v2_router
+
+
 from Agents.action_plan.router import router as action_plan_router
 from Agents.similar_cases.router import router as similar_cases_router
 from Agents.ranking.router import router as ranking_router
@@ -21,7 +21,10 @@ from Agents.effectiveness.router import router as effectiveness_router
 from Agents.validation.router import router as validation_router
 
 # # ── Orchestrator ──────────────────────────────────────────────────────────────
-from risk_analysis_orchestrator_service.router import router as orchestrator_router
+from orchestrator.risk_analysis_orchestrator_service.router import router as orchestrator_router
+from orchestrator.why_analysis_orchestrator.router import router as why_analysis_router
+from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
+
 def register_routes(app: FastAPI):
     """
     Register all agent routes to the FastAPI app.
