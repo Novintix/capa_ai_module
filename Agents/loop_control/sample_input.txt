@@ -1,0 +1,175 @@
+{
+  "sample_inputs": [
+    {
+      "incident_description": "Sterility test failures rose after a controlled SOP update despite no equipment alarms.",
+      "current_loop_count": 5,
+      "max_loops": 5,
+      "current_top_cause": "QMS change-control workflow has no mandatory role-based retraining gate before revised aseptic SOPs become effective on the floor",
+      "current_cause_confidence": 0.91,
+      "full_why_chain": [
+        {
+          "loop": 1,
+          "question": "Why did sterility tests fail?",
+          "cause": "Aseptic preparation steps were executed differently across shifts",
+          "confidence": 0.77
+        },
+        {
+          "loop": 2,
+          "question": "Why were preparation steps different across shifts?",
+          "cause": "Operators followed legacy and revised SOP versions in parallel",
+          "confidence": 0.82
+        },
+        {
+          "loop": 3,
+          "question": "Why were both SOP versions active on floor?",
+          "cause": "SOP revision communication was acknowledged but retraining completion was not enforced",
+          "confidence": 0.86
+        },
+        {
+          "loop": 4,
+          "question": "Why was retraining completion not enforced?",
+          "cause": "QMS change-control workflow has no mandatory role-based retraining gate before revised aseptic SOPs become effective on the floor",
+          "confidence": 0.91
+        },
+        {
+          "loop": 5,
+          "question": "Why does workflow allow release without retraining gate?",
+          "cause": "QMS change-control workflow has no mandatory role-based retraining gate before revised aseptic SOPs become effective on the floor",
+          "confidence": 0.91
+        }
+      ]
+    },
+    {
+      "incident_description": "Intermittent cold-chain temperature excursions occurred even though vehicle sensors stayed within range.",
+      "current_loop_count": 4,
+      "max_loops": 5,
+      "current_top_cause": "Distribution SOP and escalation policy define no dock dwell-time limit ownership, so handoff delays are unmanaged during route exceptions",
+      "current_cause_confidence": 0.88,
+      "full_why_chain": [
+        {
+          "loop": 1,
+          "question": "Why did shipment go out of range?",
+          "cause": "Thermal buffer expired before final transfer",
+          "confidence": 0.8
+        },
+        {
+          "loop": 2,
+          "question": "Why did thermal buffer expire?",
+          "cause": "Pallet remained on dock after planned pickup window",
+          "confidence": 0.84
+        },
+        {
+          "loop": 3,
+          "question": "Why was pallet dwell time not corrected immediately?",
+          "cause": "No accountable owner was triggered when dwell time exceeded threshold",
+          "confidence": 0.86
+        },
+        {
+          "loop": 4,
+          "question": "Why was no owner triggered for dwell-time breach?",
+          "cause": "Distribution SOP and escalation policy define no dock dwell-time limit ownership, so handoff delays are unmanaged during route exceptions",
+          "confidence": 0.88
+        }
+      ]
+    },
+    {
+      "incident_description": "Assay reruns increased after method transfer; labs kept correcting results with manual review.",
+      "current_loop_count": 5,
+      "max_loops": 5,
+      "current_top_cause": "Method transfer governance lacks a required ownership checkpoint for calibration accountability before analytical method go-live",
+      "current_cause_confidence": 0.9,
+      "full_why_chain": [
+        {
+          "loop": 1,
+          "question": "Why were assays repeatedly out of tolerance?",
+          "cause": "Analyzer response drifted between runs",
+          "confidence": 0.78
+        },
+        {
+          "loop": 2,
+          "question": "Why did analyzer response drift between runs?",
+          "cause": "Calibration execution varied by team and shift",
+          "confidence": 0.82
+        },
+        {
+          "loop": 3,
+          "question": "Why did calibration execution vary by team?",
+          "cause": "Method transfer package did not assign calibration ownership for go-live readiness",
+          "confidence": 0.87
+        },
+        {
+          "loop": 4,
+          "question": "Why did transfer package omit calibration ownership gate?",
+          "cause": "Method transfer governance lacks a required ownership checkpoint for calibration accountability before analytical method go-live",
+          "confidence": 0.9
+        },
+        {
+          "loop": 5,
+          "question": "Why was method go-live allowed without ownership checkpoint?",
+          "cause": "Method transfer governance lacks a required ownership checkpoint for calibration accountability before analytical method go-live",
+          "confidence": 0.9
+        }
+      ]
+    },
+    {
+      "incident_description": "Blister packs intermittently fail leak test in packaging line A after foil lot change.",
+      "current_loop_count": 3,
+      "max_loops": 5,
+      "current_top_cause": "Sealing jaw temperature was slightly low during second shift",
+      "current_cause_confidence": 0.76,
+      "full_why_chain": [
+        {
+          "loop": 1,
+          "question": "Why are packs failing leak test?",
+          "cause": "Seal integrity is inconsistent across batches",
+          "confidence": 0.73
+        },
+        {
+          "loop": 2,
+          "question": "Why is seal integrity inconsistent across batches?",
+          "cause": "Heat profile deviated around startup and shift transitions",
+          "confidence": 0.75
+        },
+        {
+          "loop": 3,
+          "question": "Why did heat profile deviate around transitions?",
+          "cause": "Sealing jaw temperature was slightly low during second shift",
+          "confidence": 0.76
+        }
+      ]
+    },
+    {
+      "incident_description": "HPLC reruns increased after occasional baseline spikes in assay sequences.",
+      "current_loop_count": 4,
+      "max_loops": 5,
+      "current_top_cause": "Analyst may have made a mistake while setting the run",
+      "current_cause_confidence": 0.68,
+      "full_why_chain": [
+        {
+          "loop": 1,
+          "question": "Why were sequences rerun?",
+          "cause": "Baseline exceeded noise acceptance limits in some runs",
+          "confidence": 0.69
+        },
+        {
+          "loop": 2,
+          "question": "Why did baseline exceed limits?",
+          "cause": "Signal stability changed between runs",
+          "confidence": 0.66
+        },
+        {
+          "loop": 3,
+          "question": "Why did signal stability change between runs?",
+          "cause": "Instrument response drifted intermittently",
+          "confidence": 0.67
+        },
+        {
+          "loop": 4,
+          "question": "Why did response drift intermittently?",
+          "cause": "Analyst may have made a mistake while setting the run",
+          "confidence": 0.68
+        }
+      ]
+    }
+  ]
+}
