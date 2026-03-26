@@ -31,4 +31,4 @@ def build_graph():
 
     builder.set_finish_point("calculation_node")
 
-    return builder.compile()
+    return builder.compile(name="A3_severity_agent")

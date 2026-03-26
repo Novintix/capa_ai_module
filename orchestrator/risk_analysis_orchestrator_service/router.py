@@ -25,7 +25,7 @@ Response design:
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from .orchestrator import orchestrator_graph, redis_client, MAX_CORRECTION_ATTEMPTS
@@ -168,6 +168,9 @@ def _build_full_response(thread_id: str, result: dict) -> dict:
 
         # ── AI reasoning output ───────────────────────────────────────────────
         "reasoning": final_report.get("reasoning", {}),
+
+        # ── Execution Log ─────────────────────────────────────────────────────
+        "node_log":     result.get("node_log", []),
 
         # ── Full report for completeness ──────────────────────────────────────
         "final_report": final_report,
@@ -465,3 +468,76 @@ async def resume(thread_id: str, body: ResumeRequest = ResumeRequest()):
         )
 
     return _build_full_response(thread_id, result)
+
+# ------------------------------------------------------------------------------
+# WEBSOCKET /capa/events/{thread_id}
+#
+# Real-time event streaming for the orchestrator.
+# UI connects here, sends {"command":"start","raw_input":"..."} to trigger
+# astream_events, receives node_start / node_end / completed events.
+# ------------------------------------------------------------------------------
+
+from .orchestrator import deep_serialize, _now as _ts_now
+
+@router.websocket("/events/{thread_id}")
+async def event_stream(websocket: WebSocket, thread_id: str):
+    await websocket.accept()
+    print(f"WS connected: {thread_id}")
+    try:
+        initial = _read_state_from_redis(thread_id)
+        if initial:
+            await websocket.send_json({
+                "type": "initial_state",
+                "data": {
+                    "nodes_completed": initial.get("nodes_completed", []),
+                    "status": _derive_status(initial.get("state", {}), initial.get("nodes_completed", []))
+                }
+            })
+        while True:
+            msg = await websocket.receive_json()
+            cmd = msg.get("command")
+            if cmd == "start":
+                raw_input = msg.get("raw_input", "")
+                if not raw_input:
+                    await websocket.send_json({"type": "error", "message": "Missing raw_input"})
+                    continue
+                config = _config(thread_id)
+                await websocket.send_json({"type": "status", "status": "started"})
+                try:
+                    async for event in orchestrator_graph.astream_events(
+                        {"raw_input": raw_input, "agent_results": [], "node_log": [], "errors": [], "correction_count": 0},
+                        config=config, version="v2"
+                    ):
+                        kind = event["event"]
+                        name = event["name"]
+                        metadata = event.get("metadata", {})
+                        
+                        # Is this event related to a top-level node in our graph?
+                        is_node = (metadata.get("langgraph_node") == name and name != "__start__")
+                        
+                        if kind == "on_chain_start" and name == "LangGraph":
+                            await websocket.send_json({"type": "graph_start"})
+                        elif kind == "on_chain_start" and is_node:
+                            await websocket.send_json({"type": "node_start", "node": name, "timestamp": _ts_now()})
+                        elif kind == "on_chain_end" and is_node:
+                            out = event["data"].get("output")
+                            await websocket.send_json({"type": "node_end", "node": name, "data": deep_serialize(out) if out else None, "timestamp": _ts_now()})
+                        elif kind == "on_chain_end" and name == "LangGraph":
+                            final_out = event["data"].get("output")
+                            await websocket.send_json({"type": "completed", "data": _build_full_response(thread_id, final_out) if final_out else {}})
+                except Exception as exc:
+                    import traceback
+                    print(traceback.format_exc()) # Log full traceback to backend terminal
+                    await websocket.send_json({
+                        "type": "error", 
+                        "message": f"Graph Execution Error: {str(exc) or 'Internal Failure'}"
+                    })
+            elif cmd == "ping":
+                await websocket.send_json({"type": "pong"})
+    except WebSocketDisconnect:
+        print(f"WS disconnected: {thread_id}")
+    except Exception as exc:
+        try:
+            await websocket.send_json({"type": "error", "message": str(exc)})
+        except Exception:
+            pass

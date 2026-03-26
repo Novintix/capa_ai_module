@@ -24,6 +24,9 @@ from Agents.validation.router import router as validation_router
 from orchestrator.risk_analysis_orchestrator_service.router import router as orchestrator_router
 from orchestrator.why_analysis_orchestrator.router import router as why_analysis_router
 from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
+from orchestrator.capa_director.router import router as director_router
+from orchestrator.dynamic_builder.router import router as dynamic_builder_router
+
 
 def register_routes(app: FastAPI):
     """
@@ -54,9 +57,11 @@ def register_routes(app: FastAPI):
     app.include_router(pattern_router)
     app.include_router(effectiveness_router)
     app.include_router(validation_router)
+    app.include_router(director_router)
 
     # # ── Orchestrator router ───────────────────────────────────────────────────
     app.include_router(orchestrator_router)  # exposes POST /capa/analyze
+    app.include_router(dynamic_builder_router, prefix="/dynamic")
     
     @app.get("/")
     def root():
@@ -83,7 +88,8 @@ def register_routes(app: FastAPI):
                 "pattern": "Pattern Analysis and Trend Recognition Agent",
                 "effectiveness": "Effectiveness Evaluation Agent",
                 "validation": "Generated Cause Validation Agent",
-                "orchestrator": "CAPA Analysis and Recommendation Orchestrator"
+                "orchestrator": "CAPA Analysis and Recommendation Orchestrator",
+                "director": "CAPA Director (Overall Orchestrator) — Risk → RCA → Action Plan → Effectiveness"
                 
             },
             "endpoints": {
@@ -118,7 +124,8 @@ def register_routes(app: FastAPI):
                 "POST /effectiveness": "Evaluate effectiveness of CAPA actions",
                 "POST /validation/": "Validate generated causes against complaint and investigation evidence",
                 "GET /validation/health": "Validation agent health check",
-                "POST /capa/analyze": "Orchestrator endpoint to analyze a complaint and generate CAPA recommendations"
+                "POST /capa/analyze": "Orchestrator endpoint to analyze a complaint and generate CAPA recommendations",
+                "POST /director/analyze": "Top-level Director Orchestrator for full CAPA lifecycle (Risk, RCA, Action, Effectiveness)"
             }
         }
     

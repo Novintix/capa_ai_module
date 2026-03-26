@@ -86,4 +86,4 @@ def create_detection_graph() -> StateGraph:
     workflow.add_conditional_edges("score_with_defaults", route_after_score)
     workflow.add_conditional_edges("finalize", route_after_finalize)
     
-    return workflow.compile()
+    return workflow.compile(name="A5_detection_agent")

@@ -35,7 +35,7 @@ def create_similar_cases_graph():
     workflow.add_edge("vector_search", "format_results")
     workflow.add_edge("format_results", END)
     
-    return workflow.compile()
+    return workflow.compile(name="A1_similar_cases_agent")
 
 
 # Export compiled graph
