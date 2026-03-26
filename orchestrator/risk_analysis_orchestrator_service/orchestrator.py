@@ -57,7 +57,6 @@ import redis
 import redis.asyncio as async_redis
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
-from langgraph.checkpoint.redis import AsyncRedisSaver
 
 from Agents.detection.graph     import create_detection_graph  as build_detection_graph
 from Agents.pattern.graph       import create_pattern_graph    as build_pattern_graph
@@ -983,9 +982,12 @@ def build_orchestrator():
     g.add_edge("A7_reasoning_agent",   "finalize_node")
     g.add_edge("finalize_node",        END)
 
-    # ── Compile with Async Redis checkpointing ────────────────────────────────
-    # Passing URL string positionally to satisfy internal redisvl parsing
-    checkpointer = AsyncRedisSaver("redis://localhost:6379")
+    # ── Compile with sync Redis checkpointing ─────────────────────────────────
+    # RedisSaver (sync) works at module-level import time — no event loop needed.
+    # AsyncRedisSaver requires get_running_loop() which fails at import time.
+    from langgraph.checkpoint.redis import RedisSaver
+    checkpointer = RedisSaver("redis://localhost:6379")
+    checkpointer.setup()
     return g.compile(checkpointer=checkpointer)
 
 
