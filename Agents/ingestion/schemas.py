@@ -76,3 +76,10 @@ class BatchExtractionResult(BaseModel):
     successful_extractions: int = Field(..., description="Number of successful extractions")
     failed_extractions: int = Field(..., description="Number of failed extractions")
     total_processing_time: float = Field(..., description="Total processing time in seconds")
+
+
+class MessyIngestInput(BaseModel):
+    """Input for messy/varied JSON ingestion"""
+    source_system: str = Field(default="unknown", description="System of origin (ERP, CRM, etc.)")
+    payload: Dict[str, Any] = Field(..., description="The raw, unformatted JSON data")
+    priority_hint: Optional[str] = Field(None, description="Optional manual priority level")

@@ -27,4 +27,4 @@ def create_pattern_graph():
     workflow.add_edge("analyze_trend", "finalize")
     workflow.add_edge("finalize", END)
 
-    return workflow.compile()
+    return workflow.compile(name="A2_pattern_agent")

@@ -12,8 +12,8 @@ from Agents.pattern.router import router as pattern_router
 
 from Agents.action_plan.router import router as action_plan_router
 from Agents.zero_evidence_agent.router import router as zero_evidence_router
-from Agents.why_analysis_orchestrator.router import router as why_analysis_router
-from Agents.rca_v2.router import router as rca_v2_router
+
+
 from Agents.action_plan.router import router as action_plan_router
 from Agents.similar_cases.router import router as similar_cases_router
 from Agents.ranking.router import router as ranking_router
@@ -22,7 +22,13 @@ from Agents.validation.router import router as validation_router
 from Agents.loop_control.router import router as loop_control_router
 
 # # ── Orchestrator ──────────────────────────────────────────────────────────────
-from risk_analysis_orchestrator_service.router import router as orchestrator_router
+from orchestrator.risk_analysis_orchestrator_service.router import router as orchestrator_router
+from orchestrator.why_analysis_orchestrator.router import router as why_analysis_router
+from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
+from orchestrator.capa_director.router import router as director_router
+from orchestrator.dynamic_builder.router import router as dynamic_builder_router
+
+
 def register_routes(app: FastAPI):
     """
     Register all agent routes to the FastAPI app.
@@ -53,9 +59,11 @@ def register_routes(app: FastAPI):
     app.include_router(effectiveness_router)
     app.include_router(validation_router)
     app.include_router(loop_control_router)
+    app.include_router(director_router)
 
     # # ── Orchestrator router ───────────────────────────────────────────────────
     app.include_router(orchestrator_router)  # exposes POST /capa/analyze
+    app.include_router(dynamic_builder_router, prefix="/dynamic")
     
     @app.get("/")
     def root():
@@ -83,7 +91,8 @@ def register_routes(app: FastAPI):
                 "effectiveness": "Effectiveness Evaluation Agent",
                 "validation": "Generated Cause Validation Agent",
                 "loop_control": "Loop Control Agent (RCA Continue/Stop Decision)",
-                "orchestrator": "CAPA Analysis and Recommendation Orchestrator"
+                "orchestrator": "CAPA Analysis and Recommendation Orchestrator",
+                "director": "CAPA Director (Overall Orchestrator) — Risk → RCA → Action Plan → Effectiveness"
                 
             },
             "endpoints": {
@@ -119,7 +128,8 @@ def register_routes(app: FastAPI):
                 "POST /validation/": "Validate generated causes against complaint and investigation evidence",
                 "GET /validation/health": "Validation agent health check",
                 "POST /loop-control/analyze": "Decide LOOP, STOP_ROOT_FOUND, or STOP_DEGRADED for 5-Why RCA",
-                "POST /capa/analyze": "Orchestrator endpoint to analyze a complaint and generate CAPA recommendations"
+                "POST /capa/analyze": "Orchestrator endpoint to analyze a complaint and generate CAPA recommendations",
+                "POST /director/analyze": "Top-level Director Orchestrator for full CAPA lifecycle (Risk, RCA, Action, Effectiveness)"
             }
         }
     

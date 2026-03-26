@@ -54,9 +54,10 @@ from typing import Annotated, Optional
 from typing_extensions import TypedDict
 
 import redis
+import redis.asyncio as async_redis
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
-from langgraph.checkpoint.redis import RedisSaver
+from langgraph.checkpoint.redis import AsyncRedisSaver
 
 from Agents.detection.graph     import create_detection_graph  as build_detection_graph
 from Agents.pattern.graph       import create_pattern_graph    as build_pattern_graph
@@ -79,6 +80,12 @@ from .state    import RiskAnalysisState
 redis_client = redis.Redis(
     host="localhost", port=6379, db=0, decode_responses=False
 )
+
+async_redis_client = async_redis.Redis(
+    host="localhost", port=6379, db=0, decode_responses=False
+)
+
+async_pool = async_redis.ConnectionPool.from_url("redis://localhost:6379", decode_responses=False)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -976,11 +983,9 @@ def build_orchestrator():
     g.add_edge("A7_reasoning_agent",   "finalize_node")
     g.add_edge("finalize_node",        END)
 
-    # ── Compile with Redis checkpointing ──────────────────────────────────────
-    # State checkpoint saved after every node.
-    # Crash recovery: resume from last checkpoint via /capa/resume/{thread_id}.
-    # thread_id in config identifies the workflow run.
-    checkpointer = RedisSaver(redis_client=redis_client)
+    # ── Compile with Async Redis checkpointing ────────────────────────────────
+    # Passing URL string positionally to satisfy internal redisvl parsing
+    checkpointer = AsyncRedisSaver("redis://localhost:6379")
     return g.compile(checkpointer=checkpointer)
 
 

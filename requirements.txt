@@ -29,6 +29,7 @@ PyMuPDF
 # ── PDF Extraction ────────────────────────────────────────────────────────────
 pdfplumber
 pypdf
+PyPDF2
 
 # ── OCR — Tesseract (for scanned PDFs) ───────────────────────────────────────
 pytesseract
@@ -45,6 +46,10 @@ json-repair
 fastapi
 uvicorn
 python-multipart
+
+# ── UI / Client ──────────────────────────────────────────────────────────────
+streamlit
+requests
 
 # ── Testing ───────────────────────────────────────────────────────────────────
 pytest
