@@ -89,14 +89,24 @@ class FishboneOrchestratorV2:
             session = self.session_manager.get_session(input_data.complaint_id)
             
             if session and session.is_complete:
-                # Session already complete - return cached result
+                # Session already complete - return full cached result
+                cached = self.session_manager.get_result(input_data.complaint_id)
+                if cached:
+                    log_memory_update(
+                        "orchestrator",
+                        input_data.complaint_id,
+                        "session_complete",
+                        "Session already complete, returning cached result"
+                    )
+                    return cached
+                # Full result not in cache (old session before fix) — re-run analysis
                 log_memory_update(
                     "orchestrator",
                     input_data.complaint_id,
-                    "session_complete",
-                    "Session already complete, returning cached result"
+                    "session_complete_no_result",
+                    "Session complete but no cached result — re-running analysis"
                 )
-                return self._build_result_from_session(session)
+                session = None
             
             # Create new session
             if not session:
@@ -139,7 +149,10 @@ class FishboneOrchestratorV2:
             
             # Get final result
             result = state_machine.get_final_result()
-            
+
+            # Persist full result so cache hits return complete data
+            self.session_manager.save_result(input_data.complaint_id, result)
+
             log_orchestrator_complete(
                 input_data.complaint_id,
                 1,
@@ -217,7 +230,14 @@ class FishboneOrchestratorV2:
                 # Path: 1 cause matched → Select it and complete
                 log_routing_decision("validation", "analysis_complete", "Single validated cause")
                 selected_cause = validation_result["validated_causes"][0]
-                selected_cause["selection_justification"] = f"Single validated cause with confidence {selected_cause.get('validation_confidence', 0.0):.2f}"
+                val_conf = selected_cause.get("validation_confidence", 0.0)
+                val_status = selected_cause.get("validation_status", "matched")
+                selected_cause["reason"] = (
+                    f"Only validated cause ({val_status}, confidence={val_conf:.2f}). "
+                    f"Directly supported by the provided evidence."
+                )
+                selected_cause["confidence_score"] = val_conf
+                selected_cause["selection_justification"] = f"Single validated cause — selected directly without ranking (validation_confidence={val_conf:.2f})"
                 
             else:
                 # Path: >1 causes matched → Ranking Agent
@@ -284,11 +304,33 @@ class FishboneOrchestratorV2:
             state_machine.control_memory.execution_trace.append("1. ListCausesAgent - Started")
             log_agent_call("ListCausesAgent", {"complaint": state_machine.complaint[:100]}, None, None)
             
+            # Build evidence context from all available supporting information
+            evidence_context = {}
+            if state_machine.evidence:
+                evidence_context["evidence"] = state_machine.evidence
+            if state_machine.sop:
+                evidence_context["sop"] = state_machine.sop
+            if state_machine.logs:
+                evidence_context["logs"] = state_machine.logs
+            if state_machine.reports:
+                evidence_context["reports"] = state_machine.reports
+            if state_machine.process_data:
+                evidence_context["process_data"] = state_machine.process_data
+            if state_machine.historical_capa:
+                evidence_context["historical_capa"] = state_machine.historical_capa
+            if state_machine.policies:
+                evidence_context["policies"] = state_machine.policies
+            if state_machine.investigation_records:
+                evidence_context["investigation_records"] = state_machine.investigation_records
+            if state_machine.supporting_system_information:
+                evidence_context["supporting_system_information"] = state_machine.supporting_system_information
+
             # Use complaint description as the question for cause generation
             question_input = QuestionInput(
                 question_id=f"{state_machine.complaint_id}_depth1",
                 question=f"What are the potential causes of: {state_machine.complaint}",
-                context=state_machine.complaint
+                context=state_machine.complaint,
+                evidence_context=evidence_context if evidence_context else None
             )
             
             # Call cause generation agent
@@ -569,48 +611,56 @@ class FishboneOrchestratorV2:
             state_machine.control_memory.execution_trace.append("4. RankingAgent - Started")
             log_agent_call("RankingAgent", {"causes_count": len(causes)}, None, None)
             
-            # Convert to ranking format
+            # Build plain dicts for rank_causes() — it does CauseInput(**dict) internally
             ranking_causes = []
             for cause in causes:
-                # Ensure potential_effects is a string
                 potential_effects = cause.get("potential_effects")
-                if potential_effects is None or isinstance(potential_effects, bool):
-                    potential_effects = ""
-                
-                ranking_causes.append(RankingCauseInput(
-                    cause_id=cause.get("cause_id", "UNKNOWN"),
-                    cause_text=cause.get("cause_text", ""),
-                    process_step=cause.get("process_step", ""),
-                    failure_mode=cause.get("failure_mode", ""),
-                    potential_effects=potential_effects,
-                    severity=cause.get("severity"),
-                    occurrence=cause.get("occurrence"),
-                    detection=cause.get("detection"),
-                    current_controls=cause.get("current_controls"),
-                    source=cause.get("source", "FMEA")
-                ))
-            
-            # Call ranking agent
+                if not potential_effects or isinstance(potential_effects, bool):
+                    potential_effects = "Not specified"
+                failure_mode = cause.get("failure_mode") or "Not specified"
+                process_step = cause.get("process_step") or "General"
+
+                ranking_causes.append({
+                    "cause_id": cause.get("cause_id", "UNKNOWN"),
+                    "cause_text": cause.get("cause_text", ""),
+                    "process_step": process_step,
+                    "failure_mode": failure_mode,
+                    "potential_effects": potential_effects,
+                    "severity": cause.get("severity", 5),
+                    "occurrence": cause.get("occurrence", 5),
+                    "detection": cause.get("detection", 5),
+                })
+
+            # Call ranking agent — returns a RankingOutput Pydantic model
             result = self.ranking_agent.rank_causes(ranking_causes)
-            
-            if result.get("ranked_causes"):
-                top_cause = result["ranked_causes"][0]
-                
-                # Find original cause to preserve all fields
+
+            if result.ranked_causes:
+                top_cause = result.ranked_causes[0]
+
+                # Find original cause dict to preserve all fields (category, validation, etc.)
                 selected = next(
-                    (c for c in causes if c.get("cause_id") == top_cause.get("cause_id")),
-                    top_cause
+                    (c for c in causes if c.get("cause_id") == top_cause.cause_id),
+                    None
                 )
-                
-                selected["reason"] = top_cause.get("reason", "Highest RCPS score")
-                selected["confidence_score"] = top_cause.get("rcps_score", 0.0) / 10.0
-                selected["selection_justification"] = f"Ranked highest by RCPS methodology. {top_cause.get('reason', '')}"
-                
-                state_machine.control_memory.execution_trace.append(f"4. RankingAgent - Success (selected {selected.get('cause_id')})")
-                log_agent_call("RankingAgent", {"selected": selected.get("cause_id")}, True)
-                
+                if selected is None:
+                    selected = causes[0]
+
+                # RankedCause fields: justification (not "reason"), rcps_score is already 0-1
+                selected["reason"] = top_cause.justification
+                selected["confidence_score"] = top_cause.rcps_score  # already normalized 0-1
+                selected["selection_justification"] = (
+                    f"Ranked #{top_cause.rank} by RCPS methodology "
+                    f"(score={top_cause.rcps_score:.2f}, risk={top_cause.risk_level}). "
+                    f"{top_cause.justification}"
+                )
+
+                state_machine.control_memory.execution_trace.append(
+                    f"4. RankingAgent - Success (selected {selected.get('cause_id')}, RCPS={top_cause.rcps_score:.2f})"
+                )
+                log_agent_call("RankingAgent", {"selected": selected.get("cause_id"), "rcps": top_cause.rcps_score}, True)
+
                 return selected
-            
+
             log_error("_call_ranking_agent", "No ranked causes returned")
             return causes[0] if causes else None
             
@@ -734,27 +784,3 @@ class FishboneOrchestratorV2:
             "error": f"Orchestrator error: {error_msg}"
         }
     
-    def _build_result_from_session(self, session: SessionState) -> Dict[str, Any]:
-        """Build result from cached session"""
-        # This is a simplified version - in production you'd reconstruct full result
-        return {
-            "complaint_id": session.complaint_id,
-            "root_cause": {
-                "cause_id": session.final_root_cause_id,
-                "cause_text": "Cached result",
-                "process_step": "",
-                "source": "CACHED",
-                "reason": "Cached from previous analysis"
-            } if session.final_root_cause_id else None,
-            "confidence": "MEDIUM",
-            "mode": "SINGLE_SHOT",
-            "causes_found": 0,
-            "causes": [],
-            "category_summary": None,
-            "validated_causes_count": 0,
-            "high_confidence_causes_count": 0,
-            "fmea_document_used": session.fmea_document_path,
-            "execution_time_seconds": 0.0,
-            "stopping_reason": "cached_result",
-            "error": None
-        }

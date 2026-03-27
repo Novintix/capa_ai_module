@@ -292,13 +292,35 @@ class SessionMemoryManager:
         
         return unevaluated
     
+    def save_result(self, complaint_id: str, result: Dict[str, Any]):
+        """Persist the full analysis result so cache hits return complete data"""
+        try:
+            key = f"fishbone_v2:result:{complaint_id}"
+            self.redis_client.setex(key, self.ttl_seconds, json.dumps(result))
+            log_memory_update("session_memory", complaint_id, "save_result", "Full result cached")
+        except Exception as e:
+            log_error("save_result", f"Failed to save result for {complaint_id}: {str(e)}")
+
+    def get_result(self, complaint_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve previously cached full analysis result"""
+        try:
+            key = f"fishbone_v2:result:{complaint_id}"
+            data = self.redis_client.get(key)
+            if data:
+                log_memory_update("session_memory", complaint_id, "get_result", "Cached result retrieved")
+                return json.loads(data)
+            return None
+        except Exception as e:
+            log_error("get_result", f"Failed to retrieve result for {complaint_id}: {str(e)}")
+            return None
+
     def delete_session(self, complaint_id: str):
         """Delete session (for cleanup or reset)"""
         try:
             key = self._get_session_key(complaint_id)
             self.redis_client.delete(key)
-            
+            result_key = f"fishbone_v2:result:{complaint_id}"
+            self.redis_client.delete(result_key)
             log_memory_update("session_memory", complaint_id, "delete", "Session deleted")
-            
         except Exception as e:
             log_error("delete_session", f"Failed to delete session for {complaint_id}: {str(e)}")

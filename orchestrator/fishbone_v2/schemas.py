@@ -188,9 +188,3 @@ class FishboneOutput(BaseModel):
                 "execution_time_seconds": 8.5
             }
         }
-
-
-    execution_trace: Optional[List[str]] = Field(
-        default_factory=list,
-        description="Trace of agents executed in order"
-    )
