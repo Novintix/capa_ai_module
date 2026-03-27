@@ -619,6 +619,7 @@ def filter_validated_node(state: AgentState) -> AgentState:
 			result
 			for result in all_results
 			if result.get("evidence_match_status") in {"matched", "partially_matched"}
+			and result.get("supporting_evidence_references")
 		]
 
 		if validated:
