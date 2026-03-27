@@ -197,18 +197,21 @@ class FishboneStateMachine:
         root_cause_detail = None
         if self.control_memory.final_root_cause:
             rc = self.control_memory.final_root_cause
+            rc_pe = rc.get("potential_effects")
+            rc_fm = rc.get("failure_mode")
+            rc_cc = rc.get("current_controls")
             root_cause_detail = {
                 "cause_id": rc.get("cause_id", "UNKNOWN"),
                 "cause_text": rc.get("cause_text", ""),
                 "process_step": rc.get("process_step", ""),
                 "category": rc.get("category"),
                 "category_confidence": rc.get("category_confidence"),
-                "failure_mode": rc.get("failure_mode"),
-                "potential_effects": rc.get("potential_effects"),
+                "failure_mode": rc_fm if isinstance(rc_fm, str) else None,
+                "potential_effects": rc_pe if isinstance(rc_pe, str) else None,
                 "severity": rc.get("severity"),
                 "occurrence": rc.get("occurrence"),
                 "detection": rc.get("detection"),
-                "current_controls": rc.get("current_controls"),
+                "current_controls": rc_cc if isinstance(rc_cc, str) else None,
                 "source": rc.get("source", "FMEA"),
                 "reason": rc.get("reason", "Selected as most critical cause"),
                 "confidence_score": rc.get("confidence_score", 0.8),
@@ -230,6 +233,9 @@ class FishboneStateMachine:
             high_conf_count = it.high_confidence_count
             
             for cause in it.categorized_causes:
+                pe = cause.get("potential_effects")
+                fm = cause.get("failure_mode")
+                cc = cause.get("current_controls")
                 causes_output.append({
                     "cause_id": cause.get("cause_id", "UNKNOWN"),
                     "cause_text": cause.get("cause_text", ""),
@@ -238,12 +244,12 @@ class FishboneStateMachine:
                     "category_confidence": cause.get("category_confidence"),
                     "category_reasoning": cause.get("category_reasoning"),
                     "secondary_categories": cause.get("secondary_categories", []),
-                    "failure_mode": cause.get("failure_mode"),
-                    "potential_effects": cause.get("potential_effects"),
+                    "failure_mode": fm if isinstance(fm, str) else None,
+                    "potential_effects": pe if isinstance(pe, str) else None,
                     "severity": cause.get("severity"),
                     "occurrence": cause.get("occurrence"),
                     "detection": cause.get("detection"),
-                    "current_controls": cause.get("current_controls"),
+                    "current_controls": cc if isinstance(cc, str) else None,
                     "source": cause.get("source", "FMEA"),
                     "validation_status": cause.get("validation_status"),
                     "validation_confidence": cause.get("validation_confidence")
