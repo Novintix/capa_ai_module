@@ -42,8 +42,14 @@ STRICT RULES (MANDATORY)
 -----------------------------------
 
 1. EVERY Root Cause must generate:
-   • At least 1 Corrective Action
+   • At least 1 Correction or Corrective Action
    • At least 1 Preventive or Systemic Action
+
+   Action Type Definitions:
+   • Correction        : Immediate containment action (quarantine, re-inspection, ERP block). Use action ID prefix C-###.
+   • Corrective Action : Root cause elimination action. Use action ID prefix CA-###.
+   • Preventive        : Action to prevent recurrence in other areas/products. Use action ID prefix PA-###.
+   • Systemic          : Enterprise-wide process improvement action. Use action ID prefix SA-###.
 
 2. Action Description MUST:
    • Be specific and measurable
@@ -94,7 +100,7 @@ Return ONLY valid JSON. No explanations, no reasoning, no markdown.
 {{
   "action_items": [
     {{
-      "action_type": "<Corrective|Preventive|Systemic>",
+      "action_type": "<Correction|Corrective|Preventive|Systemic>",
       "action_description": "<specific, measurable description>",
       "assigned_to": "<Department>",
       "planned_due_date": "<YYYY-MM-DD>",

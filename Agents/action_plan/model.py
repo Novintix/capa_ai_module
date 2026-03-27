@@ -10,7 +10,7 @@ from typing import List, Optional, Dict, Any
 
 class CapaActionItem(BaseModel):
     """Single action plan row with 9 columns"""
-    action_type: str = Field(..., description="Corrective/Preventive/Systemic")
+    action_type: str = Field(..., description="Correction/Corrective/Preventive/Systemic")
     action_description: str = Field(..., description="Specific, measurable description")
     assigned_to: str = Field(..., description="Department (not individual name)")
     planned_due_date: str = Field(..., description="YYYY-MM-DD format")
