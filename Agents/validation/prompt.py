@@ -27,7 +27,7 @@ STRICT VALIDATION RULES:
 4. If status is no_evidence, supporting references must be an empty list.
 5. confidence must be a float between 0.0 and 1.0.
 6. rationale must be concise, specific, and based only on provided evidence.
-7. Preserve cause_id and cause_text exactly from input.
+7. Preserve all cause metadata fields exactly from input when present (cause_id, cause_text, process_step, failure_mode, potential_effects, severity, occurrence, detection, current_controls, source).
 
 OUTPUT CONTRACT:
 Return ONLY valid JSON with this structure:
@@ -36,6 +36,14 @@ Return ONLY valid JSON with this structure:
 		{
 			"cause_id": "string",
 			"cause_text": "string",
+			"process_step": "string | null",
+			"failure_mode": "string | null",
+			"potential_effects": "string | null",
+			"severity": 0,
+			"occurrence": 0,
+			"detection": 0,
+			"current_controls": "string | null",
+			"source": "string | null",
 			"evidence_match_status": "matched | partially_matched | no_evidence",
 			"supporting_evidence_references": ["reference_id_1", "reference_id_2"],
 			"confidence": 0.0,
@@ -66,47 +74,25 @@ COMPLAINT DESCRIPTION:
 GENERATED CAUSES TO VALIDATE:
 {generated_causes_json}
 
-MAPPED EVIDENCE INPUTS:
-- logs:
-{logs_json}
+RETRIEVED EVIDENCE (semantically matched to this cause — most relevant passages only):
+{retrieved_evidence_json}
 
-- reports:
-{reports_json}
-
-- process_data:
-{process_data_json}
-
-- historical_capa:
-{historical_capa_json}
-
-- policies:
-{policies_json}
-
-- sop:
-{sop_json}
-
-- investigation_records:
-{investigation_records_json}
-
-- supporting_system_information:
-{supporting_system_information_json}
-
-FILE-DERIVED EVIDENCE RECORDS (reference_id uses file name):
-{file_evidence_records_json}
-
-MERGED EVIDENCE RECORDS (reference_id + source + content):
-{evidence_records_json}
+Each evidence item has:
+  "reference_id"     — use this exactly as the supporting_evidence_references value
+  "source"           — type of evidence (e.g. logs, sop, investigation_records, evidence_file)
+  "content"          — the relevant passage text
+  "similarity_score" — relevance to this cause (higher = more relevant)
 
 TASK:
-Validate every generated cause against the evidence records.
+Validate the generated cause ONLY against the evidence passages above.
+Do not invent evidence not present in the passages.
 
-Return cause_validation_results for all input causes with one of:
+Return cause_validation_results with one of:
 - matched
 - partially_matched
 - no_evidence
 
-Remember:
-- Include evidence reference IDs only when grounded support exists.
-- Keep rationale concise and evidence-based.
-- Output only valid JSON following system prompt schema.
+Include evidence reference IDs only when grounded support exists.
+Keep rationale concise and evidence-based.
+Output only valid JSON following the system prompt schema.
 """

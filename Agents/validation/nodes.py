@@ -16,7 +16,9 @@ from .logger import (
 	log_node_exit,
 	log_routing_decision,
 	log_validation_summary,
+	logger,
 )
+from .tools.semantic_retriever import build_evidence_index, retrieve_relevant_chunks
 from .prompt import VALIDATION_SYSTEM_PROMPT, VALIDATION_USER_PROMPT_TEMPLATE
 from .state import AgentState
 from .tools.excel_extractor import extract_text_from_excel
@@ -50,6 +52,18 @@ def _normalize_text(value: Any) -> str:
 	if value is None:
 		return ""
 	return re.sub(r"\s+", " ", str(value).strip().lower())
+
+
+def _coerce_optional_int(value: Any) -> Any:
+	"""Coerce optional numeric score fields to int when possible."""
+	if value is None:
+		return None
+	if isinstance(value, str) and not value.strip():
+		return None
+	try:
+		return int(value)
+	except (TypeError, ValueError):
+		return None
 
 
 def clean_llm_response(response_text: str) -> str:
@@ -425,12 +439,24 @@ def prepare_evidence_node(state: AgentState) -> AgentState:
 			log_node_exit("prepare_evidence", updates)
 			return updates
 
+		# Build in-memory semantic index: chunk all records and embed them once
+		try:
+			chunk_count = build_evidence_index(evidence_records)
+			logger.info(
+				f"[prepare_evidence] Semantic index built: {chunk_count} chunks "
+				f"from {len(evidence_records)} records ({len(file_evidence_records)} files)"
+			)
+		except Exception as idx_exc:
+			chunk_count = 0
+			log_error("prepare_evidence", f"Semantic indexing failed (non-fatal): {idx_exc}")
+
 		updates = {
 			"evidence_records": evidence_records,
 			"file_evidence_records": file_evidence_records,
+			"evidence_chunk_count": chunk_count,
 			"notes": (
 				f"Prepared {len(evidence_records)} evidence records "
-				f"(including {len(file_evidence_records)} from files) for grounding."
+				f"({len(file_evidence_records)} from files, {chunk_count} chunks indexed)."
 			),
 			"next_step": "validate_causes",
 		}
@@ -493,25 +519,49 @@ def validate_causes_node(state: AgentState) -> AgentState:
 		for cause in causes:
 			cause_id = str(cause.get("cause_id", "")).strip()
 			cause_text = str(cause.get("cause_text", "")).strip()
+			cause_payload = {
+				"cause_id": cause_id,
+				"cause_text": cause_text,
+				"process_step": cause.get("process_step"),
+				"failure_mode": cause.get("failure_mode"),
+				"potential_effects": cause.get("potential_effects"),
+				"severity": _coerce_optional_int(cause.get("severity")),
+				"occurrence": _coerce_optional_int(cause.get("occurrence")),
+				"detection": _coerce_optional_int(cause.get("detection")),
+				"current_controls": cause.get("current_controls"),
+				"source": cause.get("source"),
+			}
 
-			single_cause = [{"cause_id": cause_id, "cause_text": cause_text}]
+			# Build semantic query: cause text + process step + failure mode
+			semantic_query = " ".join(filter(None, [
+				cause_text,
+				str(cause.get("process_step") or ""),
+				str(cause.get("failure_mode") or ""),
+			]))
+
+			# Retrieve top-6 semantically relevant evidence chunks
+			retrieved_chunks = retrieve_relevant_chunks(semantic_query, top_k=6)
+
+			# Fallback: if semantic index empty, surface short non-file records
+			if not retrieved_chunks:
+				retrieved_chunks = [
+					{"reference_id": r["reference_id"], "source": r["source"], "content": r["content"], "similarity_score": 0.0}
+					for r in evidence_records
+					if not r.get("file_path") and len(r.get("content", "")) < 2000
+				][:8]
+
+			logger.info(
+				f"[validate_causes] cause={cause_id} query_len={len(semantic_query)} "
+				f"retrieved={len(retrieved_chunks)} chunks"
+			)
+
+			single_cause = [cause_payload]
 			user_prompt = VALIDATION_USER_PROMPT_TEMPLATE.format(
 				complaint_id=state.get("complaint_id") or "N/A",
 				question=state.get("question") or "N/A",
 				complaint_description=state.get("complaint_description", ""),
 				generated_causes_json=json.dumps(single_cause, ensure_ascii=True, indent=2),
-				logs_json=json.dumps(state.get("logs"), ensure_ascii=True, indent=2),
-				reports_json=json.dumps(state.get("reports"), ensure_ascii=True, indent=2),
-				process_data_json=json.dumps(state.get("process_data"), ensure_ascii=True, indent=2),
-				historical_capa_json=json.dumps(state.get("historical_capa"), ensure_ascii=True, indent=2),
-				policies_json=json.dumps(state.get("policies"), ensure_ascii=True, indent=2),
-				sop_json=json.dumps(state.get("sop"), ensure_ascii=True, indent=2),
-				investigation_records_json=json.dumps(state.get("investigation_records"), ensure_ascii=True, indent=2),
-				supporting_system_information_json=json.dumps(
-					state.get("supporting_system_information"), ensure_ascii=True, indent=2
-				),
-				file_evidence_records_json=json.dumps(state.get("file_evidence_records", []), ensure_ascii=True, indent=2),
-				evidence_records_json=json.dumps(evidence_records, ensure_ascii=True, indent=2),
+				retrieved_evidence_json=json.dumps(retrieved_chunks, ensure_ascii=True, indent=2),
 			)
 
 			full_prompt = f"{VALIDATION_SYSTEM_PROMPT}\n\n---\n\n{user_prompt}"
@@ -552,8 +602,7 @@ def validate_causes_node(state: AgentState) -> AgentState:
 
 				normalized_results.append(
 					{
-						"cause_id": cause_id,
-						"cause_text": cause_text,
+						**cause_payload,
 						"evidence_match_status": status,
 						"supporting_evidence_references": [str(ref) for ref in references],
 						"confidence": round(confidence, 3),
@@ -564,8 +613,7 @@ def validate_causes_node(state: AgentState) -> AgentState:
 			except Exception as cause_exc:
 				normalized_results.append(
 					{
-						"cause_id": cause_id,
-						"cause_text": cause_text,
+						**cause_payload,
 						"evidence_match_status": "no_evidence",
 						"supporting_evidence_references": [],
 						"confidence": 0.0,

@@ -1,0 +1,53 @@
+input:
+{
+"incident_description": "Recurring contamination observed after post-maintenance restart in filling line.",
+"current_loop_count": 4,
+"max_loops": 6,
+"current_top_cause": "SOP exists but was not followed because enforcement ownership was not clearly assigned across shifts.",
+"current_cause_confidence": 0.82,
+"fmea_document_path": null,
+"full_why_chain": [
+{
+"loop": 1,
+"question": "Why did contamination occur?",
+"cause": "Line clearance checks were inconsistently performed after maintenance.",
+"confidence": 0.68
+},
+{
+"loop": 2,
+"question": "Why were checks inconsistent?",
+"cause": "Verification responsibility was unclear during handover.",
+"confidence": 0.74
+},
+{
+"loop": 3,
+"question": "Why was responsibility unclear?",
+"cause": "No single owner was accountable for SOP enforcement on the shift.",
+"confidence": 0.79
+},
+{
+"loop": 4,
+"question": "Why no accountable owner?",
+"cause": "SOP exists but was not followed because enforcement ownership was not clearly assigned across shifts.",
+"confidence": 0.82
+}
+]
+}
+
+output:
+{
+    "decision": "STOP_ROOT_FOUND",
+    "reasoning": "Current cause is sufficiently deep, actionable, and chain-resolving to be treated as root cause.",
+    "chain_health": {
+        "circular": false,
+        "specificity_trend": "increasing",
+        "confidence_trend": "increasing"
+    },
+    "root_cause_score": {
+        "actionability": 3,
+        "system_depth": 3,
+        "recurrence_prevention": 3,
+        "total": 9
+    },
+    "next_step": null
+}

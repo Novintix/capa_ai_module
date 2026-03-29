@@ -30,6 +30,7 @@ class AgentState(TypedDict, total=False):
 	# Processing fields
 	evidence_records: List[Dict[str, Any]]
 	file_evidence_records: List[Dict[str, Any]]
+	evidence_chunk_count: int           # number of chunks indexed by semantic_retriever
 	cause_validation_results: List[Dict[str, Any]]
 	validated_causes: List[Dict[str, Any]]
 

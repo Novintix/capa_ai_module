@@ -24,6 +24,7 @@ from Agents.loop_control.router import router as loop_control_router
 # # ── Orchestrator ──────────────────────────────────────────────────────────────
 from orchestrator.risk_analysis_orchestrator_service.router import router as orchestrator_router
 from orchestrator.why_analysis_orchestrator.router import router as why_analysis_router
+from orchestrator.why_analysis_v2.router import router as why_analysis_v2_router
 from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
 from orchestrator.capa_director.router import router as director_router
 from orchestrator.dynamic_builder.router import router as dynamic_builder_router
@@ -52,6 +53,7 @@ def register_routes(app: FastAPI):
     app.include_router(why_question_router)
     app.include_router(zero_evidence_router)
     app.include_router(why_analysis_router)
+    app.include_router(why_analysis_v2_router)
     app.include_router(rca_v2_router)
     app.include_router(similar_cases_router)
     app.include_router(ranking_router)
@@ -84,6 +86,7 @@ def register_routes(app: FastAPI):
                 "why_question": "Why Question Agent (5 Whys)",
                 "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)",
                 "why_analysis": "Why Analysis Orchestrator (Question → Cause Gen → Zero Evidence Pipeline)",
+                "why_analysis_v2": "Why Analysis V2 Orchestrator (Question → Cause Gen → Validation → Loop Control)",
                 "rca_v2": "RCA v2 Orchestrator (State Machine Implementation with Controlled Memory)",
                 "similar_cases": "Similar Cases Search Agent (Vector Search)",
                 "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
@@ -116,6 +119,8 @@ def register_routes(app: FastAPI):
                 "GET /zero-evidence/health": "Zero Evidence Agent health check",
                 "POST /why-analysis/": "Run full Why Analysis pipeline (Question → Cause Gen → Zero Evidence)",
                 "GET /why-analysis/health": "Why Analysis Orchestrator health check",
+                "POST /why-analysis-v2/": "Run Why Analysis V2 (Question → Cause Gen → Validation → Loop Control with conditional ranking)",
+                "GET /why-analysis-v2/health": "Why Analysis V2 Orchestrator health check",
                 "POST /rca-v2/": "Run RCA v2 Analysis with proper state machine (JSON input)",
                 "POST /rca-v2/upload": "Run RCA v2 Analysis with file upload support",
                 "GET /rca-v2/health": "RCA v2 Orchestrator health check",

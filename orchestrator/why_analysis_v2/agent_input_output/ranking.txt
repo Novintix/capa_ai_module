@@ -1,0 +1,79 @@
+input:
+{
+  "causes": [
+    {
+      "cause_id": "C001",
+      "cause_text": "Excess ink, insufficient drying time",
+      "process_step": "Syringe Marking",
+      "failure_mode": "Smudged or blurred markings",
+      "potential_effects": "Poor readability leading to dosing error",
+      "severity": 7,
+      "occurrence": 4,
+      "detection": 5
+    },
+            {
+            "cause_id": "C004",
+            "cause_text": "Responsibility for line clearance was not clearly assigned; no designated person was accountable for confirming the Clear‑Clean‑Check.",
+            "process_step": "Accountability assignment",
+            "failure_mode": "No owner to verify completion",
+            "potential_effects": "Task falls through the cracks, increasing risk of contamination and non‑compliance with GMP.",
+            "severity": 8,
+            "occurrence": 4,
+            "detection": 3
+            
+        }
+  ]
+}
+
+
+output:
+{
+    "ranked_causes": [
+        {
+            "rank": 1,
+            "cause_id": "C001",
+            "cause_text": "Excess ink, insufficient drying time",
+            "rcps_score": 0.98,
+            "rpn": 140,
+            "rpn_score": 1.0,
+            "evidence_strength": 1.0,
+            "mechanism_fit": 0.9,
+            "causal_proximity": 1.0,
+            "risk_level": "High",
+            "justification": "RPN: 140 (score: 1.00), Evidence: 1.0, Mechanism: 0.9, Proximity: 1.0",
+            "confidence": 1.0
+        },
+        {
+            "rank": 2,
+            "cause_id": "C004",
+            "cause_text": "Responsibility for line clearance was not clearly assigned; no designated person was accountable for confirming the Clear‑Clean‑Check.",
+            "rcps_score": 0.87,
+            "rpn": 96,
+            "rpn_score": 0.6857,
+            "evidence_strength": 1.0,
+            "mechanism_fit": 0.9,
+            "causal_proximity": 1.0,
+            "risk_level": "High",
+            "justification": "RPN: 96 (score: 0.69), Evidence: 1.0, Mechanism: 0.9, Proximity: 1.0",
+            "confidence": 1.0
+        }
+    ],
+    "selected_root_cause": "C001",
+    "total_causes": 2,
+    "domain": "generic",
+    "config_used": {
+        "domain": "generic",
+        "weights": {
+            "rpn_weight": 0.35,
+            "evidence_weight": 0.3,
+            "mechanism_weight": 0.2,
+            "proximity_weight": 0.15
+        },
+        "max_causes": 20,
+        "evidence_context": "investigation",
+        "mechanism_context": "technical analysis",
+        "proximity_context": "causal analysis"
+    },
+    "message": "Ranked 2 causes in generic domain. Top root cause: C001 with RCPS 0.9800",
+    "metadata": null
+}

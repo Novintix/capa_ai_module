@@ -1,0 +1,236 @@
+{
+  "runs_per_case": 1,
+  "force_fallback": false,
+  "cases": [
+    {
+      "case_id": "LC-01",
+      "title": "System design flaw",
+      "expected_decisions": [
+        "LOOP",
+        "STOP_ROOT_FOUND"
+      ],
+      "min_system_depth": 3,
+      "max_system_depth": null,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "STOP_ROOT_FOUND": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "STOP_ROOT_FOUND",
+          "system_depth": 3,
+          "total_score": 9,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Current cause is sufficiently deep, actionable, and chain-resolving to be treated as root cause."
+        }
+      ]
+    },
+    {
+      "case_id": "LC-02",
+      "title": "Lack of enforcement",
+      "expected_decisions": [
+        "LOOP",
+        "STOP_ROOT_FOUND"
+      ],
+      "min_system_depth": 3,
+      "max_system_depth": null,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "STOP_ROOT_FOUND": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "STOP_ROOT_FOUND",
+          "system_depth": 3,
+          "total_score": 9,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Current cause is sufficiently deep, actionable, and chain-resolving to be treated as root cause."
+        }
+      ]
+    },
+    {
+      "case_id": "LC-03",
+      "title": "Tooling gap",
+      "expected_decisions": [
+        "LOOP",
+        "STOP_ROOT_FOUND"
+      ],
+      "min_system_depth": 3,
+      "max_system_depth": null,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "STOP_ROOT_FOUND": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "STOP_ROOT_FOUND",
+          "system_depth": 3,
+          "total_score": 9,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Current cause is sufficiently deep, actionable, and chain-resolving to be treated as root cause."
+        }
+      ]
+    },
+    {
+      "case_id": "LC-04",
+      "title": "Organizational ownership gap",
+      "expected_decisions": [
+        "LOOP",
+        "STOP_ROOT_FOUND"
+      ],
+      "min_system_depth": 3,
+      "max_system_depth": null,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "STOP_ROOT_FOUND": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "STOP_ROOT_FOUND",
+          "system_depth": 3,
+          "total_score": 9,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Current cause is sufficiently deep, actionable, and chain-resolving to be treated as root cause."
+        }
+      ]
+    },
+    {
+      "case_id": "LC-05",
+      "title": "Training gap",
+      "expected_decisions": [
+        "LOOP",
+        "STOP_ROOT_FOUND"
+      ],
+      "min_system_depth": 3,
+      "max_system_depth": null,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "STOP_ROOT_FOUND": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "STOP_ROOT_FOUND",
+          "system_depth": 3,
+          "total_score": 9,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Current cause is sufficiently deep, actionable, and chain-resolving to be treated as root cause."
+        }
+      ]
+    },
+    {
+      "case_id": "LC-06",
+      "title": "Resource constraint",
+      "expected_decisions": [
+        "LOOP",
+        "STOP_ROOT_FOUND"
+      ],
+      "min_system_depth": 3,
+      "max_system_depth": null,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "STOP_ROOT_FOUND": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "STOP_ROOT_FOUND",
+          "system_depth": 3,
+          "total_score": 9,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Current cause is sufficiently deep, actionable, and chain-resolving to be treated as root cause."
+        }
+      ]
+    },
+    {
+      "case_id": "LC-07",
+      "title": "Degraded circular chain",
+      "expected_decisions": [
+        "STOP_DEGRADED"
+      ],
+      "min_system_depth": null,
+      "max_system_depth": null,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "STOP_DEGRADED": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "STOP_DEGRADED",
+          "system_depth": 2,
+          "total_score": 5,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Why-chain quality degraded (circular + decreasing specificity); further loops are unlikely to improve quality."
+        }
+      ]
+    },
+    {
+      "case_id": "LC-08",
+      "title": "Local symptom only",
+      "expected_decisions": [
+        "LOOP",
+        "STOP_DEGRADED"
+      ],
+      "min_system_depth": null,
+      "max_system_depth": 2,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "LOOP": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "LOOP",
+          "system_depth": 1,
+          "total_score": 6,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Current cause is not yet strong enough as a true root cause; continue Why loop."
+        }
+      ]
+    },
+    {
+      "case_id": "LC-09",
+      "title": "Max loops exhausted",
+      "expected_decisions": [
+        "STOP_DEGRADED"
+      ],
+      "min_system_depth": null,
+      "max_system_depth": 2,
+      "pass_rate": 1.0,
+      "decision_histogram": {
+        "STOP_DEGRADED": 1
+      },
+      "runs": [
+        {
+          "run_index": 1,
+          "decision": "STOP_DEGRADED",
+          "system_depth": 1,
+          "total_score": 3,
+          "passed": true,
+          "errors": [],
+          "reasoning": "Maximum why-loop limit reached without a strong systemic root cause. Escalate to manual investigation."
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_cases": 9,
+    "total_runs": 9,
+    "passed_runs": 9,
+    "failed_runs": 0,
+    "overall_pass_rate": 1.0
+  }
+}
