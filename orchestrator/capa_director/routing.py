@@ -1,33 +1,58 @@
 from .state import DirectorState
 
-# ── RPN thresholds ────────────────────────────────────────────────────────────
-HIGH_RISK_RPN = 200      # Above this → mandatory full RCA
-LOW_RISK_RPN  = 100      # Below this → skip RCA, go straight to action plan
+# RPN threshold — below this, RCA is skipped and we go straight to action plan
+LOW_RISK_RPN = 100
 
 
 def route_after_risk(state: DirectorState) -> str:
     """
     After Risk Analysis (O2):
-    - Error           → error_recovery
-    - RPN > 200       → rca  (high risk, full investigation)
-    - RPN 100–200     → rca  (moderate, still needs RCA)
-    - RPN < 100       → action_plan (low risk, skip RCA)
+    Always route to human_review_risk so the human can see the results
+    before anything else runs — regardless of RPN score.
     """
     if state.get("error"):
         return "error_recovery"
 
-    risk_output = state.get("risk_analysis_output") or {}
+    print("\n[ROUTER] Risk Analysis done → human_review_risk (always)")
+    return "human_review_risk"
+
+
+def route_after_human_review_risk(state: DirectorState) -> str:
+    """
+    After the human reviews the Risk Analysis output:
+    - Rejected          → error_recovery
+    - Approved + RPN>=100 → rca
+    - Approved + RPN<100  → action_plan (skip RCA for low-risk)
+    """
+    if state.get("error"):
+        return "error_recovery"
+
+    if state.get("human_approved") is False:
+        return "error_recovery"
+
+    # Determine next step based on RPN
+    risk_output  = state.get("risk_analysis_output") or {}
     final_report = risk_output.get("final_report") or {}
-    rpn_score = final_report.get("rpn", {}).get("score", 0)
+    rpn_data     = final_report.get("rpn") or {}
+    raw_rpn      = rpn_data.get("rpn_value")
+    rpn_level    = rpn_data.get("rpn_level", "UNKNOWN")
 
-    print(f"\n[ROUTER] RPN Score: {rpn_score}")
+    try:
+        rpn_score = float(raw_rpn) if raw_rpn is not None else 0.0
+    except (TypeError, ValueError):
+        rpn_score = 0.0
 
-    if rpn_score >= LOW_RISK_RPN:
-        print("[ROUTER] High/Moderate risk → routing to RCA")
+    # If RPN is missing/unparseable, default to running RCA (safer)
+    if rpn_score == 0.0 and raw_rpn is None:
+        print("[ROUTER] RPN not found → defaulting to rca")
         return "rca"
-    else:
-        print("[ROUTER] Low risk → skipping RCA, routing to Action Plan")
+
+    if rpn_score < LOW_RISK_RPN:
+        print(f"[ROUTER] RPN {rpn_score} ({rpn_level}) < {LOW_RISK_RPN} → action_plan (RCA skipped)")
         return "action_plan"
+
+    print(f"[ROUTER] RPN {rpn_score} ({rpn_level}) >= {LOW_RISK_RPN} → rca")
+    return "rca"
 
 
 def route_after_rca(state: DirectorState) -> str:

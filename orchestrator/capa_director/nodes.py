@@ -24,11 +24,21 @@ def _thread_id(state: DirectorState, suffix: str) -> str:
 def risk_analysis_node(state: DirectorState) -> dict:
     print("\n[DIRECTOR] ── Risk Analysis (O2) ──────────────────────────────")
 
+    # Build a rich raw_input so the risk orchestrator's context_node LLM
+    # can extract all enriched fields (batch, regulatory standards, region, etc.)
+    parts = [f"Complaint ID: {state['complaint_id']}", state["complaint"]]
+    if state.get("evidence"):
+        parts.append(f"Evidence: {state['evidence']}")
+    if state.get("sop"):
+        parts.append(f"Relevant SOP: {state['sop']}")
+    if state.get("system_context"):
+        parts.append(f"System Context: {state['system_context']}")
+
     risk_input = {
-        "raw_input": state["complaint"],
-        "agent_results": [],
-        "node_log": [],
-        "errors": [],
+        "raw_input":        "\n\n".join(parts),
+        "agent_results":    [],
+        "node_log":         [],
+        "errors":           [],
         "correction_count": 0,
     }
     config = {"configurable": {"thread_id": _thread_id(state, "risk")}}
@@ -37,25 +47,75 @@ def risk_analysis_node(state: DirectorState) -> dict:
         result = risk_graph.invoke(risk_input, config=config)
     except Exception as exc:
         return {
-            "error": f"Risk Analysis exception: {exc}",
+            "error":       f"Risk Analysis exception: {exc}",
             "failed_node": "risk_analysis",
-            "status": "error",
+            "status":      "error",
         }
 
     if result.get("status") == "awaiting_correction" or result.get("validation_passed") is False:
         error_msg = result.get("validation_error", "Risk Analysis failed validation.")
         return {
-            "error": f"Risk Analysis Error: {error_msg}",
+            "error":       f"Risk Analysis Error: {error_msg}",
             "failed_node": "risk_analysis",
-            "status": "error",
+            "status":      "error",
         }
 
-    print("[DIRECTOR] Risk Analysis completed ✓")
+    # Extract RPN for director reasoning
+    final_report = result.get("final_report") or {}
+    rpn_data     = final_report.get("rpn") or {}
+    raw_rpn      = rpn_data.get("rpn_value")
+    rpn_level    = rpn_data.get("rpn_level", "UNKNOWN")
+    sev_label    = rpn_data.get("severity_label", "N/A")
+
+    try:
+        rpn_numeric = float(raw_rpn) if raw_rpn is not None else 0.0
+    except (TypeError, ValueError):
+        rpn_numeric = 0.0
+
+    next_step = "RCA" if rpn_numeric >= 100 else "Action Plan (RCA skipped — low risk)"
+
+    reasoning = (
+        f"Risk Analysis complete. "
+        f"RPN Score: {raw_rpn} | Level: {rpn_level} | Severity: {sev_label}. "
+        f"Next step: {next_step} — please review and approve to continue."
+    )
+
+    print(f"[DIRECTOR] Risk Analysis completed ✓  RPN={raw_rpn} ({rpn_level}) → {next_step}")
     return {
         "risk_analysis_output": result,
-        "status": "running",
-        "error": None,
-        "failed_node": None,
+        "director_reasoning":   reasoning,
+        "status":               "running",
+        "error":                None,
+        "failed_node":          None,
+    }
+
+
+def human_review_risk_node(state: DirectorState) -> dict:
+    """
+    Dedicated human-review gate between O2 (Risk Analysis) and O3 (RCA).
+
+    This node itself does nothing — the graph pauses BEFORE it via
+    interrupt_before=["human_review_risk"].  When the human resumes,
+    human_approved / human_feedback are injected into state and
+    route_after_human_review_risk decides where to go next.
+    """
+    print("\n[DIRECTOR] ── Human Review (post-O2) ──────────────────────────")
+
+    if state.get("human_approved") is False:
+        feedback = state.get("human_feedback") or "No feedback provided"
+        print(f"[DIRECTOR] Human rejected after Risk Analysis. Feedback: {feedback}")
+        return {
+            "error":       f"Human rejected after Risk Analysis. Feedback: {feedback}",
+            "failed_node": "human_review_risk",
+            "status":      "error",
+        }
+
+    print("[DIRECTOR] Human approved — proceeding to next stage.")
+    return {
+        "human_approved": None,   # reset for next gate
+        "status":         "running",
+        "error":          None,
+        "failed_node":    None,
     }
 
 
@@ -228,31 +288,39 @@ def finalize_node(state: DirectorState) -> dict:
 def error_recovery_node(state: DirectorState) -> dict:
     """
     Intelligent error recovery:
-    - Increments retry counter
-    - Decides whether to retry the failed node or give up
-    - Sets recovery_next so the conditional edge knows where to go
+    - Human rejection → finalize immediately (no retry)
+    - Other errors    → retry failed node up to max_retries, then finalize
     """
     retry_count = (state.get("retry_count") or 0) + 1
     max_retries = state.get("max_retries") or 2
-    failed_node = state.get("failed_node", "unknown")
-    error       = state.get("error", "Unknown error")
+    failed_node = state.get("failed_node") or "unknown"
+    error       = state.get("error") or "Unknown error"
 
     print(f"\n[RECOVERY] Node '{failed_node}' failed (attempt {retry_count}/{max_retries})")
     print(f"[RECOVERY] Error: {error}")
 
+    # Human rejection — no point retrying, escalate immediately
+    if "rejected" in error.lower() or "human reviewer rejected" in error.lower():
+        print(f"[RECOVERY] Human rejection detected → escalating to finalize.")
+        return {
+            "retry_count":   retry_count,
+            "recovery_next": "finalize",
+            "status":        "error",
+        }
+
     if retry_count <= max_retries:
         print(f"[RECOVERY] Retrying '{failed_node}'...")
         return {
-            "retry_count": retry_count,
-            "error": None,                # Clear error to allow retry
-            "recovery_next": failed_node, # Route back to the failed node
-            "status": "running",
+            "retry_count":   retry_count,
+            "error":         None,
+            "recovery_next": failed_node,
+            "status":        "running",
         }
     else:
         print(f"[RECOVERY] Max retries reached for '{failed_node}'. Escalating to finalize.")
         return {
-            "retry_count": retry_count,
-            "error": f"[UNRECOVERABLE] {failed_node} failed after {max_retries} retries: {error}",
+            "retry_count":   retry_count,
+            "error":         f"[UNRECOVERABLE] {failed_node} failed after {max_retries} retries: {error}",
             "recovery_next": "finalize",
-            "status": "error",
+            "status":        "error",
         }
