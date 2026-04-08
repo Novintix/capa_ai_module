@@ -33,7 +33,11 @@ WHEN NO FMEA CAUSES ARE PROVIDED:
 - Generate 3-5 most likely causes for the problem
 - Include process-related, material-related, and human-related causes
 - Provide realistic severity, occurrence, and detection ratings (1-10)
-- Focus on actionable causes teams can investigate"""
+- Focus on actionable causes teams can investigate
+- CRITICAL: Keep cause_text SHORT and FOCUSED (3-8 words max)
+- Each cause should describe ONE specific issue only
+- Examples: "Calibration checklist outdated", "Operator training inadequate", "Pump seal worn"
+- Avoid long explanations or multiple concepts in one cause"""
 
 CAUSE_PROCESSING_OUTPUT_FORMAT = """OUTPUT REQUIREMENTS:
 - Return ONLY valid JSON format
@@ -51,7 +55,7 @@ FOR CAUSE GENERATION:
   "mode": "generation",
   "causes": [
     {
-      "cause_text": "Description of the cause",
+      "cause_text": "Short focused description (3-8 words)",
       "process_step": "Relevant process step",
       "failure_mode": "How it manifests",
       "potential_effects": "Impact if not addressed",
@@ -62,7 +66,14 @@ FOR CAUSE GENERATION:
       "source": "Generated"
     }
   ]
-}"""
+}
+
+IMPORTANT FOR CAUSE_TEXT:
+- Keep it SHORT: 3-8 words maximum
+- ONE specific issue per cause
+- Clear and actionable
+- Good examples: "Calibration procedure not followed", "Operator training inadequate", "Equipment maintenance overdue"
+- Bad examples: Long sentences with multiple concepts or detailed explanations"""
 
 def get_unified_cause_prompt(question: str, causes_text: str = None) -> str:
     """
@@ -92,6 +103,12 @@ Return validation JSON with relevant_cause_numbers array."""
 Generate possible causes for the problem since no FMEA document is available.
 
 QUESTION: {question}
+
+CRITICAL REQUIREMENTS FOR CAUSE_TEXT:
+- ONE specific issue only
+- No long explanations
+- Focus on the core problem
+- Examples: "Training inadequate", "Checklist outdated", "Equipment not calibrated"
 
 Generate expert causes JSON with causes array."""
     
