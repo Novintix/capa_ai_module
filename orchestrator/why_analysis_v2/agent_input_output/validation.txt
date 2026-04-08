@@ -1,0 +1,188 @@
+input:
+{
+  "complaint_id": "CAPA-VAL-B202",
+  "question": "Why was the required line clearance and 'Clear-Clean-Check' not performed after the pump head replacement before resuming filling?",
+  "complaint_description": "During the final visual inspection of Ceftriaxone for Injection 1g (Vial), Batch CF-882, a significant spike in 'Visible Particulate Matter' was detected. Out of a batch size of 10,000 vials, 142 vials were rejected for white, lint-like fibers. This exceeds the Acceptable Quality Level (AQL) limit of 0.1% and represents the first occurrence of fiber contamination in this product line this quarter.",
+
+  "generated_causes": [
+      {
+            "cause_id": "C001",
+            "cause_text": "Operators were not adequately trained on the updated SOP requiring line clearance and Clear‑Clean‑Check after pump head replacement.",
+            "process_step": "Post‑maintenance verification",
+            "failure_mode": "Procedure not executed",
+            "potential_effects": "Residual contaminants remain in the line, leading to product contamination and batch rejection.",
+            "severity": 8,
+            "occurrence": 4,
+            "detection": 3,
+            "current_controls": "Standard training program, SOP documents, periodic competency assessments.",
+            "source": "Generated"
+        },
+        {
+            "cause_id": "C002",
+            "cause_text": "Production schedule pressure caused the maintenance crew to skip the line clearance to meet fill targets.",
+            "process_step": "Maintenance turnaround",
+            "failure_mode": "Step omitted due to time constraints",
+            "potential_effects": "Incomplete cleaning, increased risk of cross‑contamination and equipment damage.",
+            "severity": 7,
+            "occurrence": 5,
+            "detection": 2,
+            "current_controls": "Shift planning, production KPI monitoring, supervisor sign‑off requirement.",
+            "source": "Generated"
+        },
+        {
+            "cause_id": "C003",
+            "cause_text": "The Clear‑Clean‑Check checklist was outdated and did not list the pump‑head replacement as a trigger for line clearance.",
+            "process_step": "Documentation control",
+            "failure_mode": "Checklist omission",
+            "potential_effects": "Operators unaware of the need to perform clearance, leading to undetected residues.",
+            "severity": 7,
+            "occurrence": 3,
+            "detection": 4,
+            "current_controls": "Document revision control, periodic checklist review, audit of change notices.",
+            "source": "Generated"
+        },
+        {
+            "cause_id": "C004",
+            "cause_text": "Responsibility for line clearance was not clearly assigned; no designated person was accountable for confirming the Clear‑Clean‑Check.",
+            "process_step": "Accountability assignment",
+            "failure_mode": "No owner to verify completion",
+            "potential_effects": "Task falls through the cracks, increasing risk of contamination and non‑compliance with GMP.",
+            "severity": 8,
+            "occurrence": 4,
+            "detection": 3,
+            "current_controls": "RACI matrix, shift handover logs, supervisor verification.",
+            "source": "Generated"
+        }
+  ],
+
+  "logs": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\coating_process_log_B-202.txt"
+  ],
+  "reports": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\stability_report_B-202.txt"
+  ],
+  "process_data": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\pan_speed_temp_B-202-process_data.csv"
+  ],
+  "historical_capa": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\historical_capa_coating.txt"
+  ],
+  "policies": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\deviation_management_policy.txt"
+  ],
+  "sop": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\film_coating_sop.txt"
+  ],
+  "investigation_records": [
+    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\investigation_record_B-202.txt"
+  ],
+
+  "supporting_system_information": {
+    "mes": "Inlet temperature alarm on CP-04 acknowledged by operator J. Thomas at 08:30 on 2025-11-10. Alarm closed without corrective action entry. No deviation form linked to alarm event. Pan speed setpoint change to 6 RPM recorded in equipment log at 10:14 with no associated authorization or escalation record."
+  }
+}
+
+
+output:
+{
+    "complaint_id": "CAPA-VAL-B202",
+    "complaint_description": "During the final visual inspection of Ceftriaxone for Injection 1g (Vial), Batch CF-882, a significant spike in 'Visible Particulate Matter' was detected. Out of a batch size of 10,000 vials, 142 vials were rejected for white, lint-like fibers. This exceeds the Acceptable Quality Level (AQL) limit of 0.1% and represents the first occurrence of fiber contamination in this product line this quarter.",
+    "total_input_causes": 4,
+    "total_validated_causes": 1,
+    "validated_causes": [
+        {
+            "cause_id": "C004",
+            "cause_text": "Responsibility for line clearance was not clearly assigned; no designated person was accountable for confirming the Clear‑Clean‑Check.",
+            "process_step": "Accountability assignment",
+            "failure_mode": "No owner to verify completion",
+            "potential_effects": "Task falls through the cracks, increasing risk of contamination and non‑compliance with GMP.",
+            "severity": 8,
+            "occurrence": 4,
+            "detection": 3,
+            "current_controls": "RACI matrix, shift handover logs, supervisor verification.",
+            "source": "Generated",
+            "evidence_match_status": "partially_matched",
+            "supporting_evidence_references": [
+                "investigation_record_B-202.txt",
+                "film_coating_sop.txt",
+                "deviation_management_policy.txt",
+                "coating_process_log_B-202.txt"
+            ],
+            "confidence": 0.6,
+            "rationale": "Investigation record and operator log document missing written handover and unrecorded deviations, indicating gaps in accountability. SOP and policy require documented handover and deviation reporting, supporting a general accountability issue, but no direct evidence of line clearance or Clear‑Clean‑Check assignment."
+        }
+    ],
+    "cause_validation_results": [
+        {
+            "cause_id": "C001",
+            "cause_text": "Operators were not adequately trained on the updated SOP requiring line clearance and Clear‑Clean‑Check after pump head replacement.",
+            "process_step": "Post‑maintenance verification",
+            "failure_mode": "Procedure not executed",
+            "potential_effects": "Residual contaminants remain in the line, leading to product contamination and batch rejection.",
+            "severity": 8,
+            "occurrence": 4,
+            "detection": 3,
+            "current_controls": "Standard training program, SOP documents, periodic competency assessments.",
+            "source": "Generated",
+            "evidence_match_status": "no_evidence",
+            "supporting_evidence_references": [],
+            "confidence": 0.1,
+            "rationale": "Provided evidence pertains to coating process deviations, temperature alarms, pan speed changes, and prior CAPA on spray rate training. No records address training on line clearance or Clear‑Clean‑Check after pump head replacement."
+        },
+        {
+            "cause_id": "C002",
+            "cause_text": "Production schedule pressure caused the maintenance crew to skip the line clearance to meet fill targets.",
+            "process_step": "Maintenance turnaround",
+            "failure_mode": "Step omitted due to time constraints",
+            "potential_effects": "Incomplete cleaning, increased risk of cross‑contamination and equipment damage.",
+            "severity": 7,
+            "occurrence": 5,
+            "detection": 2,
+            "current_controls": "Shift planning, production KPI monitoring, supervisor sign‑off requirement.",
+            "source": "Generated",
+            "evidence_match_status": "no_evidence",
+            "supporting_evidence_references": [],
+            "confidence": 0.1,
+            "rationale": "No provided logs, investigation records, SOPs, or other evidence mention production schedule pressure, maintenance crew actions, or omission of line clearance after pump head replacement."
+        },
+        {
+            "cause_id": "C003",
+            "cause_text": "The Clear‑Clean‑Check checklist was outdated and did not list the pump‑head replacement as a trigger for line clearance.",
+            "process_step": "Documentation control",
+            "failure_mode": "Checklist omission",
+            "potential_effects": "Operators unaware of the need to perform clearance, leading to undetected residues.",
+            "severity": 7,
+            "occurrence": 3,
+            "detection": 4,
+            "current_controls": "Document revision control, periodic checklist review, audit of change notices.",
+            "source": "Generated",
+            "evidence_match_status": "no_evidence",
+            "supporting_evidence_references": [],
+            "confidence": 0.1,
+            "rationale": "None of the provided evidence (logs, reports, process data, SOPs, policies, investigation records) mentions a Clear‑Clean‑Check checklist, pump‑head replacement, or line clearance requirements."
+        },
+        {
+            "cause_id": "C004",
+            "cause_text": "Responsibility for line clearance was not clearly assigned; no designated person was accountable for confirming the Clear‑Clean‑Check.",
+            "process_step": "Accountability assignment",
+            "failure_mode": "No owner to verify completion",
+            "potential_effects": "Task falls through the cracks, increasing risk of contamination and non‑compliance with GMP.",
+            "severity": 8,
+            "occurrence": 4,
+            "detection": 3,
+            "current_controls": "RACI matrix, shift handover logs, supervisor verification.",
+            "source": "Generated",
+            "evidence_match_status": "partially_matched",
+            "supporting_evidence_references": [
+                "investigation_record_B-202.txt",
+                "film_coating_sop.txt",
+                "deviation_management_policy.txt",
+                "coating_process_log_B-202.txt"
+            ],
+            "confidence": 0.6,
+            "rationale": "Investigation record and operator log document missing written handover and unrecorded deviations, indicating gaps in accountability. SOP and policy require documented handover and deviation reporting, supporting a general accountability issue, but no direct evidence of line clearance or Clear‑Clean‑Check assignment."
+        }
+    ],
+    "overall_confidence": 0.6,
+    "notes": "Returning causes with grounded supporting evidence."
+}

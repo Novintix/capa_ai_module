@@ -511,13 +511,11 @@ class FishboneOrchestratorV2:
             # Create validation input
             validation_input = ValidationInput(
                 complaint_id=state_machine.complaint_id,
-                question_id=f"{state_machine.complaint_id}_depth1",
                 question=f"Validate causes for: {state_machine.complaint}",
                 generated_causes=generated_causes,
-                complaint_description=state_machine.complaint,  # REQUIRED field
-                evidence=state_machine.evidence,
+                complaint_description=state_machine.complaint,
+                investigation_evidence=state_machine.evidence,  # main evidence field
                 sop=state_machine.sop,
-                evidence_files=state_machine.evidence_files or [],
                 logs=state_machine.logs,
                 reports=state_machine.reports,
                 process_data=state_machine.process_data,

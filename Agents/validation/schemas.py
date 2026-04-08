@@ -51,6 +51,14 @@ class CauseValidationResult(BaseModel):
 
 	cause_id: str = Field(..., description="Cause identifier")
 	cause_text: str = Field(..., description="Cause description")
+	process_step: Optional[str] = Field(None, description="Associated process step")
+	failure_mode: Optional[str] = Field(None, description="Associated failure mode")
+	potential_effects: Optional[str] = Field(None, description="Potential effects")
+	severity: Optional[int] = Field(None, description="Severity rating from FMEA")
+	occurrence: Optional[int] = Field(None, description="Occurrence rating from FMEA")
+	detection: Optional[int] = Field(None, description="Detection rating from FMEA")
+	current_controls: Optional[str] = Field(None, description="Current process controls")
+	source: Optional[str] = Field(None, description="Source of the generated cause")
 	evidence_match_status: Literal["matched", "partially_matched", "no_evidence"] = Field(
 		..., description="How strongly evidence supports this cause"
 	)

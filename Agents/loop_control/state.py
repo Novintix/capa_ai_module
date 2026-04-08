@@ -39,6 +39,7 @@ class RootCauseScore(BaseModel):
 	system_depth: ScoreBand
 	recurrence_prevention: ScoreBand
 	total: int = Field(..., ge=3, le=9)
+	recurrence_str: Optional[str] = None  # "full" | "partial" | "none" for readability
 
 
 class LoopSignals(BaseModel):
@@ -47,8 +48,15 @@ class LoopSignals(BaseModel):
 	boundary_crossed: bool
 	team_cannot_fix: bool
 	alignment: Literal["strong", "weak", "none"]
+	assessed_confidence: float = Field(default=0.0, ge=0.0, le=1.0)
 	llm_fallback: bool = False
 	llm_fallback_reason: Optional[str] = None
+	# Fields populated by unified assessment (used by decide/generate_next_step)
+	recurrence_str: Optional[str] = None          # "full" | "partial" | "none"
+	probe_angle: Optional[str] = None             # next-probe direction
+	next_question_hint: Optional[str] = None      # specific next why-question
+	assessment_rationale: Optional[str] = None    # LLM rationale text
+	llm_is_root_cause: bool = False               # LLM's own is_root_cause verdict
 
 
 class NextStep(BaseModel):

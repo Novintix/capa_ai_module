@@ -1,0 +1,66 @@
+input: 
+{
+    "question_id": "CAPA-2026-09",
+    "question": "Why was the required line clearance and 'Clear-Clean-Check' not performed after the pump head replacement before resuming filling?"
+}
+
+output:
+{
+    "question_id": "CAPA-2026-09",
+    "question": "Why was the required line clearance and 'Clear-Clean-Check' not performed after the pump head replacement before resuming filling?",
+    "causes": [
+        {
+            "cause_id": "C001",
+            "cause_text": "Operators were not adequately trained on the updated SOP requiring line clearance and Clear‑Clean‑Check after pump head replacement.",
+            "process_step": "Post‑maintenance verification",
+            "failure_mode": "Procedure not executed",
+            "potential_effects": "Residual contaminants remain in the line, leading to product contamination and batch rejection.",
+            "severity": 8,
+            "occurrence": 4,
+            "detection": 3,
+            "current_controls": "Standard training program, SOP documents, periodic competency assessments.",
+            "source": "Generated"
+        },
+        {
+            "cause_id": "C002",
+            "cause_text": "Production schedule pressure caused the maintenance crew to skip the line clearance to meet fill targets.",
+            "process_step": "Maintenance turnaround",
+            "failure_mode": "Step omitted due to time constraints",
+            "potential_effects": "Incomplete cleaning, increased risk of cross‑contamination and equipment damage.",
+            "severity": 7,
+            "occurrence": 5,
+            "detection": 2,
+            "current_controls": "Shift planning, production KPI monitoring, supervisor sign‑off requirement.",
+            "source": "Generated"
+        },
+        {
+            "cause_id": "C003",
+            "cause_text": "The Clear‑Clean‑Check checklist was outdated and did not list the pump‑head replacement as a trigger for line clearance.",
+            "process_step": "Documentation control",
+            "failure_mode": "Checklist omission",
+            "potential_effects": "Operators unaware of the need to perform clearance, leading to undetected residues.",
+            "severity": 7,
+            "occurrence": 3,
+            "detection": 4,
+            "current_controls": "Document revision control, periodic checklist review, audit of change notices.",
+            "source": "Generated"
+        },
+        {
+            "cause_id": "C004",
+            "cause_text": "Responsibility for line clearance was not clearly assigned; no designated person was accountable for confirming the Clear‑Clean‑Check.",
+            "process_step": "Accountability assignment",
+            "failure_mode": "No owner to verify completion",
+            "potential_effects": "Task falls through the cracks, increasing risk of contamination and non‑compliance with GMP.",
+            "severity": 8,
+            "occurrence": 4,
+            "detection": 3,
+            "current_controls": "RACI matrix, shift handover logs, supervisor verification.",
+            "source": "Generated"
+        }
+    ],
+    "total_causes": 4,
+    "fmea_document_used": "Not Available",
+    "matched_entries": 0,
+    "confidence": 0.7,
+    "notes": "FMEA document not available. Generated possible causes using expert knowledge."
+}
