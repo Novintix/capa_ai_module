@@ -26,6 +26,7 @@ from orchestrator.risk_analysis_orchestrator_service.router import router as orc
 from orchestrator.why_analysis_orchestrator.router import router as why_analysis_router
 from orchestrator.why_analysis_v2.router import router as why_analysis_v2_router
 from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
+from orchestrator.fishbone_v2.router import router as fishbone_v2_router  # NEW: Single-depth fishbone with 6M categorization
 from orchestrator.capa_director.router import router as director_router
 from orchestrator.dynamic_builder.router import router as dynamic_builder_router
 
@@ -55,6 +56,7 @@ def register_routes(app: FastAPI):
     app.include_router(why_analysis_router)
     app.include_router(why_analysis_v2_router)
     app.include_router(rca_v2_router)
+    app.include_router(fishbone_v2_router)  # NEW: Fishbone v2
     app.include_router(similar_cases_router)
     app.include_router(ranking_router)
     app.include_router(pattern_router)
@@ -88,6 +90,7 @@ def register_routes(app: FastAPI):
                 "why_analysis": "Why Analysis Orchestrator (Question → Cause Gen → Zero Evidence Pipeline)",
                 "why_analysis_v2": "Why Analysis V2 Orchestrator (Question → Cause Gen → Validation → Loop Control)",
                 "rca_v2": "RCA v2 Orchestrator (State Machine Implementation with Controlled Memory)",
+                "fishbone_v2": "Fishbone v2 Orchestrator (Single-Depth Analysis with 6M Categorization)",
                 "similar_cases": "Similar Cases Search Agent (Vector Search)",
                 "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
                 "pattern": "Pattern Analysis and Trend Recognition Agent",
@@ -145,3 +148,14 @@ def register_routes(app: FastAPI):
             "status": "healthy",
             "service": "Centralized Agent Repository"
         }
+
+
+# Create FastAPI app instance
+app = FastAPI(
+    title="CAPA AI Module - Centralized Agent Repository",
+    description="Centralized repository for all CAPA analysis agents and orchestrators",
+    version="1.0.0"
+)
+
+# Register all routes
+register_routes(app)

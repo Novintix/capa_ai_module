@@ -45,3 +45,18 @@ Thumbs.db
 
 # Project specific
 detection_policy.xlsx
+
+# Test files
+test_*.py
+test_*.json
+*_test_result.json
+
+# Redis dumps
+dump.rdb
+*.rdb
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/

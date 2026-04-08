@@ -47,7 +47,7 @@ def generate_actions_node(state: ActionPlanState) -> ActionPlanState:
         
         if "primary_actions" not in parsed_json or parsed_json["primary_actions"] is None:
             parsed_json["primary_actions"] = sum(
-                1 for a in action_items if a.get("action_type") == "Corrective"
+                1 for a in action_items if a.get("action_type") in ("Correction", "Corrective")
             )
         
         if "preventive_systemic_actions" not in parsed_json or parsed_json["preventive_systemic_actions"] is None:
@@ -96,15 +96,15 @@ def validate_actions_node(state: ActionPlanState) -> ActionPlanState:
     try:
         action_items = state.get("action_items", []) or []
 
-        # Rule 1: Check for corrective and preventive actions
+        # Rule 1: Check for corrective/correction and preventive actions
         action_types = [a.get("action_type") for a in action_items]
-        has_corrective = "Corrective" in action_types
+        has_corrective = "Corrective" in action_types or "Correction" in action_types
         has_preventive = "Preventive" in action_types or "Systemic" in action_types
 
         if not (has_corrective and has_preventive):
-            log_error("validate_actions_node", 
-                     "Missing required action types: need both Corrective and Preventive/Systemic")
-            raise ValueError("CAPA Rule 1 violated: Missing Corrective or Preventive/Systemic actions")
+            log_error("validate_actions_node",
+                     "Missing required action types: need both Correction/Corrective and Preventive/Systemic")
+            raise ValueError("CAPA Rule 1 violated: Missing Correction/Corrective or Preventive/Systemic actions")
 
         # Rule 2: Check for department assignments (no individual names)
         departments = {"Manufacturing", "QA", "R&D", "Supplier Quality", "Validation", 
