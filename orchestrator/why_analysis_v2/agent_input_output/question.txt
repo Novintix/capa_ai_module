@@ -1,0 +1,17 @@
+input: 
+
+{
+  "complaint_id": "CAPA-2026-09",
+  "complaint": "During the final visual inspection of Ceftriaxone for Injection 1g (Vial), Batch CF-882, a significant spike in 'Visible Particulate Matter' was detected. Out of a batch size of 10,000 vials, 142 vials were rejected for white, lint-like fibers. This exceeds the Acceptable Quality Level (AQL) limit of 0.1% and represents the first occurrence of fiber contamination in this product line this quarter.",
+  "evidence": "Forensic microscopy identifies the particles as polyester-based microfibers consistent with cleanroom garment degradation. Environmental Monitoring (EM) logs show a momentary non-viable particle 'Spike Alert' in the Grade A zone at 02:15 AM; filling continued as counts normalized within 120 seconds. Maintenance records indicate a peristaltic pump head replacement at 01:45 AM due to tubing rupture. CCTV footage shows the operator reaching over the open conveyor line to adjust the pump assembly. Gowning logs reveal the operator was wearing a sterile suit (ID: ST-992) that had undergone 45 autoclave cycles, exceeding the 40-cycle retirement limit. No 'Line Clearance' or 'Smoke Study' verification was documented following the pump intervention.",
+  "sop": "SOP-STER-044 Rev 08 (34 pages): Section 3.2 requires a full 'Clear-Clean-Check' protocol and line clearance before resuming production after any mechanical intervention in the Grade A zone. Section 3.5 strictly prohibits operators from reaching over open primary packaging or exposed product. Section 5.8 mandates sterile garment retirement after 40 autoclave cycles or upon first sign of thinning. Section 8.1 requires a formal impact assessment and Production Manager sign-off for any EM 'Limit Alert' occurring during an active fill cycle."
+}
+
+output: 
+
+{
+    "complaint_id": "CAPA-2026-09",
+    "why_question": "Why was the required line clearance and 'Clear-Clean-Check' not performed after the pump head replacement before resuming filling?",
+    "reasoning": "Identifying why the SOP-mandated clearance was omitted targets the procedural lapse that likely allowed garment fibers to contaminate the product.",
+    "why_depth": 1
+}
