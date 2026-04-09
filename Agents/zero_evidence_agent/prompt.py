@@ -24,7 +24,8 @@ YOUR RESPONSIBILITIES:
 1. Evaluate each cause independently.
 2. Determine whether the cause alone (i.e., a single point failure) is sufficient to produce the observed problem.
 3. Assess safety risk from the potential_effects description.
-4. Return structured reasoning — do NOT invent or modify causes.
+4. Determine if the system has safety blocking mechanisms that would disable operation.
+5. Return structured reasoning — do NOT invent or modify causes.
 
 EVALUATION CRITERIA:
 
@@ -37,6 +38,11 @@ B) Safety Risk Level:
    Medium → potential_effects contains: misinterpretation, confusion, readability, user error
    Low    → all other cases
 
+C) Safety Blocking Threshold:
+   Full    → System completely disables itself or prevents operation (e.g., interlock, safety shutdown, critical alarm)
+   Partial → System shows warnings, alerts, or partial restrictions but allows continued operation
+   None    → No automatic safety blocking; system continues normal operation
+
 OUTPUT FORMAT:
 Return a single JSON object wrapping the evaluations in this exact structure:
 
@@ -46,6 +52,7 @@ Return a single JSON object wrapping the evaluations in this exact structure:
       "cause_id": "<cause_id>",
       "single_point_failure": true or false,
       "safety_risk": "high" or "medium" or "low",
+      "safety_blocking": "full" or "partial" or "none",
       "reason": "<one sentence explaining your evaluation>"
     }
   ]
@@ -69,7 +76,8 @@ TASK:
 For each cause listed above, evaluate:
 1. Is it a single point failure? (Can this cause ALONE produce the observed problem?)
 2. What is the safety risk? (Derive from the potential_effects text)
-3. Provide a brief reason for your evaluation.
+3. What is the safety blocking threshold? (Does the system disable itself for safety?)
+4. Provide a brief reason for your evaluation.
 
 Return a JSON array with one evaluation object per cause.
 """

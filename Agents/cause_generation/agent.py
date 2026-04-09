@@ -48,6 +48,19 @@ class CauseGenerationAgent:
         """
         
         try:
+            # Validate input (Pydantic should have already validated, but double-check)
+            if not question_input.question_id or not question_input.question:
+                return {
+                    "question_id": question_input.question_id or "UNKNOWN",
+                    "question": question_input.question or "",
+                    "causes": [],
+                    "total_causes": 0,
+                    "fmea_document_used": fmea_document_path or "Not Available",
+                    "matched_entries": 0,
+                    "confidence": 0.0,
+                    "notes": "Error: Invalid input - question_id and question are required"
+                }
+            
             # Prepare initial state
             initial_state = {
                 "question_id": question_input.question_id,
@@ -88,11 +101,24 @@ class CauseGenerationAgent:
             
             return result
             
+        except ValueError as e:
+            # Pydantic validation error
+            log_error("process_question", f"Validation error: {str(e)}")
+            return {
+                "question_id": getattr(question_input, 'question_id', 'UNKNOWN'),
+                "question": getattr(question_input, 'question', ''),
+                "causes": [],
+                "total_causes": 0,
+                "fmea_document_used": fmea_document_path or "Not Available",
+                "matched_entries": 0,
+                "confidence": 0.0,
+                "notes": f"Validation error: {str(e)}"
+            }
         except Exception as e:
             log_error("process_question", str(e))
             return {
-                "question_id": question_input.question_id,
-                "question": question_input.question,
+                "question_id": getattr(question_input, 'question_id', 'UNKNOWN'),
+                "question": getattr(question_input, 'question', ''),
                 "causes": [],
                 "total_causes": 0,
                 "fmea_document_used": fmea_document_path or "Not Available",

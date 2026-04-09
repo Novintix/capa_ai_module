@@ -58,10 +58,47 @@ def _format_causes_for_prompt(causes: List[Dict[str, Any]]) -> str:
 
 def initialize_node(state: AgentState) -> AgentState:
     """
-    Node: Initialize state with safe defaults.
-    Single responsibility: Prepare the working state.
+    Node: Initialize state with input validation
+    Single responsibility: Prepare the working state and validate inputs
     """
     log_node_entry("initialize", state)
+    
+    # Validate required inputs
+    question = state.get("question", "").strip()
+    question_id = state.get("question_id", "").strip()
+    
+    if not question_id:
+        error_msg = "Invalid input: 'question_id' is required and cannot be empty"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "next_step": END,
+        }
+        log_routing_decision("initialize", "END", "Invalid question_id")
+        log_node_exit("initialize", updates)
+        return updates
+    
+    if not question:
+        error_msg = "Invalid input: 'question' is required and cannot be empty"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "next_step": END,
+        }
+        log_routing_decision("initialize", "END", "Invalid question")
+        log_node_exit("initialize", updates)
+        return updates
+    
+    if len(question) < 5:
+        error_msg = f"Invalid input: Question too short (minimum 5 characters). Received: '{question}'"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "next_step": END,
+        }
+        log_routing_decision("initialize", "END", "Question too short")
+        log_node_exit("initialize", updates)
+        return updates
 
     updates = {
         "iteration": 0,
@@ -87,15 +124,16 @@ def initialize_node(state: AgentState) -> AgentState:
 
 def validate_input_node(state: AgentState) -> AgentState:
     """
-    Node: Validate that causes are present and non-empty.
-    Single responsibility: Guard against empty input.
+    Node: Validate that causes are present, non-empty, and well-formed.
+    Single responsibility: Guard against invalid input.
     """
     log_node_entry("validate_input", state)
 
     causes = state.get("causes", [])
 
+    # Check if causes list exists and is not empty
     if not causes:
-        error_msg = "Zero Evidence Agent received an empty causes list — cannot proceed."
+        error_msg = "Invalid input: Zero Evidence Agent received an empty causes list — cannot proceed."
         log_error("validate_input", error_msg)
         updates = {
             "error": error_msg,
@@ -104,11 +142,41 @@ def validate_input_node(state: AgentState) -> AgentState:
         log_routing_decision("validate_input", "END", "Empty causes list")
         log_node_exit("validate_input", updates)
         return updates
+    
+    # Validate causes structure
+    invalid_causes = []
+    for i, cause in enumerate(causes):
+        if not isinstance(cause, dict):
+            invalid_causes.append(f"Cause {i}: Not a dictionary")
+            continue
+        
+        # Check required fields
+        if not cause.get("cause_id"):
+            invalid_causes.append(f"Cause {i}: Missing 'cause_id'")
+        if not cause.get("cause_text"):
+            invalid_causes.append(f"Cause {i}: Missing 'cause_text'")
+        if not cause.get("process_step"):
+            invalid_causes.append(f"Cause {i}: Missing 'process_step'")
+        if not cause.get("failure_mode"):
+            invalid_causes.append(f"Cause {i}: Missing 'failure_mode'")
+    
+    if invalid_causes:
+        error_msg = f"Invalid input: Causes have structural issues: {'; '.join(invalid_causes[:3])}"
+        if len(invalid_causes) > 3:
+            error_msg += f" (and {len(invalid_causes) - 3} more)"
+        log_error("validate_input", error_msg)
+        updates = {
+            "error": error_msg,
+            "next_step": END,
+        }
+        log_routing_decision("validate_input", "END", "Invalid cause structure")
+        log_node_exit("validate_input", updates)
+        return updates
 
     updates = {
         "next_step": "llm_evaluate",
     }
-    log_routing_decision("validate_input", "llm_evaluate", f"{len(causes)} causes found")
+    log_routing_decision("validate_input", "llm_evaluate", f"{len(causes)} valid causes found")
     log_node_exit("validate_input", updates)
     return updates
 
@@ -236,7 +304,7 @@ def score_causes_node(state: AgentState) -> AgentState:
 def select_cause_node(state: AgentState) -> AgentState:
     """
     Node: Select the single Most Critical Functional Cause
-    from the scored list.
+    from the scored list and calculate confidence score.
     """
     log_node_entry("select_cause", state)
 
@@ -252,22 +320,67 @@ def select_cause_node(state: AgentState) -> AgentState:
             f"Highest criticality score ({selected['final_score']:.2f}) — "
             f"severity={selected['severity']}, "
             f"single_point_failure={selected['single_point_failure']}, "
-            f"safety_risk={selected['safety_risk']}. "
+            f"safety_risk={selected['safety_risk']}, "
+            f"safety_blocking={selected.get('safety_blocking', 'none')}. "
             f"LLM reasoning: {selected['llm_reason']}"
         )
+
+        # Calculate numerical confidence score (0.0-1.0) based on:
+        # 1. Final score magnitude (higher score = higher confidence)
+        # 2. Score separation from second-best cause (larger gap = higher confidence)
+        # 3. LLM evaluation quality (has reasoning = higher confidence)
+        # 4. Severity level (higher severity = higher confidence in selection)
+        
+        final_score = selected['final_score']
+        severity = selected['severity']
+        has_llm_reasoning = selected['llm_reason'] != "No LLM evaluation available"
+        
+        # Base confidence from final score (normalized to 0-1)
+        # Max possible score is 10 (all factors at max), typical range is 3-8
+        score_confidence = min(1.0, final_score / 10.0)
+        
+        # Separation factor: how much better is this than second-best?
+        if len(scored_causes) > 1:
+            second_score = scored_causes[1]['final_score']
+            score_gap = final_score - second_score
+            # Gap of 2+ points = high confidence, 0 gap = lower confidence
+            separation_factor = min(1.0, 0.7 + (score_gap / 10.0))
+        else:
+            # Only one cause = moderate confidence
+            separation_factor = 0.75
+        
+        # LLM evaluation quality factor
+        llm_factor = 1.0 if has_llm_reasoning else 0.85
+        
+        # Severity factor (higher severity = more confident in selection)
+        if severity >= 8:
+            severity_factor = 1.0
+        elif severity >= 6:
+            severity_factor = 0.95
+        elif severity >= 4:
+            severity_factor = 0.85
+        else:
+            severity_factor = 0.75
+        
+        # Composite confidence score
+        confidence_score = score_confidence * separation_factor * llm_factor * severity_factor
+        
+        # Ensure confidence is in valid range
+        confidence_score = max(0.0, min(1.0, confidence_score))
 
         updates = {
             "selected_cause_id": selected["cause_id"],
             "selected_cause_text": selected["cause_text"],
             "selected_cause_process_step": selected["process_step"],
             "selection_reason": reason,
-            "confidence_level": "MEDIUM",
+            "confidence_level": round(confidence_score, 2),  # Numerical score instead of label
             "next_step": "finalize",
         }
-        log_routing_decision("select_cause", "finalize", f"Selected: {selected['cause_id']}")
+        log_routing_decision("select_cause", "finalize", f"Selected: {selected['cause_id']}, confidence: {confidence_score:.2f}")
         log_node_exit("select_cause", {
             "selected_cause_id": selected["cause_id"],
             "final_score": selected["final_score"],
+            "confidence_score": confidence_score,
             "next_step": "finalize"
         })
         return updates
@@ -277,6 +390,7 @@ def select_cause_node(state: AgentState) -> AgentState:
         log_error("select_cause", error_msg)
         updates = {
             "error": error_msg,
+            "confidence_level": 0.0,  # Zero confidence on error
             "next_step": "finalize",
         }
         log_routing_decision("select_cause", "finalize", "Selection exception")

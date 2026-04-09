@@ -29,7 +29,7 @@ class AgentState(TypedDict):
     selected_cause_text: Optional[str]
     selected_cause_process_step: Optional[str]
     selection_reason: Optional[str]
-    confidence_level: Optional[str]   # "MEDIUM" as per spec
+    confidence_level: Optional[float]   # Numerical confidence score (0.0-1.0)
 
     # Control
     iteration: int

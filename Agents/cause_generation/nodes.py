@@ -26,10 +26,58 @@ from config.aws_bedrock_config import get_llm
 
 def initialize_node(state: AgentState) -> AgentState:
     """
-    Node: Initialize state
-    Single responsibility: Set up initial state
+    Node: Initialize state with input validation
+    Single responsibility: Set up initial state and validate inputs
     """
     log_node_entry("initialize", state)
+    
+    # Validate required inputs
+    question = state.get("question", "").strip()
+    
+    if not question:
+        error_msg = "Invalid input: 'question' is required and cannot be empty"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "causes": [],
+            "total_causes": 0,
+            "confidence": 0.0,
+            "next_step": "finalize"
+        }
+        log_routing_decision("initialize", "finalize", "Invalid question input")
+        log_node_exit("initialize", updates)
+        return updates
+    
+    # Validate question format (should be a "why" question or at least meaningful)
+    if len(question) < 5:
+        error_msg = f"Invalid input: Question too short (minimum 5 characters). Received: '{question}'"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "causes": [],
+            "total_causes": 0,
+            "confidence": 0.0,
+            "next_step": "finalize"
+        }
+        log_routing_decision("initialize", "finalize", "Question too short")
+        log_node_exit("initialize", updates)
+        return updates
+    
+    # Validate question_id
+    question_id = state.get("question_id", "").strip()
+    if not question_id:
+        error_msg = "Invalid input: 'question_id' is required and cannot be empty"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "causes": [],
+            "total_causes": 0,
+            "confidence": 0.0,
+            "next_step": "finalize"
+        }
+        log_routing_decision("initialize", "finalize", "Invalid question_id")
+        log_node_exit("initialize", updates)
+        return updates
     
     updates = {
         "iteration": 0,
