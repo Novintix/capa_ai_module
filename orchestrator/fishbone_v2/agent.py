@@ -87,9 +87,9 @@ class FishboneOrchestratorV2:
             
             # Get or create session
             session = self.session_manager.get_session(input_data.complaint_id)
-            
+
             if session and session.is_complete:
-                # Session already complete - return full cached result
+                # ── Case A: Session complete → return full cached result ──────────
                 cached = self.session_manager.get_result(input_data.complaint_id)
                 if cached:
                     log_memory_update(
@@ -99,7 +99,7 @@ class FishboneOrchestratorV2:
                         "Session already complete, returning cached result"
                     )
                     return cached
-                # Full result not in cache (old session before fix) — re-run analysis
+                # Full result not in cache (old session) — re-run
                 log_memory_update(
                     "orchestrator",
                     input_data.complaint_id,
@@ -107,8 +107,23 @@ class FishboneOrchestratorV2:
                     "Session complete but no cached result — re-running analysis"
                 )
                 session = None
-            
-            # Create new session
+
+            elif session and not session.is_complete:
+                # ── Case B: Session exists but INCOMPLETE (crash/timeout) ────────
+                # fishbone_v2 is single-depth — there is no partial state to resume
+                # from. Explicitly delete the stale session and restart cleanly.
+                log_memory_update(
+                    "orchestrator",
+                    input_data.complaint_id,
+                    "session_incomplete_restart",
+                    f"Found incomplete session (depth={session.current_depth}, "
+                    f"iterations={len(session.iterations)}) — "
+                    "deleting stale session and restarting analysis"
+                )
+                self.session_manager.delete_session(input_data.complaint_id)
+                session = None
+
+            # ── Create new session (Cases B/C: no session or stale deleted) ──────
             if not session:
                 session = self.session_manager.create_session(
                     complaint_id=input_data.complaint_id,
@@ -192,11 +207,24 @@ class FishboneOrchestratorV2:
                 state_machine,
                 causes_result["causes"]
             )
-            
+
             categorized_causes = categorization_result["categorized_causes"]
-            category_summary = categorization_result["category_summary"]
-            
-            state_machine.transition_to(FishboneState.VALIDATING, "Causes categorized")
+            category_summary   = categorization_result["category_summary"]
+
+            if categorization_result.get("categorization_failed"):
+                # Confidence already set to LOW inside _call_categorization_agent
+                log_error(
+                    "_execute_single_iteration",
+                    f"Categorization failed for {state_machine.complaint_id} — "
+                    f"all {len(categorized_causes)} causes set to Unknown. "
+                    "Continuing with validation (confidence degraded to LOW)."
+                )
+                state_machine.transition_to(
+                    FishboneState.VALIDATING,
+                    "Causes categorized (DEGRADED — Unknown categories, confidence=LOW)"
+                )
+            else:
+                state_machine.transition_to(FishboneState.VALIDATING, "Causes categorized")
             
             # ═══════════════════════════════════════════════════════════
             # STEP 3: Validation Agent
@@ -450,33 +478,49 @@ class FishboneOrchestratorV2:
                     "category_summary": category_summary
                 }
             else:
-                # Categorization failed
+                # ── Categorization returned no output ────────────────────────────
                 log_error("_call_categorization_agent", "Categorization graph returned no output")
                 for cause in causes:
                     cause["category"] = "Unknown"
                     cause["category_confidence"] = 0.0
-                    cause["category_reasoning"] = "Categorization failed"
+                    cause["category_reasoning"] = "Categorization failed — no output from agent"
                     cause["secondary_categories"] = []
-                
+
+                # Mark confidence as LOW — fishbone diagram has no valid categories
+                state_machine.control_memory.confidence_level = "LOW"
+                state_machine.control_memory.execution_trace.append(
+                    "2. CategorizationAgent - FAILED (no output) "
+                    "→ all causes set to Unknown, confidence degraded to LOW"
+                )
+
                 return {
                     "categorized_causes": causes,
-                    "category_summary": {"Unknown": len(causes)}
+                    "category_summary": {"Unknown": len(causes)},
+                    "categorization_failed": True
                 }
-                
+
         except Exception as e:
             log_error("_call_categorization_agent", str(e))
             log_agent_call("CategorizationAgent", {}, False, str(e))
-            
+
             # Return causes without categories on error
             for cause in causes:
                 cause["category"] = "Unknown"
                 cause["category_confidence"] = 0.0
-                cause["category_reasoning"] = f"Error: {str(e)}"
+                cause["category_reasoning"] = f"Categorization error: {str(e)}"
                 cause["secondary_categories"] = []
-            
+
+            # Mark confidence as LOW — exception means fishbone diagram is invalid
+            state_machine.control_memory.confidence_level = "LOW"
+            state_machine.control_memory.execution_trace.append(
+                f"2. CategorizationAgent - EXCEPTION ({str(e)[:80]}) "
+                "→ all causes set to Unknown, confidence degraded to LOW"
+            )
+
             return {
                 "categorized_causes": causes,
-                "category_summary": {"Unknown": len(causes)}
+                "category_summary": {"Unknown": len(causes)},
+                "categorization_failed": True
             }
     
     def _call_validation_agent(self, state_machine: FishboneStateMachine, causes: List[Dict]) -> Dict[str, Any]:
