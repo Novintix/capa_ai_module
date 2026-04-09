@@ -1,8 +1,15 @@
 """
 Node functions for Ranking Agent.
 Each node performs a specific step in the RCPS calculation workflow.
+
+Key optimisation (v2):
+  evaluate_evidence + evaluate_mechanism + evaluate_proximity are replaced by a
+  SINGLE evaluate_all_scores node that issues ONE LLM call per cause and parses
+  all 3 scores from a JSON response.  LLM call count: 3N → N.
 """
 
+import json
+import re
 from typing import Dict, Any
 from Agents.ranking.state import RankingState, RankedCause, RankingOutput, RankingConfig
 from Agents.ranking.logger import (
@@ -10,13 +17,8 @@ from Agents.ranking.logger import (
     log_normalization, log_evidence_eval, log_mechanism_eval,
     log_proximity_eval, log_rcps_calculation, log_final_ranking, log_error
 )
-from Agents.ranking.prompts import (
-    build_evidence_prompt,
-    build_mechanism_prompt,
-    build_proximity_prompt
-)
+from Agents.ranking.prompts import build_scores_prompt
 from config.aws_bedrock_config import get_llm
-import os
 
 
 def calculate_rpn(state: RankingState) -> Dict[str, Any]:
@@ -90,170 +92,159 @@ def normalize_rpn(state: RankingState) -> Dict[str, Any]:
         return {"error": error_msg}
 
 
-def evaluate_evidence(state: RankingState) -> Dict[str, Any]:
+# ---------------------------------------------------------------------------
+# Score defaults used as fallbacks when LLM parsing fails
+# ---------------------------------------------------------------------------
+_DEFAULT_EVIDENCE   = 0.5   # Historical level — conservative
+_DEFAULT_MECHANISM  = 0.7   # Moderate fit — conservative
+_DEFAULT_PROXIMITY  = 0.7   # Contributor — conservative
+
+_ALLOWED_EVIDENCE   = {1.0, 0.7, 0.5, 0.3}
+_ALLOWED_MECHANISM  = {0.9, 0.7, 0.4}
+_ALLOWED_PROXIMITY  = {1.0, 0.7, 0.4}
+
+
+def _snap_to_allowed(value: float, allowed: set, cause_id: str, field: str) -> float:
+    """Snap a float to the nearest allowed value, logging if a correction was needed."""
+    if value in allowed:
+        return value
+    snapped = min(allowed, key=lambda x: abs(x - value))
+    log_error(
+        "evaluate_all_scores",
+        f"[{cause_id}] {field}={value} is not an allowed value — snapping to {snapped}"
+    )
+    return snapped
+
+
+def _parse_scores_response(raw: str, cause_id: str) -> Dict[str, float]:
     """
-    Node 3: Evaluate evidence strength using LLM.
-    Evidence types: Observable (1.0), Indirect (0.7), Historical (0.5), None (0.3)
+    Parse the LLM JSON response for a cause.
+
+    Handles:
+    - Clean JSON objects: {"evidence_strength": 0.7, ...}
+    - JSON wrapped in ```json ... ``` fences
+    - Reasoning tags like <reasoning>...</reasoning>
+    - Partial / malformed JSON (returns defaults)
+
+    Returns:
+        dict with evidence_strength, mechanism_fit, causal_proximity
     """
-    log_node_start("evaluate_evidence")
-    
+    defaults = {
+        "evidence_strength": _DEFAULT_EVIDENCE,
+        "mechanism_fit": _DEFAULT_MECHANISM,
+        "causal_proximity": _DEFAULT_PROXIMITY,
+    }
+
+    try:
+        text = raw
+
+        # Strip reasoning tags if present
+        text = re.sub(r'<reasoning>.*?</reasoning>', '', text, flags=re.DOTALL).strip()
+
+        # Strip markdown fences
+        text = re.sub(r'```(?:json)?', '', text).replace('```', '').strip()
+
+        # Extract first valid JSON object
+        start = text.find('{')
+        end   = text.rfind('}')
+        if start == -1 or end == -1 or end <= start:
+            raise ValueError("No JSON object found in LLM response")
+        parsed = json.loads(text[start:end + 1])
+
+        evidence  = float(parsed.get("evidence_strength",  _DEFAULT_EVIDENCE))
+        mechanism = float(parsed.get("mechanism_fit",       _DEFAULT_MECHANISM))
+        proximity = float(parsed.get("causal_proximity",   _DEFAULT_PROXIMITY))
+
+        return {
+            "evidence_strength":  _snap_to_allowed(evidence,  _ALLOWED_EVIDENCE,  cause_id, "evidence_strength"),
+            "mechanism_fit":      _snap_to_allowed(mechanism, _ALLOWED_MECHANISM, cause_id, "mechanism_fit"),
+            "causal_proximity":   _snap_to_allowed(proximity, _ALLOWED_PROXIMITY, cause_id, "causal_proximity"),
+        }
+
+    except Exception as exc:
+        log_error(
+            "evaluate_all_scores",
+            f"[{cause_id}] Failed to parse LLM response: {exc} | raw={raw[:200]!r} | Using defaults."
+        )
+        return defaults
+
+
+def evaluate_all_scores(state: RankingState) -> Dict[str, Any]:
+    """
+    Node 3 (unified): Evaluate evidence_strength, mechanism_fit, AND causal_proximity
+    for every cause in a SINGLE LLM call per cause.
+
+    Replaces the old 3-node, 3-call-per-cause sequence:
+        evaluate_evidence → evaluate_mechanism → evaluate_proximity
+
+    LLM calls: 3N → N  (e.g. 30 → 10 for 10 causes)
+
+    State output:
+        evidence_evaluated   — populated for RCPS node compatibility
+        mechanism_evaluated  — populated for RCPS node compatibility
+        proximity_evaluated  — populated with all 3 scores merged
+    """
+    log_node_start("evaluate_all_scores")
+
     try:
         rpn_normalized = state.rpn_normalized
+        config = state.input.config or RankingConfig()
         llm = get_llm()
-        
-        evidence_results = []
-        
+
+        scored_causes = []
+
         for cause in rpn_normalized:
-            config = state.input.config or RankingConfig()
-            
-            prompt = build_evidence_prompt(
-                cause_text=cause['cause_text'],
-                issue_type=cause['issue_type'],
-                context_step=cause['context_step'],
+            prompt = build_scores_prompt(
+                cause_text=cause["cause_text"],
+                issue_type=cause["issue_type"],
+                context_step=cause["context_step"],
+                impact_description=cause["impact_description"],
                 domain=config.domain,
-                evidence_context=config.evidence_context
+                evidence_context=config.evidence_context,
+                mechanism_context=config.mechanism_context,
+                proximity_context=config.proximity_context,
             )
-            
+
             response = llm.invoke(prompt)
-            score_text = response.content.strip()
-            
-            # Parse score with comprehensive validation
-            try:
-                evidence_score = float(score_text.strip())
-                # Validate score is one of the allowed values
-                allowed_scores = [1.0, 0.7, 0.5, 0.3]
-                if evidence_score not in allowed_scores:
-                    # Find closest allowed score
-                    evidence_score = min(allowed_scores, key=lambda x: abs(x - evidence_score))
-                    log_error("evaluate_evidence", f"LLM returned invalid score {score_text} for {cause['cause_id']}, using closest valid: {evidence_score}")
-            except (ValueError, TypeError):
-                # If LLM fails to return valid score, log error and use conservative default
-                log_error("evaluate_evidence", f"Invalid LLM response for {cause['cause_id']}: '{score_text}'. Using default.")
-                evidence_score = 0.5  # Conservative default (historical evidence level)
-            
-            # Additional validation - ensure score is reasonable
-            if not (0.0 <= evidence_score <= 1.0):
-                log_error("evaluate_evidence", f"Score out of range for {cause['cause_id']}: {evidence_score}. Clamping to valid range.")
-                evidence_score = max(0.3, min(1.0, evidence_score))
-            
-            result = {**cause, "evidence_strength": evidence_score}
-            evidence_results.append(result)
-            log_evidence_eval(cause["cause_id"], evidence_score)
-        
-        log_node_end("evaluate_evidence", f"Evaluated evidence for {len(evidence_results)} causes")
-        return {"evidence_evaluated": evidence_results}
-        
+            scores   = _parse_scores_response(response.content, cause["cause_id"])
+
+            result = {
+                **cause,
+                "evidence_strength":  scores["evidence_strength"],
+                "mechanism_fit":      scores["mechanism_fit"],
+                "causal_proximity":   scores["causal_proximity"],
+            }
+            scored_causes.append(result)
+
+            # Log each dimension (matches existing logger calls)
+            log_evidence_eval(cause["cause_id"],  scores["evidence_strength"])
+            log_mechanism_eval(cause["cause_id"], scores["mechanism_fit"])
+            log_proximity_eval(cause["cause_id"], scores["causal_proximity"])
+
+        log_node_end(
+            "evaluate_all_scores",
+            f"Scored {len(scored_causes)} causes ({len(scored_causes)} LLM calls — was {3 * len(scored_causes)})"
+        )
+
+        # Populate all 3 state fields so downstream nodes (calculate_rcps) stay unchanged
+        return {
+            "evidence_evaluated":  scored_causes,   # backward-compat alias
+            "mechanism_evaluated": scored_causes,   # backward-compat alias
+            "proximity_evaluated": scored_causes,   # passed directly to calculate_rcps
+        }
+
     except Exception as e:
-        error_msg = f"Failed to evaluate evidence: {str(e)}"
-        log_error("evaluate_evidence", error_msg)
+        error_msg = f"Failed to evaluate scores: {str(e)}"
+        log_error("evaluate_all_scores", error_msg)
         return {"error": error_msg}
 
 
-
-def evaluate_mechanism(state: RankingState) -> Dict[str, Any]:
-    """
-    Node 4: Evaluate mechanism fit using LLM.
-    Scores: Strong (0.9), Moderate (0.7), Weak (0.4)
-    """
-    log_node_start("evaluate_mechanism")
-    
-    try:
-        evidence_evaluated = state.evidence_evaluated
-        llm = get_llm()
-        
-        mechanism_results = []
-        
-        for cause in evidence_evaluated:
-            config = state.input.config or RankingConfig()
-            
-            prompt = build_mechanism_prompt(
-                cause_text=cause['cause_text'],
-                issue_type=cause['issue_type'],
-                impact_description=cause['impact_description'],
-                domain=config.domain,
-                mechanism_context=config.mechanism_context
-            )
-            
-            response = llm.invoke(prompt)
-            score_text = response.content.strip()
-            
-            # Parse score with validation
-            try:
-                mechanism_score = float(score_text)
-                # Validate score is one of the allowed values
-                allowed_scores = [0.9, 0.7, 0.4]
-                if mechanism_score not in allowed_scores:
-                    # Find closest allowed score
-                    mechanism_score = min(allowed_scores, key=lambda x: abs(x - mechanism_score))
-            except (ValueError, TypeError):
-                # If LLM fails to return valid score, log error and use conservative default
-                log_error("evaluate_mechanism", f"Invalid LLM response for {cause['cause_id']}: '{score_text}'")
-                mechanism_score = 0.7  # Conservative default (moderate fit)
-            
-            result = {**cause, "mechanism_fit": mechanism_score}
-            mechanism_results.append(result)
-            log_mechanism_eval(cause["cause_id"], mechanism_score)
-        
-        log_node_end("evaluate_mechanism", f"Evaluated mechanism for {len(mechanism_results)} causes")
-        return {"mechanism_evaluated": mechanism_results}
-        
-    except Exception as e:
-        error_msg = f"Failed to evaluate mechanism: {str(e)}"
-        log_error("evaluate_mechanism", error_msg)
-        return {"error": error_msg}
-
-
-def evaluate_proximity(state: RankingState) -> Dict[str, Any]:
-    """
-    Node 5: Evaluate causal proximity using LLM.
-    Scores: Direct (1.0), Contributor (0.7), Background (0.4)
-    """
-    log_node_start("evaluate_proximity")
-    
-    try:
-        mechanism_evaluated = state.mechanism_evaluated
-        llm = get_llm()
-        
-        proximity_results = []
-        
-        for cause in mechanism_evaluated:
-            config = state.input.config or RankingConfig()
-            
-            prompt = build_proximity_prompt(
-                cause_text=cause['cause_text'],
-                issue_type=cause['issue_type'],
-                context_step=cause['context_step'],
-                domain=config.domain,
-                proximity_context=config.proximity_context
-            )
-            
-            response = llm.invoke(prompt)
-            score_text = response.content.strip()
-            
-            # Parse score with validation
-            try:
-                proximity_score = float(score_text)
-                # Validate score is one of the allowed values
-                allowed_scores = [1.0, 0.7, 0.4]
-                if proximity_score not in allowed_scores:
-                    # Find closest allowed score
-                    proximity_score = min(allowed_scores, key=lambda x: abs(x - proximity_score))
-            except (ValueError, TypeError):
-                # If LLM fails to return valid score, log error and use conservative default
-                log_error("evaluate_proximity", f"Invalid LLM response for {cause['cause_id']}: '{score_text}'")
-                proximity_score = 0.7  # Conservative default (contributor level)
-            
-            result = {**cause, "causal_proximity": proximity_score}
-            proximity_results.append(result)
-            log_proximity_eval(cause["cause_id"], proximity_score)
-        
-        log_node_end("evaluate_proximity", f"Evaluated proximity for {len(proximity_results)} causes")
-        return {"proximity_evaluated": proximity_results}
-        
-    except Exception as e:
-        error_msg = f"Failed to evaluate proximity: {str(e)}"
-        log_error("evaluate_proximity", error_msg)
-        return {"error": error_msg}
+# ---------------------------------------------------------------------------
+# Stale node aliases — kept so old imports don’t break during migration
+# ---------------------------------------------------------------------------
+evaluate_evidence  = evaluate_all_scores   # noqa: E305  (redirects to unified node)
+evaluate_mechanism = evaluate_all_scores   # noqa
+evaluate_proximity = evaluate_all_scores   # noqa
 
 
 
