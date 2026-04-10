@@ -14,7 +14,8 @@ from .tools.semantic_matcher import rank_fmea_by_semantic_similarity
 from .prompts import (
     get_unified_cause_prompt,
     format_causes_for_validation,
-    validate_prompt_inputs
+    validate_prompt_inputs,
+    get_scoring_prompt
 )
 from .logger import (
     log_node_entry, log_node_exit, log_routing_decision, 
@@ -25,10 +26,58 @@ from config.aws_bedrock_config import get_llm
 
 def initialize_node(state: AgentState) -> AgentState:
     """
-    Node: Initialize state
-    Single responsibility: Set up initial state
+    Node: Initialize state with input validation
+    Single responsibility: Set up initial state and validate inputs
     """
     log_node_entry("initialize", state)
+    
+    # Validate required inputs
+    question = state.get("question", "").strip()
+    
+    if not question:
+        error_msg = "Invalid input: 'question' is required and cannot be empty"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "causes": [],
+            "total_causes": 0,
+            "confidence": 0.0,
+            "next_step": "finalize"
+        }
+        log_routing_decision("initialize", "finalize", "Invalid question input")
+        log_node_exit("initialize", updates)
+        return updates
+    
+    # Validate question format (should be a "why" question or at least meaningful)
+    if len(question) < 5:
+        error_msg = f"Invalid input: Question too short (minimum 5 characters). Received: '{question}'"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "causes": [],
+            "total_causes": 0,
+            "confidence": 0.0,
+            "next_step": "finalize"
+        }
+        log_routing_decision("initialize", "finalize", "Question too short")
+        log_node_exit("initialize", updates)
+        return updates
+    
+    # Validate question_id
+    question_id = state.get("question_id", "").strip()
+    if not question_id:
+        error_msg = "Invalid input: 'question_id' is required and cannot be empty"
+        log_error("initialize", error_msg)
+        updates = {
+            "error": error_msg,
+            "causes": [],
+            "total_causes": 0,
+            "confidence": 0.0,
+            "next_step": "finalize"
+        }
+        log_routing_decision("initialize", "finalize", "Invalid question_id")
+        log_node_exit("initialize", updates)
+        return updates
     
     updates = {
         "iteration": 0,
@@ -312,7 +361,7 @@ Return ONLY the JSON array, no other text."""
                         response_text = '[' + response_text + ']'
                     extracted = json.loads(response_text)
                 
-                # Convert to cause format
+                # Convert to cause format (without hardcoded scores)
                 evidence_causes = []
                 for idx, item in enumerate(extracted, 1):
                     if isinstance(item, dict) and item.get("cause_text"):
@@ -322,9 +371,9 @@ Return ONLY the JSON array, no other text."""
                             "process_step": "Evidence-based",
                             "failure_mode": "Directly mentioned in evidence",
                             "potential_effects": None,
-                            "severity": 9,  # High severity for evidence-based causes
-                            "occurrence": 5,  # Medium occurrence (unknown)
-                            "detection": 2,  # Low detection (already occurred)
+                            "severity": None,  # Will be scored by LLM
+                            "occurrence": None,  # Will be scored by LLM
+                            "detection": None,  # Will be scored by LLM
                             "current_controls": None,
                             "source": f"Evidence ({item.get('source_reference', 'unknown')})"
                         })
@@ -448,7 +497,7 @@ def match_fmea_node(state: AgentState) -> AgentState:
             return updates
         
         notes = f"Matched {len(matched_rows)} FMEA entries using {matching_method}"
-        # Calculate confidence based on match quality
+        # Calculate initial confidence based on match quality (will be refined in finalize)
         if matching_method == "keyword + semantic":
             confidence = min(1.0, len(matched_rows) / 5.0 + 0.2)
         elif matching_method == "semantic only":
@@ -459,7 +508,7 @@ def match_fmea_node(state: AgentState) -> AgentState:
         updates = {
             "matched_rows": matched_rows,
             "matched_entries": len(matched_rows),
-            "confidence": confidence,
+            "confidence": confidence,  # Initial confidence, will be refined later
             "notes": notes,
             "fmea_document_used": state.get("fmea_document_path", "Unknown"),
             "next_step": "extract_causes"
@@ -611,11 +660,79 @@ def extract_causes_node(state: AgentState) -> AgentState:
 def finalize_node(state: AgentState) -> AgentState:
     """
     Node: Finalize output
-    Single responsibility: Prepare final response
+    Single responsibility: Prepare final response and calculate confidence
     """
     log_node_entry("finalize", state)
     
+    # Calculate confidence based on scores and source
+    causes = state.get("causes", [])
+    confidence = state.get("confidence")
+    
+    if confidence is None and causes:
+        # Calculate confidence based on:
+        # 1. Source reliability (Evidence > FMEA > Generated)
+        # 2. Score completeness
+        # 3. Number of causes
+        # 4. Average RPN (Risk Priority Number) - higher RPN = more confident in risk assessment
+        
+        evidence_count = sum(1 for c in causes if "Evidence" in c.get("source", ""))
+        fmea_count = sum(1 for c in causes if c.get("source") == "FMEA")
+        generated_count = sum(1 for c in causes if c.get("source") == "Generated")
+        
+        scored_count = sum(1 for c in causes if c.get("severity") and c.get("occurrence") and c.get("detection"))
+        
+        # Calculate average RPN for scored causes
+        rpn_values = []
+        for c in causes:
+            if c.get("severity") and c.get("occurrence") and c.get("detection"):
+                rpn = c["severity"] * c["occurrence"] * c["detection"]
+                rpn_values.append(rpn)
+        
+        avg_rpn = sum(rpn_values) / len(rpn_values) if rpn_values else 0
+        
+        # Base confidence on source mix (dynamic based on actual counts)
+        total_causes = len(causes)
+        evidence_ratio = evidence_count / total_causes
+        fmea_ratio = fmea_count / total_causes
+        generated_ratio = generated_count / total_causes
+        
+        # Weighted confidence based on source reliability
+        base_confidence = (
+            evidence_ratio * 0.85 +    # Evidence-based: highest confidence
+            fmea_ratio * 0.75 +         # FMEA: good confidence
+            generated_ratio * 0.60      # Generated: moderate confidence
+        )
+        
+        # Adjust for score completeness
+        if scored_count == len(causes):
+            score_factor = 1.0
+        elif scored_count > 0:
+            score_factor = 0.85
+        else:
+            score_factor = 0.70
+        
+        # Adjust for number of causes (more causes = slightly lower confidence per cause)
+        if len(causes) <= 3:
+            count_factor = 1.0
+        elif len(causes) <= 5:
+            count_factor = 0.95
+        else:
+            count_factor = 0.90
+        
+        # Adjust for RPN distribution (if we have high-risk causes, we're more confident)
+        if avg_rpn > 200:  # High risk
+            rpn_factor = 1.05
+        elif avg_rpn > 100:  # Medium risk
+            rpn_factor = 1.0
+        else:  # Low risk
+            rpn_factor = 0.95
+        
+        confidence = min(1.0, base_confidence * score_factor * count_factor * rpn_factor)
+    elif confidence is None:
+        confidence = 0.0
+    
     updates = {
+        "confidence": round(confidence, 2),
         "next_step": "end",
         "iteration": state.get("iteration", 0) + 1,
         "evidence_extracted": state.get("evidence_extracted", 0)
@@ -624,6 +741,114 @@ def finalize_node(state: AgentState) -> AgentState:
     log_routing_decision("finalize", "END", "Process complete")
     log_node_exit("finalize", updates)
     return updates
+
+
+def score_causes_node(state: AgentState) -> AgentState:
+    """
+    Node: Score causes with Severity, Occurrence, Detection using LLM
+    Single responsibility: Assign risk scores to all causes based on context
+    """
+    log_node_entry("score_causes", state)
+    
+    try:
+        causes = state.get("causes", [])
+        
+        if not causes:
+            # No causes to score, skip to finalize
+            updates = {"next_step": "finalize"}
+            log_routing_decision("score_causes", "finalize", "No causes to score")
+            log_node_exit("score_causes", updates)
+            return updates
+        
+        # Check if any cause needs scoring
+        needs_scoring = any(
+            cause.get("severity") is None or 
+            cause.get("occurrence") is None or 
+            cause.get("detection") is None 
+            for cause in causes
+        )
+        
+        if not needs_scoring:
+            # All causes already have scores, skip to finalize
+            updates = {"next_step": "finalize"}
+            log_routing_decision("score_causes", "finalize", "All causes already scored")
+            log_node_exit("score_causes", updates)
+            return updates
+        
+        # Get LLM to score causes
+        question = state.get("question", "")
+        evidence_context = state.get("evidence_context", {})
+        
+        llm = get_llm()
+        prompt = get_scoring_prompt(question, causes, evidence_context)
+        
+        # Call LLM
+        response = llm.invoke(prompt)
+        response_text = response.content.strip()
+        
+        # Clean response
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+        
+        # Extract JSON array
+        start_idx = response_text.find('[')
+        end_idx = response_text.rfind(']')
+        
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            array_text = response_text[start_idx:end_idx+1]
+            scores = json.loads(array_text)
+            
+            # Apply scores to causes
+            score_map = {score.get("cause_id"): score for score in scores}
+            
+            scored_count = 0
+            for cause in causes:
+                cause_id = cause.get("cause_id")
+                if cause_id in score_map:
+                    score_data = score_map[cause_id]
+                    
+                    # Update scores if they were None
+                    if cause.get("severity") is None:
+                        cause["severity"] = score_data.get("severity")
+                    if cause.get("occurrence") is None:
+                        cause["occurrence"] = score_data.get("occurrence")
+                    if cause.get("detection") is None:
+                        cause["detection"] = score_data.get("detection")
+                    
+                    scored_count += 1
+            
+            logger.info(f"[score_causes] Scored {scored_count}/{len(causes)} causes")
+            
+            updates = {
+                "causes": causes,
+                "next_step": "finalize"
+            }
+            log_routing_decision("score_causes", "finalize", f"Scored {scored_count} causes")
+            log_node_exit("score_causes", {"scored_count": scored_count})
+            return updates
+        else:
+            # Failed to parse scores, log warning and continue
+            logger.warning(f"[score_causes] Failed to parse LLM scores, continuing with existing scores")
+            updates = {"next_step": "finalize"}
+            log_routing_decision("score_causes", "finalize", "Score parsing failed")
+            log_node_exit("score_causes", updates)
+            return updates
+            
+    except Exception as e:
+        error_msg = f"Cause scoring failed: {str(e)}"
+        log_error("score_causes", error_msg)
+        logger.warning(f"[score_causes] {error_msg}, continuing with existing scores")
+        
+        # Don't fail the entire process, just continue
+        updates = {"next_step": "finalize"}
+        log_routing_decision("score_causes", "finalize", "Exception occurred")
+        log_node_exit("score_causes", updates)
+        return updates
 
 
 def clean_llm_response(response_text: str) -> str:
@@ -704,19 +929,19 @@ def process_with_llm_node(state: AgentState) -> AgentState:
                     "causes": filtered_causes,
                     "total_causes": len(filtered_causes),
                     "notes": f"LLM filtered {len(causes)} causes to {len(filtered_causes)} relevant causes. {reasoning}",
-                    "next_step": "finalize"
+                    "next_step": "score_causes"
                 }
                 
-                log_routing_decision("process_with_llm", "finalize", f"Filtered to {len(filtered_causes)} relevant causes")
-                log_node_exit("process_with_llm", {"next_step": "finalize", "filtered_count": len(filtered_causes)})
+                log_routing_decision("process_with_llm", "score_causes", f"Filtered to {len(filtered_causes)} relevant causes")
+                log_node_exit("process_with_llm", {"next_step": "score_causes", "filtered_count": len(filtered_causes)})
                 return updates
             else:
                 # Unexpected response format, continue with unfiltered causes
                 updates = {
                     "notes": "LLM validation returned unexpected format, returning all causes",
-                    "next_step": "finalize"
+                    "next_step": "score_causes"
                 }
-                log_routing_decision("process_with_llm", "finalize", "Unexpected LLM response")
+                log_routing_decision("process_with_llm", "score_causes", "Unexpected LLM response")
                 log_node_exit("process_with_llm", updates)
                 return updates
                 
@@ -744,14 +969,14 @@ def process_with_llm_node(state: AgentState) -> AgentState:
                     "causes": generated_causes,
                     "total_causes": len(generated_causes),
                     "matched_entries": 0,
-                    "confidence": 0.7,  # Medium confidence for generated causes
+                    "confidence": None,  # Will be calculated based on scores
                     "notes": "FMEA document not available. Generated possible causes using expert knowledge.",
                     "fmea_document_used": "Not Available",
-                    "next_step": "finalize"
+                    "next_step": "score_causes"
                 }
                 
-                log_routing_decision("process_with_llm", "finalize", f"Generated {len(generated_causes)} causes")
-                log_node_exit("process_with_llm", {"next_step": "finalize", "generated_count": len(generated_causes)})
+                log_routing_decision("process_with_llm", "score_causes", f"Generated {len(generated_causes)} causes")
+                log_node_exit("process_with_llm", {"next_step": "score_causes", "generated_count": len(generated_causes)})
                 return updates
             else:
                 # Unexpected response format
