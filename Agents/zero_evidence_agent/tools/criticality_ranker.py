@@ -3,10 +3,11 @@ Criticality Ranking Tool for Zero Evidence Agent
 
 Computes a composite criticality score for each cause using:
 
-    score = (0.4 * severity)
-           + (0.2 * single_point_failure_score)
-           + (0.2 * system_dependency_score)
-           + (0.2 * safety_impact_score)
+    score = (0.35 * severity)
+           + (0.20 * single_point_failure_score)
+           + (0.20 * system_dependency_score)
+           + (0.15 * safety_impact_score)
+           + (0.10 * safety_blocking_score)
 
 Where:
   single_point_failure_score  : 10 if single point failure, else 5
@@ -15,6 +16,9 @@ Where:
   safety_impact_score         : 10 if safety_risk == "high"
                                  6 if safety_risk == "medium"
                                  2 if safety_risk == "low"
+  safety_blocking_score       : 10 if system disables itself for safety
+                                 5 if partial blocking/warning
+                                 0 if no safety blocking
 
 This tool does NOT call the LLM. It only performs deterministic math.
 LLM evaluations are passed in as input.
@@ -31,6 +35,13 @@ _SAFETY_SCORE_MAP = {
     "high": 10,
     "medium": 6,
     "low": 2
+}
+
+# Safety blocking threshold mapping
+_SAFETY_BLOCKING_MAP = {
+    "full": 10,      # System completely disables itself
+    "partial": 5,    # System shows warnings or partial blocking
+    "none": 0        # No safety blocking mechanism
 }
 
 
@@ -70,7 +81,7 @@ def compute_criticality_scores(
     Args:
         causes:           Raw cause list from input (with severity, process_step, etc.)
         llm_evaluations:  LLM output — list of dicts with cause_id, single_point_failure,
-                          safety_risk, reason
+                          safety_risk, safety_blocking, reason
         question:         Original question (used for system dependency check)
 
     Returns:
@@ -78,6 +89,7 @@ def compute_criticality_scores(
           - single_point_failure_score
           - system_dependency_score
           - safety_impact_score
+          - safety_blocking_score
           - final_score
           - llm_reason
     """
@@ -110,12 +122,17 @@ def compute_criticality_scores(
         safety_risk = str(llm_eval.get("safety_risk", "low")).lower()
         safety_impact_score = _SAFETY_SCORE_MAP.get(safety_risk, 2)
 
-        # Composite score
+        # Safety blocking score (new factor)
+        safety_blocking = str(llm_eval.get("safety_blocking", "none")).lower()
+        safety_blocking_score = _SAFETY_BLOCKING_MAP.get(safety_blocking, 0)
+
+        # Composite score with adjusted weights (total = 1.0)
         final_score = (
-            (0.4 * severity)
-            + (0.2 * single_point_failure_score)
-            + (0.2 * system_dependency_score)
-            + (0.2 * safety_impact_score)
+            (0.35 * severity)                           # Severity: 35%
+            + (0.20 * single_point_failure_score)       # Single-point failure: 20%
+            + (0.20 * system_dependency_score)          # System dependency: 20%
+            + (0.15 * safety_impact_score)              # Safety impact: 15%
+            + (0.10 * safety_blocking_score)            # Safety blocking: 10%
         )
 
         scored.append({
@@ -130,6 +147,8 @@ def compute_criticality_scores(
             "system_dependency_score": system_dependency_score,
             "safety_risk": safety_risk,
             "safety_impact_score": safety_impact_score,
+            "safety_blocking": safety_blocking,
+            "safety_blocking_score": safety_blocking_score,
             "final_score": round(final_score, 4),
             "llm_reason": llm_eval.get("reason", "No LLM evaluation available")
         })

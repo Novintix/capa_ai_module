@@ -3,7 +3,7 @@ Cause Generation Agent Schemas
 Input/Output data models
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 
 
@@ -13,6 +13,24 @@ class QuestionInput(BaseModel):
     question: str = Field(..., description="Why question (e.g., 'Why did the bike stop?', 'Why is tablet strength incorrect?')")
     context: Optional[str] = Field(None, description="Additional context or previous cause from 5-Why analysis")
     evidence_context: Optional[dict] = Field(None, description="Evidence, logs, reports for cause extraction")
+    
+    @field_validator('question_id')
+    @classmethod
+    def validate_question_id(cls, v):
+        if not v or not v.strip():
+            raise ValueError("question_id cannot be empty")
+        if len(v.strip()) < 1:
+            raise ValueError("question_id must be at least 1 character")
+        return v.strip()
+    
+    @field_validator('question')
+    @classmethod
+    def validate_question(cls, v):
+        if not v or not v.strip():
+            raise ValueError("question cannot be empty")
+        if len(v.strip()) < 5:
+            raise ValueError("question must be at least 5 characters long")
+        return v.strip()
 
 
 class Cause(BaseModel):

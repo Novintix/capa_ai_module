@@ -38,11 +38,12 @@ def run_zero_evidence_analysis(input_data: ZeroEvidenceInput):
     The agent selects the **Most Critical Functional Cause** from the
     provided cause list using first-principles reasoning and criticality scoring.
 
-    Scoring formula:
-        score = (0.4 * severity)
-              + (0.2 * single_point_failure_score)
-              + (0.2 * system_dependency_score)
-              + (0.2 * safety_impact_score)
+    Scoring formula (5 factors):
+        score = (0.35 * severity)
+              + (0.20 * single_point_failure_score)
+              + (0.20 * system_dependency_score)
+              + (0.15 * safety_impact_score)
+              + (0.10 * safety_blocking_score)
 
     Args:
         input_data: ZeroEvidenceInput from the cause generation agent
@@ -75,14 +76,13 @@ def run_zero_evidence_analysis(input_data: ZeroEvidenceInput):
         # Build Pydantic response
         selected = result["selected_root_cause"]
         return ZeroEvidenceResult(
-            mode=result["mode"],
             selected_root_cause=SelectedRootCause(
                 cause_id=selected["cause_id"],
                 cause_text=selected["cause_text"],
                 process_step=selected["process_step"],
                 reason=selected["reason"],
             ),
-            confidence=result.get("confidence", "MEDIUM"),
+            confidence=result.get("confidence", 0.5),  # Default to 0.5 if not set
         )
 
     except HTTPException:
@@ -101,6 +101,5 @@ def zero_evidence_health():
     return {
         "status": "healthy",
         "agent": "zero_evidence",
-        "mode": "ZERO_EVIDENCE_MODE",
         "agent_initialized": agent is not None,
     }

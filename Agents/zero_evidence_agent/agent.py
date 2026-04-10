@@ -21,18 +21,13 @@ from config.aws_bedrock_config import get_llm
 
 class ZeroEvidenceAgent:
     """
-    Zero Evidence Agent using LangGraph.
+    Zero Evidence Agent - Ranks causes by criticality and selects the most critical one.
 
-    Responsibilities:
-    - Accept cause list from cause generation agent
-    - Use Bedrock LLM to evaluate single point failure and safety risk
-    - Apply deterministic criticality scoring formula
-    - Return exactly ONE most critical cause
-
-    Does NOT:
-    - Generate new causes
-    - Use historical data
-    - Validate against evidence
+    Simple flow:
+    1. Receives list of causes
+    2. LLM evaluates each cause (single-point failure, safety risk, safety blocking)
+    3. Ranks by 5 criteria (severity, SPF, system dependency, safety impact, safety blocking)
+    4. Returns the top-ranked cause
     """
 
     def __init__(self):
@@ -48,26 +43,39 @@ class ZeroEvidenceAgent:
 
     def analyze(self, input_data: ZeroEvidenceInput) -> Dict[str, Any]:
         """
-        Analyze candidate causes and return the Most Critical Functional Cause.
+        Rank causes and return the most critical one.
 
         Args:
-            input_data: ZeroEvidenceInput containing question and list of causes
+            input_data: Question and list of causes to rank
 
         Returns:
-            Dict matching the ZeroEvidenceResult schema:
             {
-                "mode": "ZERO_EVIDENCE_MODE",
                 "selected_root_cause": {
                     "cause_id": "...",
                     "cause_text": "...",
                     "process_step": "...",
                     "reason": "..."
                 },
-                "confidence": "MEDIUM"
+                "confidence": 0.82
             }
         """
         try:
-            # Build initial state — convert Pydantic models to plain dicts
+            # Validate input
+            if not input_data.question_id or not input_data.question:
+                return {
+                    "selected_root_cause": None,
+                    "confidence": 0.0,
+                    "error": "Invalid input: question_id and question are required",
+                }
+            
+            if not input_data.causes or len(input_data.causes) == 0:
+                return {
+                    "selected_root_cause": None,
+                    "confidence": 0.0,
+                    "error": "Invalid input: causes list cannot be empty",
+                }
+            
+            # Build initial state
             causes_as_dicts = [cause.model_dump() for cause in input_data.causes]
 
             initial_state = {
@@ -91,33 +99,37 @@ class ZeroEvidenceAgent:
             # Run graph
             final_state = self.graph.invoke(initial_state)
 
-            # Check for unrecoverable error (no cause selected)
+            # Check for errors
             if not final_state.get("selected_cause_id"):
-                error_detail = final_state.get("error", "Unknown error — no cause selected")
+                error_detail = final_state.get("error", "No cause selected")
                 return {
-                    "mode": "ZERO_EVIDENCE_MODE",
                     "selected_root_cause": None,
-                    "confidence": "LOW",
+                    "confidence": 0.0,
                     "error": error_detail,
                 }
 
-            # Build result
+            # Return result
             return {
-                "mode": "ZERO_EVIDENCE_MODE",
                 "selected_root_cause": {
                     "cause_id": final_state["selected_cause_id"],
                     "cause_text": final_state["selected_cause_text"],
                     "process_step": final_state["selected_cause_process_step"],
                     "reason": final_state["selection_reason"],
                 },
-                "confidence": final_state.get("confidence_level", "MEDIUM"),
+                "confidence": final_state.get("confidence_level", 0.5),
             }
 
+        except ValueError as e:
+            log_error("analyze", f"Validation error: {str(e)}")
+            return {
+                "selected_root_cause": None,
+                "confidence": 0.0,
+                "error": f"Validation error: {str(e)}",
+            }
         except Exception as e:
             log_error("analyze", str(e))
             return {
-                "mode": "ZERO_EVIDENCE_MODE",
                 "selected_root_cause": None,
-                "confidence": "LOW",
+                "confidence": 0.0,
                 "error": f"Agent error: {str(e)}",
             }
