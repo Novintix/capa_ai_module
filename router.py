@@ -27,6 +27,7 @@ from orchestrator.why_analysis_orchestrator.router import router as why_analysis
 from orchestrator.why_analysis_v2.router import router as why_analysis_v2_router
 from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
 from orchestrator.fishbone_v2.router import router as fishbone_v2_router  # NEW: Single-depth fishbone with 6M categorization
+from orchestrator.fishbone_v3.router import router as fishbone_v3_router  # NEW: HITL Fishbone
 from orchestrator.capa_director.router import router as director_router
 from orchestrator.dynamic_builder.router import router as dynamic_builder_router
 
@@ -57,6 +58,7 @@ def register_routes(app: FastAPI):
     app.include_router(why_analysis_v2_router)
     app.include_router(rca_v2_router)
     app.include_router(fishbone_v2_router)  # NEW: Fishbone v2
+    app.include_router(fishbone_v3_router)  # NEW: Fishbone v3 (HITL)
     app.include_router(similar_cases_router)
     app.include_router(ranking_router)
     app.include_router(pattern_router)
@@ -91,6 +93,7 @@ def register_routes(app: FastAPI):
                 "why_analysis_v2": "Why Analysis V2 Orchestrator (Question → Cause Gen → Validation → Loop Control)",
                 "rca_v2": "RCA v2 Orchestrator (State Machine Implementation with Controlled Memory)",
                 "fishbone_v2": "Fishbone v2 Orchestrator (Single-Depth Analysis with 6M Categorization)",
+                "fishbone_v3": "Fishbone v3 Orchestrator (Human-in-the-Loop Analysis with Decisions)",
                 "similar_cases": "Similar Cases Search Agent (Vector Search)",
                 "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
                 "pattern": "Pattern Analysis and Trend Recognition Agent",
@@ -127,6 +130,8 @@ def register_routes(app: FastAPI):
                 "POST /rca-v2/": "Run RCA v2 Analysis with proper state machine (JSON input)",
                 "POST /rca-v2/upload": "Run RCA v2 Analysis with file upload support",
                 "GET /rca-v2/health": "RCA v2 Orchestrator health check",
+                "POST /fishbone-v3/analyze": "Phase 1: Run Fishbone analysis and pause for human review",
+                "POST /fishbone-v3/decide": "Phase 2: Submit human decisions (RCA, PROCEED) for causes",
                 "POST /similar-cases/": "Find similar complaint cases using vector search",
                 "GET /similar-cases/health": "Similar cases agent health check",
                 "POST /ranking/": "Rank candidate root causes using RCPS methodology",

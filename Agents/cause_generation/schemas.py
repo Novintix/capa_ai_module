@@ -37,8 +37,8 @@ class Cause(BaseModel):
     """Single cause from FMEA"""
     cause_id: str = Field(..., description="Unique cause identifier")
     cause_text: str = Field(..., description="Cause description from FMEA")
-    process_step: str = Field(..., description="Associated process step")
-    failure_mode: str = Field(..., description="Associated failure mode")
+    process_step: Optional[str] = Field(None, description="Associated process step")
+    failure_mode: Optional[str] = Field(None, description="Associated failure mode")
     potential_effects: Optional[str] = Field(None, description="Potential effects")
     severity: Optional[int] = Field(None, description="Severity rating from FMEA")
     occurrence: Optional[int] = Field(None, description="Occurrence rating from FMEA")

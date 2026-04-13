@@ -12,16 +12,17 @@ class CauseInput(BaseModel):
 
     cause_id: str = Field(..., description="Unique cause identifier")
     cause_text: str = Field(..., description="Cause description")
-    process_step: str = Field(..., description="Associated process step")
-    failure_mode: str = Field(..., description="Associated failure mode")
+    process_step: Optional[str] = Field(None, description="Associated process step")
+    failure_mode: Optional[str] = Field(None, description="Associated failure mode")
     potential_effects: Optional[str] = Field(None, description="Potential effects on the system or patient")
     severity: Optional[int] = Field(None, description="Severity rating from FMEA (1-10)")
     occurrence: Optional[int] = Field(None, description="Occurrence rating from FMEA (1-10)")
     detection: Optional[int] = Field(None, description="Detection rating from FMEA (1-10)")
     current_controls: Optional[str] = Field(None, description="Current process controls in place")
-    source: str = Field(default="FMEA", description="Source of cause")
+    source: Optional[str] = Field(default="FMEA", description="Source of cause")
+    category: Optional[str] = Field(None, description="6M Category")
     
-    @field_validator('cause_id', 'cause_text', 'process_step', 'failure_mode')
+    @field_validator('cause_id', 'cause_text')
     @classmethod
     def validate_required_strings(cls, v, info):
         if not v or not str(v).strip():
@@ -42,17 +43,13 @@ class CauseInput(BaseModel):
 class ZeroEvidenceInput(BaseModel):
     """Input to Zero Evidence Agent from Cause Generation Agent"""
 
-    question_id: str = Field(..., description="Question identifier")
-    question: str = Field(..., description="Original why question")
+    question_id: Optional[str] = Field(None, description="Question identifier")
+    complaint_id: Optional[str] = Field(None, description="Complaint identifier")
+    question: str = Field(..., description="Original why question or complaint")
+    complaint_description: Optional[str] = Field(None, description="Complaint description")
+    investigation_evidence: Optional[str] = Field(None, description="Investigation evidence")
     causes: List[CauseInput] = Field(..., description="List of candidate causes to evaluate")
-    total_causes: int = Field(..., description="Total number of causes provided")
-    
-    @field_validator('question_id')
-    @classmethod
-    def validate_question_id(cls, v):
-        if not v or not v.strip():
-            raise ValueError("question_id cannot be empty")
-        return v.strip()
+    total_causes: Optional[int] = Field(None, description="Total number of causes provided")
     
     @field_validator('question')
     @classmethod
