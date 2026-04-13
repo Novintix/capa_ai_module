@@ -69,7 +69,6 @@ FOR CAUSE GENERATION:
 }
 
 IMPORTANT FOR CAUSE_TEXT:
-- Keep it SHORT: 3-8 words maximum
 - ONE specific issue per cause
 - Clear and actionable
 - Good examples: "Calibration procedure not followed", "Operator training inadequate", "Equipment maintenance overdue"
@@ -155,6 +154,116 @@ def validate_prompt_inputs(question: str) -> bool:
         True if inputs are valid
     """
     return bool(question and question.strip())
+
+
+# =============================================================================
+# DEDUPLICATION PROMPT
+# =============================================================================
+
+DEDUPLICATION_SYSTEM_ROLE = """You are a CAUSE DEDUPLICATION EXPERT specializing in identifying duplicate or semantically identical causes.
+
+YOUR ROLE:
+- Analyze a list of causes and identify duplicates
+- Recognize when causes describe the same root issue with different wording
+- Keep only unique causes, removing redundant ones
+- Preserve the most specific and actionable version of each cause
+
+DUPLICATE DETECTION CRITERIA:
+1. **Exact duplicates**: Same wording
+2. **Semantic duplicates**: Same meaning, different words
+3. **Subset duplicates**: One cause is a more specific version of another
+4. **Paraphrases**: Different phrasing of the same issue
+
+EXAMPLES OF DUPLICATES:
+- "Compression force set incorrectly" ≈ "Compression force was set at 12kN instead of specified 10kN"
+- "Operator setup error" ≈ "Operator made setup mistake"
+- "Training inadequate" ≈ "Insufficient operator training"
+- "Equipment not calibrated" ≈ "Calibration not performed"
+
+KEEP THE BETTER VERSION:
+- More specific > More generic
+- Evidence-based > FMEA-based
+- Actionable > Vague"""
+
+DEDUPLICATION_TASK_INSTRUCTIONS = """TASK: Review the list of causes and remove duplicates.
+
+RULES:
+1. Compare each cause with all others
+2. If two causes describe the same issue, keep only ONE
+3. When choosing which to keep:
+   - Prefer evidence-based causes over FMEA causes
+   - Prefer more specific descriptions over generic ones
+   - Prefer causes with higher severity/occurrence scores
+4. Return ONLY the unique causes
+5. Preserve all original fields for kept causes
+
+IMPORTANT:
+- Be strict about duplicates - if causes are semantically the same, they are duplicates
+- Don't be fooled by different wording - focus on the underlying issue
+- A cause that is a more detailed version of another is a duplicate (keep the detailed one)"""
+
+DEDUPLICATION_OUTPUT_FORMAT = """OUTPUT FORMAT:
+Return ONLY valid JSON with unique causes:
+
+{
+  "unique_causes": [
+    {
+      "cause_id": "C001",
+      "cause_text": "...",
+      "process_step": "...",
+      "failure_mode": "...",
+      "potential_effects": "...",
+      "severity": 7,
+      "occurrence": 5,
+      "detection": 6,
+      "current_controls": "...",
+      "source": "..."
+    }
+  ],
+  "removed_duplicates": [
+    {
+      "removed_cause_id": "C003",
+      "removed_cause_text": "...",
+      "duplicate_of": "C001",
+      "reason": "Same issue as C001 but less specific"
+    }
+  ],
+  "total_input": 10,
+  "total_unique": 7,
+  "total_removed": 3
+}"""
+
+
+def get_deduplication_prompt(causes: list) -> str:
+    """
+    Build prompt for deduplicating causes
+    
+    Args:
+        causes: List of cause dictionaries to deduplicate
+        
+    Returns:
+        Complete prompt for LLM deduplication
+    """
+    # Build causes list
+    causes_text = ""
+    for cause in causes:
+        causes_text += f"\nCause ID: {cause.get('cause_id', 'Unknown')}\n"
+        causes_text += f"Cause Text: {cause.get('cause_text', 'N/A')}\n"
+        causes_text += f"Process Step: {cause.get('process_step', 'N/A')}\n"
+        causes_text += f"Failure Mode: {cause.get('failure_mode', 'N/A')}\n"
+        causes_text += f"Source: {cause.get('source', 'Unknown')}\n"
+        causes_text += f"Severity: {cause.get('severity', 'N/A')}\n"
+        causes_text += "---\n"
+    
+    return f"""{DEDUPLICATION_SYSTEM_ROLE}
+
+{DEDUPLICATION_TASK_INSTRUCTIONS}
+
+{DEDUPLICATION_OUTPUT_FORMAT}
+
+CAUSES TO DEDUPLICATE ({len(causes)} total):{causes_text}
+
+Analyze these causes carefully and return ONLY the JSON with unique causes and removed duplicates."""
 
 
 # =============================================================================

@@ -15,6 +15,7 @@ from .nodes import (
     match_fmea_node,
     extract_causes_node,
     process_with_llm_node,
+    deduplicate_causes_node,
     score_causes_node,
     finalize_node
 )
@@ -32,9 +33,10 @@ def create_cause_generation_graph():
     5. extract_from_evidence -> match_fmea (always)
     6. match_fmea -> extract_causes OR process_with_llm (conditional: no matches)
     7. extract_causes -> process_with_llm (always)
-    8. process_with_llm -> score_causes (always)
-    9. score_causes -> finalize (always)
-    10. finalize -> END (always)
+    8. process_with_llm -> deduplicate_causes (always)
+    9. deduplicate_causes -> score_causes (always)
+    10. score_causes -> finalize (always)
+    11. finalize -> END (always)
     """
     
     # Create graph
@@ -49,6 +51,7 @@ def create_cause_generation_graph():
     workflow.add_node("match_fmea", match_fmea_node)
     workflow.add_node("extract_causes", extract_causes_node)
     workflow.add_node("process_with_llm", process_with_llm_node)
+    workflow.add_node("deduplicate_causes", deduplicate_causes_node)
     workflow.add_node("score_causes", score_causes_node)
     workflow.add_node("finalize", finalize_node)
     
@@ -67,6 +70,7 @@ def create_cause_generation_graph():
     # Simple edges (always same destination)
     workflow.add_edge("initialize", "validate_fmea")
     workflow.add_edge("extract_causes", "process_with_llm")
+    workflow.add_edge("deduplicate_causes", "score_causes")
     workflow.add_edge("score_causes", "finalize")
     
     # Conditional edges (can go to different destinations based on state)
@@ -75,7 +79,7 @@ def create_cause_generation_graph():
     workflow.add_conditional_edges("parse_question", route_from_node)       # -> extract_from_evidence
     workflow.add_conditional_edges("extract_from_evidence", route_from_node) # -> match_fmea
     workflow.add_conditional_edges("match_fmea", route_from_node)           # -> extract_causes OR process_with_llm
-    workflow.add_conditional_edges("process_with_llm", route_from_node)     # -> score_causes OR finalize
+    workflow.add_conditional_edges("process_with_llm", route_from_node)     # -> deduplicate_causes OR finalize
     workflow.add_conditional_edges("finalize", route_from_node)             # -> END
     
     # Compile graph

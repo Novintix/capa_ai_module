@@ -60,3 +60,6 @@ dump.rdb
 *.temp
 temp/
 tmp/
+
+# UI folder
+ui/

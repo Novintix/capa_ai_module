@@ -743,6 +743,81 @@ def finalize_node(state: AgentState) -> AgentState:
     return updates
 
 
+def deduplicate_causes_node(state: AgentState) -> AgentState:
+    """
+    Node: Deduplicate causes using LLM
+    Single responsibility: Remove duplicate/similar causes after all processing
+    """
+    log_node_entry("deduplicate_causes", state)
+    
+    causes = state.get("causes", [])
+    
+    if not causes or len(causes) <= 1:
+        # No deduplication needed
+        log_node_exit("deduplicate_causes", {"next_step": "score_causes", "causes_count": len(causes)})
+        return {"next_step": "score_causes"}
+    
+    try:
+        from .prompts import get_deduplication_prompt
+        from config.aws_bedrock_config import get_llm
+        
+        # Build deduplication prompt
+        prompt = get_deduplication_prompt(causes)
+        
+        # Call LLM with temperature=0 for deterministic results
+        llm = get_llm(temperature=0.0)
+        response = llm.invoke(prompt)
+        response_text = response.content if hasattr(response, 'content') else str(response)
+        
+        # Parse JSON response
+        import json
+        import re
+        
+        # Extract JSON from response
+        json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+        if not json_match:
+            logger.warning("[deduplicate_causes] No JSON found in LLM response, keeping all causes")
+            log_node_exit("deduplicate_causes", {"next_step": "score_causes", "deduplication": "skipped"})
+            return {"next_step": "score_causes"}
+        
+        result = json.loads(json_match.group())
+        
+        unique_causes = result.get("unique_causes", [])
+        removed_duplicates = result.get("removed_duplicates", [])
+        
+        if not unique_causes:
+            logger.warning("[deduplicate_causes] No unique causes returned, keeping original causes")
+            log_node_exit("deduplicate_causes", {"next_step": "score_causes", "deduplication": "failed"})
+            return {"next_step": "score_causes"}
+        
+        logger.info(f"[deduplicate_causes] Deduplication complete:")
+        logger.info(f"  - Input causes: {len(causes)}")
+        logger.info(f"  - Unique causes: {len(unique_causes)}")
+        logger.info(f"  - Removed duplicates: {len(removed_duplicates)}")
+        
+        for dup in removed_duplicates:
+            logger.info(f"  - Removed {dup.get('removed_cause_id')}: {dup.get('reason')}")
+        
+        updates = {
+            "causes": unique_causes,
+            "total_causes": len(unique_causes),
+            "removed_duplicates": removed_duplicates,
+            "next_step": "score_causes"
+        }
+        
+        log_routing_decision("deduplicate_causes", "score_causes", f"Deduplication complete: {len(causes)} -> {len(unique_causes)} causes")
+        log_node_exit("deduplicate_causes", updates)
+        return updates
+        
+    except Exception as e:
+        error_msg = f"Deduplication failed: {str(e)}"
+        logger.error(f"[deduplicate_causes] {error_msg}")
+        log_error("deduplicate_causes", error_msg)
+        # Continue with original causes if deduplication fails
+        log_node_exit("deduplicate_causes", {"next_step": "score_causes", "error": error_msg})
+        return {"next_step": "score_causes"}
+
+
 def score_causes_node(state: AgentState) -> AgentState:
     """
     Node: Score causes with Severity, Occurrence, Detection using LLM
@@ -929,19 +1004,19 @@ def process_with_llm_node(state: AgentState) -> AgentState:
                     "causes": filtered_causes,
                     "total_causes": len(filtered_causes),
                     "notes": f"LLM filtered {len(causes)} causes to {len(filtered_causes)} relevant causes. {reasoning}",
-                    "next_step": "score_causes"
+                    "next_step": "deduplicate_causes"
                 }
                 
-                log_routing_decision("process_with_llm", "score_causes", f"Filtered to {len(filtered_causes)} relevant causes")
-                log_node_exit("process_with_llm", {"next_step": "score_causes", "filtered_count": len(filtered_causes)})
+                log_routing_decision("process_with_llm", "deduplicate_causes", f"Filtered to {len(filtered_causes)} relevant causes")
+                log_node_exit("process_with_llm", {"next_step": "deduplicate_causes", "filtered_count": len(filtered_causes)})
                 return updates
             else:
                 # Unexpected response format, continue with unfiltered causes
                 updates = {
                     "notes": "LLM validation returned unexpected format, returning all causes",
-                    "next_step": "score_causes"
+                    "next_step": "deduplicate_causes"
                 }
-                log_routing_decision("process_with_llm", "score_causes", "Unexpected LLM response")
+                log_routing_decision("process_with_llm", "deduplicate_causes", "Unexpected LLM response")
                 log_node_exit("process_with_llm", updates)
                 return updates
                 
@@ -972,11 +1047,11 @@ def process_with_llm_node(state: AgentState) -> AgentState:
                     "confidence": None,  # Will be calculated based on scores
                     "notes": "FMEA document not available. Generated possible causes using expert knowledge.",
                     "fmea_document_used": "Not Available",
-                    "next_step": "score_causes"
+                    "next_step": "deduplicate_causes"
                 }
                 
-                log_routing_decision("process_with_llm", "score_causes", f"Generated {len(generated_causes)} causes")
-                log_node_exit("process_with_llm", {"next_step": "score_causes", "generated_count": len(generated_causes)})
+                log_routing_decision("process_with_llm", "deduplicate_causes", f"Generated {len(generated_causes)} causes")
+                log_node_exit("process_with_llm", {"next_step": "deduplicate_causes", "generated_count": len(generated_causes)})
                 return updates
             else:
                 # Unexpected response format
