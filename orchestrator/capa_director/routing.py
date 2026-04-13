@@ -47,11 +47,8 @@ def route_after_human_review_risk(state: DirectorState) -> str:
         print("[ROUTER] RPN not found → defaulting to rca")
         return "rca"
 
-    if rpn_score < LOW_RISK_RPN:
-        print(f"[ROUTER] RPN {rpn_score} ({rpn_level}) < {LOW_RISK_RPN} → action_plan (RCA skipped)")
-        return "action_plan"
-
-    print(f"[ROUTER] RPN {rpn_score} ({rpn_level}) >= {LOW_RISK_RPN} → rca")
+    # Always run RCA regardless of RPN — skip logic removed
+    print(f"[ROUTER] RPN {rpn_score} ({rpn_level}) → rca (always)")
     return "rca"
 
 

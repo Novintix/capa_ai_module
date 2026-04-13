@@ -157,13 +157,25 @@ def rca_node(state: DirectorState) -> dict:
             "status": "error",
         }
 
+    root_cause_text = (result.get("root_cause") or {}).get("cause_text", "Unknown")
+    confidence      = result.get("confidence", "UNKNOWN")
+    depth           = result.get("analysis_depth", "?")
+
+    reasoning = (
+        f"RCA complete. "
+        f"Root cause: {root_cause_text} "
+        f"(confidence: {confidence}, depth: {depth}). "
+        f"Next step: Action Plan generation — please review and approve to continue."
+    )
+
     print("[DIRECTOR] RCA completed ✓")
     return {
-        "rca_output": result,
-        "status": "running",
-        "error": None,
-        "failed_node": None,
-        "human_approved": None,   # Reset for next human gate
+        "rca_output":        result,
+        "director_reasoning": reasoning,
+        "status":            "running",
+        "error":             None,
+        "failed_node":       None,
+        "human_approved":    None,   # Reset for next human gate
     }
 
 
@@ -211,7 +223,7 @@ def action_plan_node(state: DirectorState) -> dict:
 
     try:
         graph  = build_action_graph()
-        result = graph.invoke({"capa_input": capa_input})
+        result = graph.invoke({"capa_input": capa_input.model_dump()})
     except Exception as exc:
         return {
             "error": f"Action Plan exception: {exc}",
@@ -219,13 +231,24 @@ def action_plan_node(state: DirectorState) -> dict:
             "status": "error",
         }
 
+    action_items  = result.get("action_items", [])
+    conf_score    = result.get("confidence_score", "N/A")
+    n_actions     = result.get("total_actions", len(action_items))
+
+    reasoning = (
+        f"Action Plan generated with {n_actions} corrective action(s) "
+        f"(confidence: {conf_score}). "
+        f"Next step: Effectiveness Evaluation — please review the actions and approve to continue."
+    )
+
     print("[DIRECTOR] Action Plan completed ✓")
     return {
-        "action_plan_output": result,
-        "status": "running",
-        "error": None,
-        "failed_node": None,
-        "human_approved": None,
+        "action_plan_output":  result,
+        "director_reasoning":  reasoning,
+        "status":              "running",
+        "error":               None,
+        "failed_node":         None,
+        "human_approved":      None,
     }
 
 
@@ -255,7 +278,7 @@ def effectiveness_node(state: DirectorState) -> dict:
 
     try:
         graph  = build_effectiveness_graph()
-        result = graph.invoke({"evaluation_input": eff_input})
+        result = graph.invoke({"evaluation_input": eff_input.model_dump()})
     except Exception as exc:
         return {
             "error": f"Effectiveness exception: {exc}",
@@ -263,12 +286,24 @@ def effectiveness_node(state: DirectorState) -> dict:
             "status": "error",
         }
 
+    evaluated = result.get("evaluated_actions", [])
+    n_eval    = len(evaluated)
+    overall   = result.get("overall_effectiveness_score", result.get("overall_score", "N/A"))
+
+    reasoning = (
+        f"Effectiveness Evaluation complete. "
+        f"{n_eval} action(s) evaluated "
+        f"(overall score: {overall}). "
+        f"All pipeline stages have finished. Ready to finalize."
+    )
+
     print("[DIRECTOR] Effectiveness completed ✓")
     return {
         "effectiveness_output": result,
-        "status": "running",
-        "error": None,
-        "failed_node": None,
+        "director_reasoning":   reasoning,
+        "status":               "running",
+        "error":                None,
+        "failed_node":          None,
     }
 
 
