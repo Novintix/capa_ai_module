@@ -61,5 +61,8 @@ dump.rdb
 temp/
 tmp/
 
+# UI Test folder
+UI/
+
 # UI folder
 ui/

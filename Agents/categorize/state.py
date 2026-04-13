@@ -4,14 +4,14 @@ from pydantic import BaseModel, Field
 class Cause(BaseModel):
     cause_id: str
     cause_text: str
-    process_step: str
-    failure_mode: str
-    potential_effects: str
+    process_step: Optional[str] = None
+    failure_mode: Optional[str] = None
+    potential_effects: Optional[str] = None
     severity: Optional[int] = None
     occurrence: Optional[int] = None
     detection: Optional[int] = None
     current_controls: Optional[str] = None
-    source: str
+    source: Optional[str] = None
 
 class CategorizedCause(BaseModel):
     cause_id: str
