@@ -26,6 +26,7 @@ class HumanReviewInput(BaseModel):
 
 
 class CAPADirectorOutput(BaseModel):
+    thread_id:                Optional[str] = None
     complaint_id:             str
     risk_analysis:            Optional[Dict[str, Any]] = None
     rca_analysis:             Optional[Dict[str, Any]] = None

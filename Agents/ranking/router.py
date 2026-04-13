@@ -4,7 +4,7 @@ Handles root cause ranking endpoints
 """
 
 from fastapi import APIRouter, HTTPException
-from Agents.ranking.state import RankingInput, RankingOutput
+from Agents.ranking.state import RankingInput, RankingOutput, RankingConfig
 from Agents.ranking.logger import log_api_request, log_api_response
 from Agents.ranking.agent import RankingAgent
 

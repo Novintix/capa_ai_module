@@ -35,6 +35,12 @@ class DirectorState(TypedDict):
     human_approved:  Optional[bool]
     human_feedback:  Optional[str]
 
+    # ── Error recovery ───────────────────────────────────────────────────────
+    failed_node:    Optional[str]
+    retry_count:    int
+    max_retries:    int
+    recovery_next:  Optional[str]
+
     # ── Flow ─────────────────────────────────────────────────────────────────
     status: str
     error:  Optional[str]

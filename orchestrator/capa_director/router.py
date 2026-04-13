@@ -9,8 +9,9 @@ router = APIRouter(prefix="/director", tags=["CAPA Director O1"])
 
 # ── Helper ─────────────────────────────────────────────────────────────────────
 
-def _build_output(state: dict, awaiting: bool = False, current_node: str = None) -> CAPADirectorOutput:
+def _build_output(state: dict, awaiting: bool = False, current_node: str = None, thread_id: str = None) -> CAPADirectorOutput:
     return CAPADirectorOutput(
+        thread_id                = thread_id or state.get("thread_id"),
         complaint_id             = state.get("complaint_id", "unknown"),
         risk_analysis            = state.get("risk_analysis_output"),
         rca_analysis             = state.get("rca_output"),
@@ -83,6 +84,12 @@ async def analyze_capa(input_data: CAPADirectorInput):
         human_approved = None,
         human_feedback = None,
 
+        # Error recovery
+        failed_node   = None,
+        retry_count   = 0,
+        max_retries   = 2,
+        recovery_next = None,
+
         status = "starting",
         error  = None,
     )
@@ -99,9 +106,9 @@ async def analyze_capa(input_data: CAPADirectorInput):
         print(f"\n[API] ⏸  Paused before '{paused_at}'")
         print(f"[API]    Reason: {state.get('director_reasoning')}")
         print(f"[API]    Thread: {thread_id}  → POST /director/resume to continue")
-        return _build_output(state, awaiting=True, current_node=paused_at)
+        return _build_output(state, awaiting=True, current_node=paused_at, thread_id=thread_id)
 
-    return _build_output(final_state)
+    return _build_output(final_state, thread_id=thread_id)
 
 
 @router.post("/resume", response_model=CAPADirectorOutput)
@@ -145,9 +152,10 @@ async def resume_capa(review: HumanReviewInput):
         state = graph.get_state(config).values
         print(f"[API] ⏸  Paused again before '{next_pause}'")
         print(f"[API]    Reason: {state.get('director_reasoning')}")
-        return _build_output(state, awaiting=True, current_node=next_pause)
+        print(f"[API]    Thread: {review.thread_id}  → POST /director/resume to continue")
+        return _build_output(state, awaiting=True, current_node=next_pause, thread_id=review.thread_id)
 
-    return _build_output(final_state)
+    return _build_output(final_state, thread_id=review.thread_id)
 
 
 @router.get("/status/{thread_id}", response_model=CAPADirectorOutput)

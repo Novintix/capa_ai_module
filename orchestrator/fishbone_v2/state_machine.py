@@ -187,11 +187,19 @@ class FishboneStateMachine:
     def get_final_result(self) -> Dict[str, Any]:
         """Generate final result from state machine"""
         # Determine confidence
-        confidence = "MEDIUM"
+        # Priority order:
+        #   1. No root cause found         → always LOW
+        #   2. confidence_level forced LOW  → LOW (e.g. categorization failure)
+        #   3. High-confidence validation   → HIGH
+        #   4. Default                      → MEDIUM
         if not self.control_memory.final_root_cause:
             confidence = "LOW"
+        elif self.control_memory.confidence_level == "LOW":
+            confidence = "LOW"   # Explicit degradation from categorization failure
         elif self.execution_memory.iteration and self.execution_memory.iteration.high_confidence_count > 0:
             confidence = "HIGH"
+        else:
+            confidence = "MEDIUM"
         
         # Build root cause detail
         root_cause_detail = None
