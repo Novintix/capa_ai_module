@@ -25,6 +25,7 @@ from Agents.loop_control.router import router as loop_control_router
 from orchestrator.risk_analysis_orchestrator_service.router import router as orchestrator_router
 from orchestrator.why_analysis_orchestrator.router import router as why_analysis_router
 from orchestrator.why_analysis_v2.router import router as why_analysis_v2_router
+from orchestrator.why_analysis_v3.router import router as why_analysis_v3_router  # NEW: Simplified with human-in-the-loop
 from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
 from orchestrator.fishbone_v2.router import router as fishbone_v2_router  # NEW: Single-depth fishbone with 6M categorization
 from orchestrator.fishbone_v3.router import router as fishbone_v3_router  # NEW: HITL Fishbone
@@ -56,6 +57,7 @@ def register_routes(app: FastAPI):
     app.include_router(zero_evidence_router)
     app.include_router(why_analysis_router)
     app.include_router(why_analysis_v2_router)
+    app.include_router(why_analysis_v3_router)  # NEW: Why Analysis V3
     app.include_router(rca_v2_router)
     app.include_router(fishbone_v2_router)  # NEW: Fishbone v2
     app.include_router(fishbone_v3_router)  # NEW: Fishbone v3 (HITL)
@@ -91,6 +93,7 @@ def register_routes(app: FastAPI):
                 "zero_evidence": "Zero Evidence Mode Agent (First-Principles Cause Selection)",
                 "why_analysis": "Why Analysis Orchestrator (Question → Cause Gen → Zero Evidence Pipeline)",
                 "why_analysis_v2": "Why Analysis V2 Orchestrator (Question → Cause Gen → Validation → Loop Control)",
+                "why_analysis_v3": "Why Analysis V3 Orchestrator (Question → Cause Gen → Validation → Human Review)",
                 "rca_v2": "RCA v2 Orchestrator (State Machine Implementation with Controlled Memory)",
                 "fishbone_v2": "Fishbone v2 Orchestrator (Single-Depth Analysis with 6M Categorization)",
                 "fishbone_v3": "Fishbone v3 Orchestrator (Human-in-the-Loop Analysis with Decisions)",
@@ -127,6 +130,9 @@ def register_routes(app: FastAPI):
                 "GET /why-analysis/health": "Why Analysis Orchestrator health check",
                 "POST /why-analysis-v2/": "Run Why Analysis V2 (Question → Cause Gen → Validation → Loop Control with conditional ranking)",
                 "GET /why-analysis-v2/health": "Why Analysis V2 Orchestrator health check",
+                "POST /why-analysis-v3/": "Run Why Analysis V3 (Question → Cause Gen → Validation → Human Review)",
+                "POST /why-analysis-v3/human-review": "Submit human cause selection for Why Analysis V3",
+                "GET /why-analysis-v3/health": "Why Analysis V3 Orchestrator health check",
                 "POST /rca-v2/": "Run RCA v2 Analysis with proper state machine (JSON input)",
                 "POST /rca-v2/upload": "Run RCA v2 Analysis with file upload support",
                 "GET /rca-v2/health": "RCA v2 Orchestrator health check",

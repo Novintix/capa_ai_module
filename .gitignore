@@ -63,3 +63,6 @@ tmp/
 
 # UI Test folder
 UI/
+
+# UI folder
+ui/
