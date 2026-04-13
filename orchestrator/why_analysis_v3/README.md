@@ -432,6 +432,35 @@ Each payload function:
 - **Pause/Resume**: Workflow pauses at human_review node
 - **TTL**: 7 days (configurable in Redis)
 
+### State Persistence on Resume
+
+When resuming from human review, the orchestrator properly loads the existing state from Redis checkpoint before merging the human selection. This ensures:
+
+1. **Loop Count Preserved**: `current_loop_count` maintains its value across resume
+2. **Selected Cause Preserved**: `current_selected_cause` is available for next iteration
+3. **Why Chain Preserved**: Complete history of questions and answers
+4. **Correct Question Type**: Question agent generates "continue" type (not "start") for iteration 2+
+
+**Implementation:**
+```python
+# In agent.py resume_with_human_selection()
+self.graph.update_state(config, update_state)  # Merge with checkpoint
+final_state = self.graph.invoke(None, config=config)  # Resume from checkpoint
+```
+
+**Debug Logging:**
+The payload_builder_node logs state values to help diagnose issues:
+```
+[DEBUG] current_loop_count: 1
+[DEBUG] current_selected_cause: Compression force was set at 12kN...
+[DEBUG] human_selected_cause_id: C001
+[DEBUG] human_decision: continue
+[DEBUG] Question payload type: continue
+[DEBUG] Question payload answer: Compression force was set at 12kN...
+```
+
+If you see `current_loop_count: 0` on iteration 2+, the state is not being loaded properly from Redis.
+
 ## Observability
 
 ### Logging

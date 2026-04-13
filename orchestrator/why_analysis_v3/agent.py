@@ -96,13 +96,42 @@ class WhyAnalysisV3Orchestrator:
         try:
             config = {"configurable": {"thread_id": session_id}}
             
-            # Update state with human selection and decision
-            update_state = {
-                "human_selected_cause_id": selected_cause_id,
-                "human_decision": decision,
-            }
+            print(f"[RESUME] Session: {session_id}, Selected: {selected_cause_id}, Decision: {decision}")
             
-            final_state = self.graph.invoke(update_state, config=config)
+            # Get current state to verify checkpoint exists
+            try:
+                current_state = self.graph.get_state(config)
+                print(f"[RESUME] Current state status: {current_state.values.get('status')}")
+                print(f"[RESUME] Current awaiting_human_review: {current_state.values.get('awaiting_human_review')}")
+                print(f"[RESUME] Current loop count: {current_state.values.get('current_loop_count')}")
+                print(f"[RESUME] Next node to execute: {current_state.next}")
+            except Exception as e:
+                print(f"[RESUME] Warning: Could not get current state: {e}")
+            
+            # CRITICAL FIX: When resuming from checkpoint, we MUST use invoke(None)
+            # Calling invoke(dict) starts a NEW run and goes through initialize again!
+            # First update the state, then invoke with None
+            
+            print(f"[RESUME] Updating checkpoint with human selection...")
+            self.graph.update_state(
+                config,
+                {
+                    "human_selected_cause_id": selected_cause_id,
+                    "human_decision": decision,
+                },
+                as_node="human_review"
+            )
+            
+            # Verify update
+            updated = self.graph.get_state(config)
+            print(f"[RESUME] After update - human_selected_cause_id: {updated.values.get('human_selected_cause_id')}")
+            print(f"[RESUME] After update - current_loop_count: {updated.values.get('current_loop_count')}")
+            
+            # Now invoke with None to continue from checkpoint
+            print(f"[RESUME] Invoking with None to continue from checkpoint...")
+            final_state = self.graph.invoke(None, config=config)
+            
+            print(f"[RESUME] Final state status: {final_state.get('status')}")
             return deep_serialize(final_state.get("final_output") or final_state)
 
         except Exception as exc:

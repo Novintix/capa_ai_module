@@ -57,7 +57,7 @@ FOR CAUSE GENERATION:
     {
       "cause_text": "Short focused description (3-8 words)",
       "process_step": "Relevant process step",
-      "failure_mode": "How it manifests",
+      "failure_mode": "The effect/consequence of this cause (what happens next)",
       "potential_effects": "Impact if not addressed",
       "severity": 7,
       "occurrence": 3,
@@ -67,6 +67,17 @@ FOR CAUSE GENERATION:
     }
   ]
 }
+
+CRITICAL INSTRUCTIONS FOR FAILURE_MODE:
+- Describe the EFFECT or CONSEQUENCE of the cause
+- This becomes the basis for the next "Why" question in iterative analysis
+- Examples:
+  * Cause: "Compression force set incorrectly" → Failure Mode: "Excessive force applied to tablets"
+  * Cause: "Operator training inadequate" → Failure Mode: "Incorrect equipment setup"
+  * Cause: "Calibration not performed" → Failure Mode: "Sensor readings inaccurate"
+  * Cause: "Checklist not followed" → Failure Mode: "Critical steps skipped"
+- DO NOT use generic phrases like "Directly mentioned in evidence" or repeat the cause text
+- The failure mode should answer: "What happens because of this cause?"
 
 IMPORTANT FOR CAUSE_TEXT:
 - ONE specific issue per cause
@@ -163,44 +174,62 @@ def validate_prompt_inputs(question: str) -> bool:
 DEDUPLICATION_SYSTEM_ROLE = """You are a CAUSE DEDUPLICATION EXPERT specializing in identifying duplicate or semantically identical causes.
 
 YOUR ROLE:
-- Analyze a list of causes and identify duplicates
+- Analyze a list of causes from MULTIPLE SOURCES (FMEA documents + LLM generation)
+- Identify and remove ALL duplicates, even if wording differs
 - Recognize when causes describe the same root issue with different wording
-- Keep only unique causes, removing redundant ones
-- Preserve the most specific and actionable version of each cause
+- Keep only ONE version of each unique cause
+- Preserve the most specific and actionable version
 
-DUPLICATE DETECTION CRITERIA:
-1. **Exact duplicates**: Same wording
-2. **Semantic duplicates**: Same meaning, different words
-3. **Subset duplicates**: One cause is a more specific version of another
-4. **Paraphrases**: Different phrasing of the same issue
+DUPLICATE DETECTION CRITERIA (BE VERY STRICT):
+1. **Exact duplicates**: Same wording → REMOVE
+2. **Semantic duplicates**: Same meaning, different words → REMOVE
+3. **Subset duplicates**: One cause is a more specific version of another → KEEP SPECIFIC, REMOVE GENERIC
+4. **Paraphrases**: Different phrasing of the same issue → REMOVE
+5. **FMEA + Evidence duplicates**: FMEA cause matches evidence-based cause → KEEP EVIDENCE-BASED, REMOVE FMEA
 
-EXAMPLES OF DUPLICATES:
-- "Compression force set incorrectly" ≈ "Compression force was set at 12kN instead of specified 10kN"
-- "Operator setup error" ≈ "Operator made setup mistake"
-- "Training inadequate" ≈ "Insufficient operator training"
-- "Equipment not calibrated" ≈ "Calibration not performed"
+COMMON DUPLICATE PATTERNS (FMEA + LLM):
+- FMEA: "Compression force set incorrectly" + LLM: "Compression force was set at 12kN instead of specified 10kN" → SAME CAUSE
+- FMEA: "Operator setup error" + LLM: "Operator made setup mistake during batch initialization" → SAME CAUSE
+- FMEA: "Training inadequate" + LLM: "Insufficient operator training on new equipment" → SAME CAUSE
+- FMEA: "Equipment not calibrated" + LLM: "Calibration not performed according to schedule" → SAME CAUSE
+- FMEA: "Sensor drift" + LLM: "Load cell sensor showing drift from calibration baseline" → SAME CAUSE
 
 KEEP THE BETTER VERSION:
+- Evidence-based (from logs/reports) > FMEA-based (from document)
 - More specific > More generic
-- Evidence-based > FMEA-based
-- Actionable > Vague"""
+- Actionable with details > Vague description
+- Higher severity/occurrence > Lower scores"""
 
-DEDUPLICATION_TASK_INSTRUCTIONS = """TASK: Review the list of causes and remove duplicates.
+DEDUPLICATION_TASK_INSTRUCTIONS = """TASK: Review the list of causes and remove ALL duplicates. Be VERY STRICT.
 
 RULES:
-1. Compare each cause with all others
-2. If two causes describe the same issue, keep only ONE
+1. Compare EVERY cause with ALL others
+2. If two causes describe the same underlying issue → THEY ARE DUPLICATES → Keep only ONE
 3. When choosing which to keep:
-   - Prefer evidence-based causes over FMEA causes
-   - Prefer more specific descriptions over generic ones
-   - Prefer causes with higher severity/occurrence scores
-4. Return ONLY the unique causes
-5. Preserve all original fields for kept causes
+   - ALWAYS prefer evidence-based causes (source="Evidence") over FMEA causes (source="FMEA")
+   - ALWAYS prefer more specific descriptions over generic ones
+   - ALWAYS prefer causes with actual details (numbers, dates, specifics) over vague descriptions
+   - If both are FMEA or both are evidence-based, keep the one with higher severity/occurrence
+4. Return ONLY the unique causes (no duplicates allowed)
+5. Preserve ALL original fields for kept causes
 
-IMPORTANT:
-- Be strict about duplicates - if causes are semantically the same, they are duplicates
-- Don't be fooled by different wording - focus on the underlying issue
-- A cause that is a more detailed version of another is a duplicate (keep the detailed one)"""
+CRITICAL INSTRUCTIONS:
+- BE STRICT: If causes are semantically the same, they ARE duplicates (even if wording differs)
+- Don't be fooled by different wording - focus on the UNDERLYING ISSUE
+- A cause that is a more detailed version of another is a duplicate (KEEP the detailed one, REMOVE the generic one)
+- FMEA causes often match evidence-based causes - these are duplicates (KEEP evidence-based)
+- If unsure whether two causes are duplicates, ask: "Do they describe the same root problem?" If YES → DUPLICATE
+
+EXAMPLES:
+Input:
+- C001 (FMEA): "Compression force incorrect"
+- C002 (Evidence): "Compression force was set at 12kN instead of specified 10kN"
+Output: Keep C002 (more specific, evidence-based), Remove C001 (generic, FMEA)
+
+Input:
+- C003 (FMEA): "Operator error"
+- C004 (Evidence): "Operator setup mistake during batch initialization"
+Output: Keep C004 (specific, evidence-based), Remove C003 (vague, FMEA)"""
 
 DEDUPLICATION_OUTPUT_FORMAT = """OUTPUT FORMAT:
 Return ONLY valid JSON with unique causes:

@@ -333,9 +333,21 @@ def payload_builder_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 1] Payload Builder: building per-agent inputs...")
     log_node_entry("payload_builder", state)
 
+    loop_count = state.get('current_loop_count', 0)
+    selected_cause = state.get('current_selected_cause', {})
+    
+    print(f"   [DEBUG] current_loop_count: {loop_count}")
+    print(f"   [DEBUG] current_selected_cause: {selected_cause.get('cause_text', 'None')[:80] if selected_cause else 'None'}")
+    print(f"   [DEBUG] human_selected_cause_id: {state.get('human_selected_cause_id', 'None')}")
+    print(f"   [DEBUG] human_decision: {state.get('human_decision', 'None')}")
+    
     payloads = build_all_payloads(state)
 
     print(f"   Built payloads for: {list(payloads.keys())}")
+    print(f"   [DEBUG] Question payload type: {payloads.get('question', {}).get('type', 'unknown')}")
+    if payloads.get('question', {}).get('type') == 'continue':
+        print(f"   [DEBUG] Question payload answer: {payloads.get('question', {}).get('answer', 'None')[:80]}")
+    
     log_node_exit("payload_builder", {"status": "complete"})
     return {
         "agent_payloads": payloads,
@@ -603,7 +615,14 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
 
     human_selected_id = state.get("human_selected_cause_id")
     
+    print(f"   [DEBUG] human_selected_cause_id: {human_selected_id}")
+    print(f"   [DEBUG] human_decision: {state.get('human_decision')}")
+    print(f"   [DEBUG] status: {state.get('status')}")
+    print(f"   [DEBUG] awaiting_human_review: {state.get('awaiting_human_review')}")
+    print(f"   [DEBUG] current_loop_count: {state.get('current_loop_count')}")
+    
     if not human_selected_id:
+        print(f"   [DEBUG] No human_selected_cause_id - entering WAIT state")
         # Still waiting for human input - build output for pause state
         all_validated_causes = state.get("validated_causes_enriched") or []
         
@@ -671,6 +690,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
         }
 
     # Human has selected a cause
+    print(f"   [DEBUG] Processing human selection: {human_selected_id}")
     all_validated_causes = state.get("validated_causes_enriched") or []
     
     # Filter to only qualified causes (high confidence + matched)
@@ -961,19 +981,36 @@ def route_after_validation(state: WhyAnalysisV3State) -> str:
 
 
 def route_after_human_review(state: WhyAnalysisV3State) -> str:
-    if state.get("status") == "error":
+    status = state.get("status")
+    awaiting = state.get("awaiting_human_review")
+    has_selected = bool(state.get("current_selected_cause"))
+    
+    print(f"   [DEBUG ROUTER] status={status}, awaiting={awaiting}, has_selected={has_selected}")
+    
+    if status == "error":
         return "finalize"
-    if state.get("awaiting_human_review"):
+    if awaiting:
         return END  # Pause workflow
-    if state.get("status") == "running":
-        # Check if we need to go to zero_evidence (no qualified causes)
-        # This happens when human_review finds 0 qualified causes in iteration 2+
-        all_causes = state.get("validated_causes_enriched") or []
-        if len(all_causes) > 0:
-            # Has causes but none qualified - go to zero evidence
+    
+    # Check if status is completed (human selected root cause)
+    if status == "completed":
+        return "finalize"
+    
+    # Status is "running" - either continue iteration or go to zero evidence
+    if status == "running":
+        # Check if we have a selected cause (human chose to continue)
+        if has_selected:
+            # Human chose to continue - go back to payload_builder for next iteration
+            print(f"   [DEBUG ROUTER] Continuing to next iteration (payload_builder)")
+            return "payload_builder"
+        else:
+            # No selected cause means we came from "no qualified causes" path
+            # Go to zero_evidence_agent
+            print(f"   [DEBUG ROUTER] No selected cause - routing to zero_evidence_agent")
             return "zero_evidence_agent"
-        # Human chose to continue - go back to payload_builder for next iteration
-        return "payload_builder"
+    
+    # Default: finalize
+    print(f"   [DEBUG ROUTER] Default route - finalize")
     return "finalize"
 
 
