@@ -313,13 +313,23 @@ INSTRUCTIONS:
 1. Look for explicit mentions of causes, reasons, or contributing factors
 2. Extract ONLY causes that are directly stated or strongly implied
 3. Do NOT infer or speculate - only extract what's explicitly mentioned
-4. Return as JSON array with format: [{{"cause_text": "...", "source_reference": "evidence/log/report/investigation"}}]
-5. If no explicit causes found, return empty array: []
+4. For each cause, also describe the FAILURE MODE (the effect/consequence of this cause)
+5. Return as JSON array with format: [{{"cause_text": "...", "failure_mode": "...", "source_reference": "evidence/log/report/investigation"}}]
+6. If no explicit causes found, return empty array: []
+
+CRITICAL FOR FAILURE_MODE:
+- Describe what HAPPENS because of this cause (the effect/consequence)
+- This will be used for the next "Why" question in iterative analysis
+- Examples:
+  * Cause: "Compression force set to 12 kN instead of 10 kN" → Failure Mode: "Excessive force applied to tablets"
+  * Cause: "Calibration not performed" → Failure Mode: "Sensor readings inaccurate"
+  * Cause: "Operator training inadequate" → Failure Mode: "Incorrect equipment setup"
+- DO NOT use generic phrases like "Directly mentioned in evidence"
 
 EXAMPLES OF WHAT TO EXTRACT:
-- "Operator set compression force to 4.5 kN instead of 5.0 kN" → Extract this
-- "Calibration was skipped" → Extract this
-- "Historical CAPA identified X as root cause" → Extract this
+- "Operator set compression force to 4.5 kN instead of 5.0 kN" → Extract with failure_mode: "Incorrect compression applied"
+- "Calibration was skipped" → Extract with failure_mode: "Equipment not properly calibrated"
+- "Historical CAPA identified X as root cause" → Extract with failure_mode describing the consequence
 
 EXAMPLES OF WHAT NOT TO EXTRACT:
 - General observations without cause attribution
@@ -369,7 +379,7 @@ Return ONLY the JSON array, no other text."""
                             "cause_id": f"E{idx:03d}",
                             "cause_text": item["cause_text"],
                             "process_step": "Evidence-based",
-                            "failure_mode": "Evidence-based cause (effect to be determined)",
+                            "failure_mode": item.get("failure_mode", "Evidence-based cause (effect to be determined)"),
                             "potential_effects": None,
                             "severity": None,  # Will be scored by LLM
                             "occurrence": None,  # Will be scored by LLM
@@ -765,7 +775,7 @@ def deduplicate_causes_node(state: AgentState) -> AgentState:
         prompt = get_deduplication_prompt(causes)
         
         # Call LLM with temperature=0 for deterministic results
-        llm = get_llm(temperature=0.0)
+        llm = get_llm()
         response = llm.invoke(prompt)
         response_text = response.content if hasattr(response, 'content') else str(response)
         

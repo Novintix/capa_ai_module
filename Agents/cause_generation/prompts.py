@@ -174,11 +174,12 @@ def validate_prompt_inputs(question: str) -> bool:
 DEDUPLICATION_SYSTEM_ROLE = """You are a CAUSE DEDUPLICATION EXPERT specializing in identifying duplicate or semantically identical causes.
 
 YOUR ROLE:
-- Analyze a list of causes from MULTIPLE SOURCES (FMEA documents + LLM generation)
+- Analyze a list of causes from MULTIPLE SOURCES (FMEA documents + Evidence extraction)
 - Identify and remove ALL duplicates, even if wording differs
 - Recognize when causes describe the same root issue with different wording
 - Keep only ONE version of each unique cause
 - Preserve the most specific and actionable version
+- CRITICAL: Understand the difference between PARENT causes and SPECIFIC causes
 
 DUPLICATE DETECTION CRITERIA (BE VERY STRICT):
 1. **Exact duplicates**: Same wording → REMOVE
@@ -187,49 +188,96 @@ DUPLICATE DETECTION CRITERIA (BE VERY STRICT):
 4. **Paraphrases**: Different phrasing of the same issue → REMOVE
 5. **FMEA + Evidence duplicates**: FMEA cause matches evidence-based cause → KEEP EVIDENCE-BASED, REMOVE FMEA
 
-COMMON DUPLICATE PATTERNS (FMEA + LLM):
-- FMEA: "Compression force set incorrectly" + LLM: "Compression force was set at 12kN instead of specified 10kN" → SAME CAUSE
-- FMEA: "Operator setup error" + LLM: "Operator made setup mistake during batch initialization" → SAME CAUSE
-- FMEA: "Training inadequate" + LLM: "Insufficient operator training on new equipment" → SAME CAUSE
-- FMEA: "Equipment not calibrated" + LLM: "Calibration not performed according to schedule" → SAME CAUSE
-- FMEA: "Sensor drift" + LLM: "Load cell sensor showing drift from calibration baseline" → SAME CAUSE
+CRITICAL: PARENT vs SPECIFIC CAUSES
+When you see a GENERIC cause and a SPECIFIC cause that could be related:
+- Example: "Operator setup error" (generic) vs "Compression force set to 12kN instead of 10kN" (specific)
+- These are NOT duplicates if the specific cause is ONE INSTANCE of the generic category
+- KEEP BOTH if the generic cause could have OTHER specific instances
+- REMOVE the generic ONLY if it's just a vague restatement of the specific cause
 
-KEEP THE BETTER VERSION:
-- Evidence-based (from logs/reports) > FMEA-based (from document)
-- More specific > More generic
-- Actionable with details > Vague description
-- Higher severity/occurrence > Lower scores"""
+EXAMPLES OF PARENT vs SPECIFIC (KEEP BOTH):
+- "Operator setup error" + "Compression force set to 12kN instead of 10kN" → KEEP BOTH (specific is one type of setup error)
+- "Calibration issue" + "Load cell not calibrated for 6 months" → KEEP BOTH (specific is one type of calibration issue)
+- "Training inadequate" + "Operator not trained on new SOP version 2.1" → KEEP BOTH (specific is one training gap)
 
-DEDUPLICATION_TASK_INSTRUCTIONS = """TASK: Review the list of causes and remove ALL duplicates. Be VERY STRICT.
+EXAMPLES OF TRUE DUPLICATES (REMOVE ONE):
+- "Compression force set incorrectly" + "Compression force was set at 12kN instead of 10kN" → SAME CAUSE (keep specific)
+- "Operator made setup mistake" + "Operator setup error" → SAME CAUSE (keep either, same level)
+- "Equipment not calibrated" + "Calibration not performed" → SAME CAUSE (keep either, same level)
+
+COMMON DUPLICATE PATTERNS (FMEA + Evidence):
+- FMEA: "Compression force set incorrectly" + Evidence: "Compression force was set at 12kN instead of 10kN" → DUPLICATE (same issue, keep evidence)
+- FMEA: "Sensor drift" + Evidence: "Load cell sensor showing drift from calibration baseline" → DUPLICATE (same issue, keep evidence)
+- FMEA: "Training inadequate" + Evidence: "Insufficient operator training on new equipment" → DUPLICATE (same issue, keep evidence)
+
+KEEP THE BETTER VERSION (Priority Order):
+1. Evidence-based with specific details (numbers, dates, names) > Everything else
+2. Evidence-based generic > FMEA-based specific
+3. FMEA-based specific > FMEA-based generic
+4. More actionable > Vague description
+5. Higher severity/occurrence > Lower scores"""
+
+DEDUPLICATION_TASK_INSTRUCTIONS = """TASK: Review the list of causes and remove ALL duplicates. Be VERY STRICT but SMART.
 
 RULES:
 1. Compare EVERY cause with ALL others
-2. If two causes describe the same underlying issue → THEY ARE DUPLICATES → Keep only ONE
-3. When choosing which to keep:
+2. If two causes describe the same underlying issue at the SAME LEVEL → THEY ARE DUPLICATES → Keep only ONE
+3. If one cause is GENERIC and another is a SPECIFIC INSTANCE → THEY ARE NOT DUPLICATES → Keep BOTH
+4. When choosing which duplicate to keep:
    - ALWAYS prefer evidence-based causes (source="Evidence") over FMEA causes (source="FMEA")
    - ALWAYS prefer more specific descriptions over generic ones
    - ALWAYS prefer causes with actual details (numbers, dates, specifics) over vague descriptions
    - If both are FMEA or both are evidence-based, keep the one with higher severity/occurrence
-4. Return ONLY the unique causes (no duplicates allowed)
-5. Preserve ALL original fields for kept causes
+5. Return ONLY the unique causes (no duplicates allowed)
+6. Preserve ALL original fields for kept causes
 
-CRITICAL INSTRUCTIONS:
-- BE STRICT: If causes are semantically the same, they ARE duplicates (even if wording differs)
-- Don't be fooled by different wording - focus on the UNDERLYING ISSUE
-- A cause that is a more detailed version of another is a duplicate (KEEP the detailed one, REMOVE the generic one)
-- FMEA causes often match evidence-based causes - these are duplicates (KEEP evidence-based)
-- If unsure whether two causes are duplicates, ask: "Do they describe the same root problem?" If YES → DUPLICATE
+CRITICAL DECISION TREE:
+For each pair of causes, ask:
 
-EXAMPLES:
-Input:
-- C001 (FMEA): "Compression force incorrect"
-- C002 (Evidence): "Compression force was set at 12kN instead of specified 10kN"
-Output: Keep C002 (more specific, evidence-based), Remove C001 (generic, FMEA)
+Q1: Are they describing the EXACT SAME issue?
+    YES → DUPLICATE → Keep the better version (evidence > FMEA, specific > generic)
+    NO → Go to Q2
 
-Input:
-- C003 (FMEA): "Operator error"
-- C004 (Evidence): "Operator setup mistake during batch initialization"
-Output: Keep C004 (specific, evidence-based), Remove C003 (vague, FMEA)"""
+Q2: Is one a SPECIFIC INSTANCE of the other (parent-child relationship)?
+    YES → NOT DUPLICATES → Keep BOTH
+    NO → Go to Q3
+    
+Q3: Are they at the same level of abstraction but with different wording?
+    YES → DUPLICATE → Keep the better version
+    NO → NOT DUPLICATES → Keep BOTH
+
+EXAMPLES WITH DECISIONS:
+
+Example 1:
+- C001 (Evidence): "Compression force was set at 12kN instead of 10kN"
+- C004 (FMEA): "Compression force set incorrectly"
+Decision: Q1=YES (same issue) → DUPLICATE → Keep C001 (evidence, specific), Remove C004
+
+Example 2:
+- C001 (Evidence): "Compression force was set at 12kN instead of 10kN"
+- C002 (Evidence): "Operator setup error"
+Decision: Q1=NO, Q2=YES (C001 is a specific instance of operator setup error) → NOT DUPLICATES → Keep BOTH
+
+Example 3:
+- C002 (FMEA): "Operator setup error"
+- C007 (FMEA): "Operator made setup mistake"
+Decision: Q1=NO, Q2=NO, Q3=YES (same level, different wording) → DUPLICATE → Keep either (same source, similar severity)
+
+Example 4:
+- C005 (Evidence): "Load cell not calibrated for 6 months"
+- C006 (FMEA): "Calibration procedure not followed"
+Decision: Q1=YES (both about calibration not done) → DUPLICATE → Keep C005 (evidence, specific)
+
+Example 5:
+- C003 (FMEA): "Calibration issue"
+- C005 (Evidence): "Load cell not calibrated for 6 months"
+Decision: Q1=NO, Q2=YES (C005 is a specific type of calibration issue) → NOT DUPLICATES → Keep BOTH
+
+IMPORTANT NOTES:
+- BE STRICT: If causes are semantically the same at the same level, they ARE duplicates
+- BE SMART: Don't remove parent causes just because you have specific instances
+- A generic cause like "Operator error" can have many specific instances - keep both levels
+- Focus on whether they describe the SAME SPECIFIC PROBLEM or different problems in the same category"""
 
 DEDUPLICATION_OUTPUT_FORMAT = """OUTPUT FORMAT:
 Return ONLY valid JSON with unique causes:
