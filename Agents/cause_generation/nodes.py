@@ -369,7 +369,7 @@ Return ONLY the JSON array, no other text."""
                             "cause_id": f"E{idx:03d}",
                             "cause_text": item["cause_text"],
                             "process_step": "Evidence-based",
-                            "failure_mode": "Directly mentioned in evidence",
+                            "failure_mode": "Evidence-based cause (effect to be determined)",
                             "potential_effects": None,
                             "severity": None,  # Will be scored by LLM
                             "occurrence": None,  # Will be scored by LLM

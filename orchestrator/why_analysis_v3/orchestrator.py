@@ -652,6 +652,24 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
         
         print(f"   Awaiting selection from {len(high_confidence_matched_causes)} qualified causes")
         
+        # Build current iteration output for transparency
+        current_loop = int(state.get("current_loop_count", 0))
+        iteration_output = {
+            "iteration": current_loop,
+            "question": state.get("current_why_question"),
+            "question_reasoning": state.get("current_why_reasoning"),
+            "generated_causes": state.get("current_causes", []),
+            "total_generated": state.get("current_total_causes", 0),
+            "fmea_matched": state.get("current_fmea_matched", 0),
+            "validated_causes": all_validated_causes,  # All validated causes
+            "total_validated": len(all_validated_causes),
+            "qualified_causes": high_confidence_matched_causes,  # Only qualified
+            "total_qualified": len(high_confidence_matched_causes),
+            "selected_cause": None,  # Will be filled after human selection
+            "cause_generation_result": state.get("current_cause_generation_result"),
+            "validation_result": state.get("validation_result"),
+        }
+        
         # Build final output for paused state
         execution_time = round(time.time() - float(state.get("start_time") or time.time()), 4)
         final_output = {
@@ -659,19 +677,20 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "session_id": state.get("session_id"),
             "status": "awaiting_human_review",
             "mode": state.get("mode", "NO_FMEA_SINGLE_SHOT"),
-            "analysis_depth": int(state.get("current_loop_count", 0)),
+            "analysis_depth": current_loop,
             "ai_flagged": False,
             "manual_investigation_required": False,
             "stopping_reason": None,
             "awaiting_human_review": True,
             "human_review_message": f"Please review and select one of the {len(high_confidence_matched_causes)} qualified cause(s) (≥90% confidence + matched evidence).",
-            "validated_causes": high_confidence_matched_causes,  # Only send qualified causes
+            "validated_causes": high_confidence_matched_causes,  # Only send qualified causes for selection
             "root_cause": None,
             "why_chain": state.get("why_chain", []),
+            "iteration_outputs": [iteration_output],  # Include current iteration details
             "validation_summary": {
                 "total_input_causes": (state.get("validation_result") or {}).get("total_input_causes", 0),
                 "total_validated_causes": (state.get("validation_result") or {}).get("total_validated_causes", 0),
-                "high_confidence_matched_causes": len(high_confidence_matched_causes),  # Add this info
+                "high_confidence_matched_causes": len(high_confidence_matched_causes),
                 "overall_confidence": (state.get("validation_result") or {}).get("overall_confidence"),
             },
             "execution_time_seconds": execution_time,
@@ -889,13 +908,34 @@ def finalize_node(state: WhyAnalysisV3State) -> dict:
 
     execution_time = round(time.time() - float(state.get("start_time") or time.time()), 4)
     status = _safe_text(state.get("status"), "error")
+    
+    # Build iteration outputs showing the full pipeline for each loop
+    iteration_outputs = []
+    current_loop = int(state.get("current_loop_count", 0))
+    
+    if current_loop > 0:
+        # Add current iteration details
+        iteration_output = {
+            "iteration": current_loop,
+            "question": state.get("current_why_question"),
+            "question_reasoning": state.get("current_why_reasoning"),
+            "generated_causes": state.get("current_causes", []),
+            "total_generated": state.get("current_total_causes", 0),
+            "fmea_matched": state.get("current_fmea_matched", 0),
+            "validated_causes": state.get("validated_causes_enriched", []),
+            "total_validated": len(state.get("validated_causes_enriched", [])),
+            "selected_cause": state.get("current_selected_cause"),
+            "cause_generation_result": state.get("current_cause_generation_result"),
+            "validation_result": state.get("validation_result"),
+        }
+        iteration_outputs.append(iteration_output)
 
     final_output = {
         "complaint_id": state.get("complaint_id"),
         "session_id": state.get("session_id"),
         "status": status,
         "mode": state.get("mode", "NO_FMEA_SINGLE_SHOT"),
-        "analysis_depth": int(state.get("current_loop_count", 0)),
+        "analysis_depth": current_loop,
         "ai_flagged": bool(state.get("ai_flagged", False)),
         "manual_investigation_required": bool(state.get("manual_investigation_required", False)),
         "stopping_reason": state.get("stopping_reason"),
@@ -904,6 +944,7 @@ def finalize_node(state: WhyAnalysisV3State) -> dict:
         "validated_causes": state.get("validated_causes_enriched", []) if state.get("awaiting_human_review") else None,
         "root_cause": state.get("final_root_cause"),
         "why_chain": state.get("why_chain", []),
+        "iteration_outputs": iteration_outputs,  # Full pipeline details per iteration
         "validation_summary": {
             "total_input_causes": (state.get("validation_result") or {}).get("total_input_causes", 0),
             "total_validated_causes": (state.get("validation_result") or {}).get("total_validated_causes", 0),

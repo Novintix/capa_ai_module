@@ -96,43 +96,103 @@ class WhyAnalysisV3Orchestrator:
         try:
             config = {"configurable": {"thread_id": session_id}}
             
-            print(f"[RESUME] Session: {session_id}, Selected: {selected_cause_id}, Decision: {decision}")
+            print(f"\n{'='*80}")
+            print(f"[RESUME] Starting resume process")
+            print(f"[RESUME] Session: {session_id}")
+            print(f"[RESUME] Selected: {selected_cause_id}")
+            print(f"[RESUME] Decision: {decision}")
+            print(f"{'='*80}\n")
             
             # Get current state to verify checkpoint exists
             try:
                 current_state = self.graph.get_state(config)
-                print(f"[RESUME] Current state status: {current_state.values.get('status')}")
-                print(f"[RESUME] Current awaiting_human_review: {current_state.values.get('awaiting_human_review')}")
-                print(f"[RESUME] Current loop count: {current_state.values.get('current_loop_count')}")
-                print(f"[RESUME] Next node to execute: {current_state.next}")
+                print(f"[RESUME] ✓ Checkpoint found")
+                print(f"[RESUME]   - Status: {current_state.values.get('status')}")
+                print(f"[RESUME]   - Awaiting review: {current_state.values.get('awaiting_human_review')}")
+                print(f"[RESUME]   - Loop count: {current_state.values.get('current_loop_count')}")
+                print(f"[RESUME]   - Complaint ID: {current_state.values.get('complaint_id')}")
+                print(f"[RESUME]   - Next nodes: {current_state.next}")
+                
+                # Verify we have a valid checkpoint
+                if not current_state.values or not current_state.values.get('complaint_id'):
+                    raise Exception("Checkpoint exists but has no valid state data")
+                    
             except Exception as e:
-                print(f"[RESUME] Warning: Could not get current state: {e}")
+                print(f"[RESUME] ✗ ERROR: Could not load checkpoint: {e}")
+                return {
+                    "session_id": session_id,
+                    "status": "error",
+                    "error": f"No valid checkpoint found for session {session_id}: {e}",
+                    "stopping_reason": "no_checkpoint",
+                }
             
-            # CRITICAL FIX: When resuming from checkpoint, we MUST use invoke(None)
-            # Calling invoke(dict) starts a NEW run and goes through initialize again!
-            # First update the state, then invoke with None
+            # CRITICAL FIX: The issue is that invoke(None) doesn't work at END interrupt
+            # We need to manually call human_review_node with the updated state
+            # Then continue the graph execution
             
-            print(f"[RESUME] Updating checkpoint with human selection...")
-            self.graph.update_state(
-                config,
-                {
-                    "human_selected_cause_id": selected_cause_id,
-                    "human_decision": decision,
-                },
-                as_node="human_review"
-            )
+            print(f"\n[RESUME] Step 1: Manually processing human selection...")
             
-            # Verify update
-            updated = self.graph.get_state(config)
-            print(f"[RESUME] After update - human_selected_cause_id: {updated.values.get('human_selected_cause_id')}")
-            print(f"[RESUME] After update - current_loop_count: {updated.values.get('current_loop_count')}")
+            # Get the current state values
+            state_values = dict(current_state.values)
             
-            # Now invoke with None to continue from checkpoint
-            print(f"[RESUME] Invoking with None to continue from checkpoint...")
-            final_state = self.graph.invoke(None, config=config)
+            # Add human selection
+            state_values["human_selected_cause_id"] = selected_cause_id
+            state_values["human_decision"] = decision
             
-            print(f"[RESUME] Final state status: {final_state.get('status')}")
-            return deep_serialize(final_state.get("final_output") or final_state)
+            # Manually call human_review_node to process the selection
+            from .orchestrator import human_review_node
+            print(f"[RESUME] Step 2: Calling human_review_node with selection...")
+            updated_state = human_review_node(state_values)
+            
+            # Merge the updated state
+            for key, value in updated_state.items():
+                state_values[key] = value
+            
+            print(f"[RESUME] Step 3: Updated state:")
+            print(f"[RESUME]   - Status: {state_values.get('status')}")
+            print(f"[RESUME]   - Awaiting review: {state_values.get('awaiting_human_review')}")
+            print(f"[RESUME]   - current_selected_cause exists: {bool(state_values.get('current_selected_cause'))}")
+            
+            # Check if we need to continue or finalize
+            if state_values.get("status") == "completed":
+                # Human selected root cause - finalize
+                print(f"[RESUME] Step 4: Finalizing (root cause selected)...")
+                from .orchestrator import finalize_node
+                final_update = finalize_node(state_values)
+                for key, value in final_update.items():
+                    state_values[key] = value
+                
+                print(f"\n[RESUME] ✓ Resume complete (finalized)")
+                print(f"[RESUME]   - Final status: {state_values.get('status')}")
+                print(f"{'='*80}\n")
+                
+                return deep_serialize(state_values.get("final_output") or state_values)
+            
+            elif state_values.get("status") == "running" and state_values.get("current_selected_cause"):
+                # Human chose to continue - need to run next iteration
+                print(f"[RESUME] Step 4: Continuing to next iteration...")
+                
+                # Update the checkpoint with new state
+                self.graph.update_state(config, state_values, as_node="human_review")
+                
+                # Now invoke to continue the workflow
+                print(f"[RESUME] Step 5: Invoking graph for next iteration...")
+                final_state = self.graph.invoke(None, config=config)
+                
+                print(f"\n[RESUME] ✓ Resume complete (next iteration)")
+                print(f"[RESUME]   - Final status: {final_state.get('status')}")
+                print(f"[RESUME]   - Awaiting review: {final_state.get('awaiting_human_review')}")
+                print(f"{'='*80}\n")
+                
+                return deep_serialize(final_state.get("final_output") or final_state)
+            
+            else:
+                # Something unexpected
+                print(f"[RESUME] ✗ Unexpected state after human_review_node")
+                print(f"[RESUME]   - Status: {state_values.get('status')}")
+                print(f"[RESUME]   - Has selected cause: {bool(state_values.get('current_selected_cause'))}")
+                
+                return deep_serialize(state_values.get("final_output") or state_values)
 
         except Exception as exc:
             log_error("resume_with_human_selection", str(exc))
