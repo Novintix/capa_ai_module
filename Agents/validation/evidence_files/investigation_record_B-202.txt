@@ -1,75 +1,112 @@
-INVESTIGATION RECORD
-Title     : Film Coat Peeling and Dissolution Failure - Batch B-202
-Inv. No   : INV-2026-0019
-Product   : Metformin HCl 500mg Film-Coated Tablets
-Batch     : B-202
-Initiated : 2026-02-17
-Investigator : M. Krishnan (QA)
+﻿INVESTIGATION RECORD
+Investigation Number: INV-2026-0019
+Product: Ceftriaxone for Injection 1g (Vial)
+Batch Number: CF-882
+Legacy Reference: B-202
+Investigation Type: Product quality event with documentation and process governance concerns
+Initiation Date: 2026-02-17
+Investigation Owner: QA Investigation Cell
 
------------------------------------------------------------
-1. PROBLEM STATEMENT
-Stability report SR-2026-0041 identified film coat peeling on ~22% of tablets and
-dissolution failure (63% vs. spec NLT 75%) at the 3-month accelerated stability
-timepoint (40 C / 75% RH). Investigation initiated to determine root cause.
+1. INCIDENT DESCRIPTION
+During final visual inspection, 142 vials out of 10,000 were rejected for white lint-like particulate appearance. The reject ratio exceeded established AQL limits and triggered formal investigation.
 
------------------------------------------------------------
-2. EVIDENCE GATHERED
+2. INVESTIGATION OBJECTIVES
+- Determine direct and contributing causes.
+- Assess quality and patient risk.
+- Confirm whether process execution and documentation controls were followed.
+- Define immediate containment and long-term CAPA recommendations.
 
-2.1 Batch Record Review
-- Coating operation conducted on 2025-11-10 using pan CP-04.
-- Batch record incomplete: no deviation form filed for temperature or pan speed events.
-- Shift A handover section blank.
+3. SCOPE
+- Manufacturing records for 2025-11-10 batch run.
+- Maintenance and restart controls related to pump-head replacement.
+- Shift handover records and policy compliance.
+- Process trend data and supporting quality reports.
 
-2.2 Operator Log Review (coating_process_log_B-202.txt)
-- Inlet temperature alarm at 08:30 (74 C). Alarm acknowledged. No action taken. Spray
-  continued during excursion.
-- Pan speed reduced to 6 RPM at 10:15. Deviation not escalated.
-- Written handover not completed at shift change (14:00).
-- Shift B operator ran pan at 6 RPM for approximately 2 hours before correcting.
+4. DOCUMENTS REVIEWED
+- MFG-LOG-CF882-B202 (manufacturing logbook)
+- SOP-MFG-044 (line clearance after maintenance)
+- policy.txt compendium (site policies)
+- pan_speed_temp_B-202-process_data.csv (process dataset)
+- stability_report_B-202.txt (quality and trend report)
+- historical_capa_coating.txt (prior events)
 
-2.3 Process Data Review (pan_speed_temp_B-202.csv)
-- Temperature excursion confirmed: 08:28-08:57 (duration ~29 minutes), peak 74.2 C.
-- Pan speed at 6 RPM confirmed: 10:14-16:03 (duration ~5 hours, 49 minutes).
+5. EVIDENCE MATRIX
+E1: Restart occurred with incomplete witness signature on line clearance form.
+E2: Open compliance item transferred verbally at shift handover.
+E3: No real-time deviation initiation despite trigger conditions.
+E4: Throughput pressure documented in timeline notes.
+E5: Historical CAPA trend indicates recurrence risk around handover and documentation timing.
 
-2.4 Equipment Review
-- Thermocouple CP-04 calibration current (last calibrated 2025-09-12). No equipment fault.
-- HVAC unit serviced 2025-10-15. Auto-correction function operating as designed.
-- Pan drive motor inspection: no faults. Operator manually reduced speed.
+6. TIMELINE OF RELEVANT EVENTS
+2025-11-10 06:44 - Maintenance indicates pump-head replacement complete.
+2025-11-10 07:03 - Process resumed while checklist still pending witness sign-off.
+2025-11-10 12:11 - QA walkthrough notes incomplete checklist.
+2025-11-10 13:54 - Verbal handover of unresolved quality item.
+2025-11-10 19:16 - End-of-run packet review identifies witness signature still missing.
+2026-02-15 - Defect trend report confirms reject spike.
+2026-02-17 - Investigation opened.
 
-2.5 Material Review
-- Coating polymer: HPMC E5 lot COA reviewed. All parameters within spec.
-- Core tablets: hardness 10.8 kP average (within spec 8-14 kP). No core material issue identified.
-- API particle size: within specification per incoming QC records.
+7. INTERVIEW SUMMARIES
+7.1 Operator Shift A (J. Thomas)
+- Stated intent was to complete documentation at first hold window.
+- Confirmed schedule recovery pressure communicated by planning.
+- Confirmed no deliberate concealment, but accepted delayed recording.
 
------------------------------------------------------------
-3. TIMELINE OF EVENTS
-  2025-11-10 08:30 : Inlet temp alarm. Operator acknowledges, does not act.
-  2025-11-10 10:15 : Pan speed reduced to 6 RPM by Shift A operator.
-  2025-11-10 13:50 : Verbal-only handover. Temperature and speed deviations not communicated.
-  2025-11-10 16:03 : Shift B corrects pan speed after routine check.
-  2026-02-15 : Stability failure identified at T3.
-  2026-02-17 : Investigation opened.
+7.2 Operator Shift B (R. Singh)
+- Received verbal handover that paperwork was pending.
+- Chose to continue operation expecting end-of-run closure.
+- Confirmed no formal signed transfer of open item.
 
------------------------------------------------------------
-4. PRELIMINARY FINDINGS
+7.3 Supervisor (S. Patel)
+- Confirmed repeated reminders for closure but no enforced line hold.
+- Noted concern about dispatch deadlines.
 
-a. HIGH-TEMPERATURE EXCURSION: Inlet air temperature exceeded specification limit (74 C vs. max
-   60 C) for approximately 29 minutes. Elevated temperature may have caused rapid moisture
-   evaporation, leading to brittle, poorly adhered coat film.
+7.4 QA Floor Monitor
+- Confirmed incomplete checklist observed mid-shift.
+- Requested immediate closure; no immediate stop request documented.
 
-b. EXTENDED LOW PAN SPEED: Pan speed below specification (6 RPM vs. min 7 RPM) for nearly
-   6 hours. Low pan speed reduces tablet-to-tablet movement, causing uneven coat deposition
-   and localized thick/thin areas susceptible to peeling.
+8. CAUSAL ANALYSIS
+8.1 Primary Cause
+- Breakdown in enforcement of mandatory post-maintenance restart control.
+8.2 Contributing Cause 1
+- Inadequate handover control for unresolved compliance item.
+8.3 Contributing Cause 2
+- Throughput pressure influenced operational prioritization.
+8.4 Contributing Cause 3
+- Delay in deviation initiation and GDP-compliant real-time recording.
 
-c. PROCEDURAL NON-COMPLIANCE: SOP-MFG-018 requires immediate escalation of parameter
-   deviations and written shift handover. Neither requirement was fulfilled.
+9. RISK ASSESSMENT
+Severity: High (product quality signal observed)
+Occurrence: Medium (control failures observed in prior trend)
+Detectability: Medium (detected at final visual, not prevented at source)
+Initial Risk Level: High
 
------------------------------------------------------------
-5. STATUS
-Open. Awaiting CAPA generation and sign-off.
+10. CONTAINMENT ACTIONS
+- Quarantine retained and unreleased units.
+- Expanded visual inspection sampling.
+- Temporary requirement: QA witness pre-booking for all post-maintenance restarts.
+- Shift briefing issued on written handover requirement.
 
-Investigator : M. Krishnan
-Reviewed by  : Dr. S. Mehta
-Date         : 2026-02-20
------------------------------------------------------------
+11. PROPOSED CAPA PLAN
+CAPA-1: MES lock to prevent RUN status with blank witness field on FRM-MFG-022.
+CAPA-2: Mandatory deviation auto-prompt if restart event occurs before checklist closure.
+CAPA-3: Supervisor accountability KPI on open item handover compliance.
+CAPA-4: Focused retraining with practical simulation on restart governance.
+CAPA-5: Monthly recurrence review with QA, Production, and Engineering.
+
+12. EFFECTIVENESS CRITERIA
+- 100 percent post-maintenance restarts with complete witness sign-off before RUN.
+- Zero verbal-only transfer of open critical items for 3 consecutive months.
+- At least 90 percent reduction in delayed critical entries within 2 quarters.
+
+13. INVESTIGATION STATUS
+Current state: Open - pending CAPA board approval and final particulate source characterization.
+Planned closure target: 2026-03-31
+
+14. APPROVALS
+Investigator: M. Krishnan
+QA Reviewer: S. Mehta
+Production Reviewer: S. Patel
+Quality Head Approval: Pending
+
 END OF INVESTIGATION RECORD

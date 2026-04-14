@@ -1,86 +1,116 @@
-STANDARD OPERATING PROCEDURE
-Title     : Film Coating Operation for Solid Dosage Forms
-SOP No    : SOP-MFG-018
-Version   : 3.1
-Effective : 2024-06-01
-Dept      : Manufacturing
+﻿STANDARD OPERATING PROCEDURE
+Title: Controlled Line Clearance and Clear-Clean-Check After Maintenance Interventions
+SOP Number: SOP-MFG-044
+Version: 4.3
+Effective Date: 2025-03-15
+Supersedes: SOP-MFG-044 v4.2
+Department: Manufacturing Operations
 
------------------------------------------------------------
 1. PURPOSE
-To define the standard operating procedure for film coating of tablet cores using
-aqueous coating systems in perforated coating pans.
+Define mandatory activities to assure product-contact line readiness after maintenance interventions, and prevent contamination risks associated with incomplete clearance.
 
------------------------------------------------------------
 2. SCOPE
-Applicable to all film coating operations on Equipment CP-01 through CP-06.
+Applies to all filling, transfer, and product-contact support lines where maintenance opens or disturbs closed process pathways.
 
------------------------------------------------------------
-3. EQUIPMENT AND MATERIALS
-- Perforated coating pan (capacity 60-120 kg)
-- Spray gun assembly
-- Coating solution (as per product-specific batch manufacturing record)
-- Calibrated thermometer / thermocouple (calibration current within 12 months)
+3. REFERENCES
+- POL-QA-005 Deviation Management and Escalation
+- POL-QA-012 Good Documentation Practice
+- POL-MFG-031 Shift Handover Governance
+- FRM-MFG-022 Clear-Clean-Check
+- FRM-MFG-031 Shift Handover Form
+- FRM-QA-DEV-01 Deviation Record
 
------------------------------------------------------------
-4. PROCESS PARAMETERS (STANDARD RANGES)
+4. DEFINITIONS
+- Clear-Clean-Check: Structured post-maintenance verification of cleanliness, readiness, and record completeness.
+- Witness: Authorized QA or delegate who confirms checklist completion.
+- Hold State: Operational lockout where processing cannot continue without release.
 
-Parameter                  | Specification
----------------------------|---------------------------
-Inlet air temperature      | 55 C - 60 C
-Exhaust air temperature    | 35 C - 42 C
-Pan speed                  | 7 - 10 RPM
-Spray rate                 | 15 - 25 g/min per gun
-Atomization air pressure   | 2.0 - 3.0 bar
-Coating solution viscosity | 250 - 300 cP
-Tablet bed temp            | 38 C - 45 C
+5. ROLE RESPONSIBILITIES
+5.1 Operator
+- Execute checklist in real time.
+- Record findings and abnormalities.
+- Do not resume processing without completed checklist and witness sign-off.
+5.2 Maintenance Technician
+- Confirm intervention complete and area free of tools or temporary parts.
+- Sign work order closure details.
+5.3 QA Witness
+- Verify checklist evidence and line condition.
+- Sign witness section before release.
+5.4 Shift Supervisor
+- Confirm no open critical record before shift handover and restart.
 
-All parameters must remain within specification throughout the coating cycle.
-Any deviation from specification must be recorded immediately on the Deviation Form
-(Form QA-DEV-01) and escalated to the Shift Supervisor and QA within 30 minutes.
+6. TRIGGER EVENTS REQUIRING FULL CLEAR-CLEAN-CHECK
+- Pump-head replacement
+- Product-contact hose disconnection/replacement
+- Valve seal replacement in product path
+- Nozzle or manifold disassembly
+- Any maintenance opening sterile boundary in processing path
 
------------------------------------------------------------
-5. OPERATING PROCEDURE
+7. PRE-RESTART CONTROL FLOW
+Step 1: Set line status HOLD.
+Step 2: Verify intervention closure with maintenance signature.
+Step 3: Perform physical inspection against FRM-MFG-022 sections.
+Step 4: Record completion timestamps and operator initials.
+Step 5: Obtain QA witness signature.
+Step 6: Supervisor verifies attached checklist in batch packet.
+Step 7: Release HOLD and resume operation.
 
-5.1 Pre-Coating
-  a. Verify equipment cleanliness and line clearance.
-  b. Prepare coating solution per batch record. Check viscosity before use.
-  c. Load tablet cores. Record core weight.
-  d. Start pan rotation at low speed (5 RPM) during pre-heat only.
-  e. Pre-heat pan to target inlet temperature before starting spray.
+8. CHECKLIST EXECUTION DETAIL
+8.1 Area and Accessory Cleanliness
+- Confirm no lint, residues, fibers, or loose packaging debris.
+- Confirm all cleaning labels are current.
+8.2 Product-Contact Path Integrity
+- Confirm fittings locked and seals seated.
+- Confirm no temporary tools or parts remain.
+8.3 Documentation Completeness
+- Confirm form revision current.
+- Confirm mandatory fields completed.
+8.4 Alarm and Status Review
+- Confirm no active unresolved alarms linked to intervention area.
 
-5.2 Coating
-  a. Set pan speed to target value per batch record (within 7-10 RPM range).
-  b. Begin spray. Monitor and record all parameters every 30 minutes.
-  c. If inlet temperature exceeds 60 C, immediately reduce heat supply and notify supervisor.
-  d. Do NOT continue spray during unresolved temperature excursion.
-  e. Pan speed must not be reduced below 7 RPM during active coating. If noise or
-     mechanical issue occurs, stop the pan and notify maintenance.
+9. DOCUMENTATION RULES
+- All entries must be contemporaneous.
+- No blank mandatory fields permitted.
+- Corrections require GDP-compliant correction method.
+- Delayed entry requires documented reason and supervisor approval.
 
-5.3 Post-Coating
-  a. Stop spray. Continue pan rotation during drying phase at 6-8 RPM.
-  b. Discharge tablets when tablet bed temperature drops below 35 C.
-  c. Perform visual inspection. Document findings.
-  d. Complete batch record before transferring to QC.
+10. SHIFT HANDOVER REQUIREMENT
+If checklist remains open at handover:
+- Processing remains HOLD unless QA grants documented exception.
+- Open item transferred via signed FRM-MFG-031.
+- Incoming shift explicitly accepts ownership.
 
-5.4 Shift Handover
-  a. Outgoing operator MUST complete written handover form (Form MFG-HO-03).
-  b. Any deviations, alarms, or parameter excursions occurring during the shift
-     MUST be documented on the handover form before shift end.
-  c. Verbal-only handovers are NOT acceptable.
+11. DEVIATION TRIGGERS
+Immediate deviation required when any of the following occurs:
+- Restart prior to witness sign-off.
+- Missing checklist attachment in active batch packet.
+- Verbal-only transfer of open critical item.
+- Post-facto record reconstruction of critical control step.
 
------------------------------------------------------------
-6. DEVIATIONS
-Any parameter outside stated specification is a deviation and must be handled per
-SOP-QA-021 (Deviation and CAPA Management).
+12. RISK CONTAINMENT GUIDANCE
+- Quarantine affected units where restart control failure occurred.
+- Expand visual and particulate inspection as directed by QA.
+- Stop similar interventions pending briefing if trend indicates repeat issue.
 
------------------------------------------------------------
-7. REFERENCES
-  SOP-QA-021  : Deviation and CAPA Management
-  Form QA-DEV-01 : Deviation Form
-  Form MFG-HO-03 : Shift Handover Form
+13. TRAINING REQUIREMENTS
+- Initial qualification for all operators and supervisors.
+- Annual refresher mandatory.
+- Additional briefing after critical/major related deviations.
 
------------------------------------------------------------
-Prepared by  : R. Patel (Manufacturing)
-Approved by  : Dr. A. Kumar (QA Director)
------------------------------------------------------------
+14. EFFECTIVENESS METRICS
+- Percent interventions with complete checklist before restart.
+- Number of restart deviations per quarter.
+- Number of open critical items transferred at handover.
+- Audit observations related to line clearance governance.
+
+15. RECORD RETENTION
+- FRM-MFG-022 retained with batch packet per retention schedule.
+- Related deviation records retained per QA archival policy.
+
+16. ATTACHMENT - EXAMPLE COMPLETION STANDARD
+- Operator field complete
+- Witness field complete
+- Time stamps in sequence
+- No open critical comments without linked deviation number
+
 END OF SOP

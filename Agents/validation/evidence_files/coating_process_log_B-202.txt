@@ -1,36 +1,154 @@
-COATING PROCESS OPERATOR LOG
-Product   : Metformin HCl 500mg Film-Coated Tablets
-Batch     : B-202
-Equipment : Coating Pan CP-04
-Date      : 2025-11-10
-Shift     : A (06:00 - 14:00) / B (14:00 - 22:00)
+﻿MANUFACTURING LOGBOOK AND SHIFT RECORD
+Document ID: MFG-LOG-CF882-B202
+Site: NOVINTIX Manufacturing Campus - Building 2
+Manufacturing Unit: Sterile Fill and Finish
+Product: Ceftriaxone for Injection 1g (Vial)
+Batch Number: CF-882
+Legacy Cross Reference: B-202
+Date of Manufacture: 2025-11-10
+Prepared By: Production Operations
+Reviewed By: Manufacturing Supervisor
 
------------------------------------------------------------
-TIME     OPERATOR   EVENT
------------------------------------------------------------
-06:15    J. Thomas   Pan startup. Pre-heat initiated. Target inlet temp: 55-60 C.
-06:45    J. Thomas   Coating solution prepared. Viscosity checked: 280 cP (spec 250-300 cP). OK.
-07:00    J. Thomas   Tablet bed loaded: 80 kg. Pan speed set to 8 RPM (spec 7-10 RPM).
-07:10    J. Thomas   Coating spray initiated. Inlet temp: 58 C. Exhaust temp: 38 C.
-08:30    J. Thomas   Inlet temp alarm triggered: 72 C. Alarm acknowledged. No corrective action taken. Spray continued.
-08:45    J. Thomas   Inlet temp: 74 C. Operator noted "temp fluctuating" in logbook. No supervisor notified.
-09:00    J. Thomas   Inlet temp returned to 61 C after HVAC auto-correction.
-10:15    J. Thomas   Pan speed reduced to 6 RPM (below spec). Reason logged: "excessive tablet noise."
-10:15    J. Thomas   Pan speed deviation not escalated to QA.
-11:00    J. Thomas   Visual inspection: coat appearance acceptable.
-13:50    J. Thomas   Handover to Shift B. Verbal handover only. No written entry of temp alarm or pan speed deviation.
+SECTION 1 - BATCH CONTEXT
+- Planned batch size: 10,000 vials
+- Line: FL-02
+- Product contact transfer pump: P-17
+- Maintenance work order linked: WO-MNT-55391
+- Triggering maintenance event: Pump-head replacement due to seal wear
+- Planned restart requirement: Clear-Clean-Check and line clearance with witness sign-off before process continuation
 
-14:00    R. Singh    Shift B start. Pan speed noted at 6 RPM. No correction made.
-14:30    R. Singh    Coating spray continued. Inlet temp stable at 57 C.
-16:00    R. Singh    Pan speed increased to 8 RPM after routine check against batch record.
-18:30    R. Singh    Coating complete. Spray stopped. Drying phase initiated.
-19:00    R. Singh    Tablets discharged. Visual: uniform appearance, no obvious defects.
-19:30    R. Singh    Batch transferred to QC hold area.
+SECTION 2 - PRE-SHIFT AND STARTUP DETAILS
+06:00 - Shift A team assembled for line briefing.
+06:05 - PPE compliance check completed by Shift Lead S. Patel.
+06:08 - Environmental status board reviewed: no open critical alerts.
+06:10 - Utilities check initiated for compressed air, clean steam, and nitrogen support.
+06:14 - Differential pressure in corridor C-2 reading within approved limits.
+06:18 - Maintenance confirmed completion of pump-head replacement on P-17.
+06:21 - Maintenance advised line is mechanically available; documentation packet still being finalized.
+06:24 - Operator J. Thomas requested Clear-Clean-Check form from document station.
+06:29 - Batch packet assembled at line desk; line clearance section noted as incomplete.
+06:34 - Production planning call requested schedule recovery due earlier delay in upstream staging.
+06:38 - Shift supervisor instructed team to prepare for startup while waiting for witness.
+06:42 - First pass visual inspection of transfer path performed by operator only.
+06:45 - Witness signature not yet obtained; no QA representative at line.
+06:49 - Operator note entered: clearance checklist pending witness at startup.
 
------------------------------------------------------------
-SUMMARY OF DEVIATIONS NOTED IN LOG:
-1. Inlet air temperature exceeded upper limit (74 C vs. spec 60 C max) at 08:30-09:00.
-2. Pan speed below specification (6 RPM vs. spec 7-10 RPM) from 10:15 to 16:00.
-3. Deviations not formally escalated or documented on deviation form during shift.
------------------------------------------------------------
-END OF LOG
+SECTION 3 - DETAILED EVENT TIMELINE
+06:55 - Line status set to READY by operator terminal.
+07:00 - Filling preparation resumed.
+07:03 - Product transfer verification done verbally between maintenance and operations.
+07:07 - Clear-Clean-Check form FRM-MFG-022-882 attached but witness field blank.
+07:12 - Shift lead asked QA floor monitor for immediate witness availability.
+07:15 - QA floor monitor assigned to another critical hold review.
+07:19 - Startup continued with instruction to close documentation by first process hold window.
+07:24 - In-process sample point confirmed no immediate visible particulate.
+07:30 - Throughput increased from 145 to 148 vials/min.
+07:35 - Material transfer hose clamp rechecked. No leak identified.
+07:41 - Alarm event count incremented for short transfer pressure dip; auto-recovered.
+07:46 - Operator note: no abnormal vibration on pump P-17.
+07:52 - Packaging side temporary lint observation outside product-contact zone; cleaned by housekeeping.
+07:58 - Shift lead requested checklist closure update.
+08:04 - Operator reported witness still pending.
+08:10 - Throughput increased to 151 vials/min to recover schedule.
+08:16 - Visual check at line camera station acceptable.
+08:21 - No deviation form opened at this point.
+08:27 - Team discussed entering delayed record at next hold.
+08:33 - QA patrol noted incomplete checklist and requested closure before shift end.
+08:38 - Operations acknowledged request.
+08:44 - No process stop initiated.
+08:50 - Documentation pending status unchanged.
+08:57 - Operator entry references pressure alarm acknowledgment and continued operation.
+09:03 - Throughput raised to 156 vials/min.
+09:08 - Environmental settle plate run started by microbiology team.
+09:15 - No direct product-contact intervention.
+09:22 - Batch packet check indicates missing witness signature persists.
+09:29 - Supervisor reminded team to avoid post-facto reconstruction.
+09:36 - Shift planner again requested recovery against dispatch commitment.
+09:43 - Throughput 157 vials/min.
+09:51 - Routine line cleaning around conveyor guards completed.
+10:00 - Throughput 160 vials/min.
+10:08 - Operator entry: line stable, no visible fibers in in-process check.
+10:17 - Batch documentation still open for line clearance witness.
+10:26 - Supervisor phoned QA desk for witness escalation.
+10:33 - QA desk advised witness can be provided after current lot release review.
+10:41 - Operator note: hold event not triggered due schedule pressure.
+10:49 - Throughput 162 vials/min.
+10:57 - Alarm count unchanged.
+11:05 - In-process visual check: acceptable.
+11:14 - Operator note: checklist to be completed before handover.
+11:23 - Shift lead reviewed packet; marked action item for closeout.
+11:31 - Throughput 165 vials/min.
+11:40 - No deviation ticket opened.
+11:48 - Verbal reminder issued by supervisor: no verbal-only carry forward.
+11:56 - Line remained in run state.
+12:05 - QA corridor walk-through requested packet for review.
+12:11 - Packet shown with checklist incomplete.
+12:18 - QA advised immediate escalation if witness unavailable.
+12:27 - Team deferred action to shift-end window.
+12:36 - Throughput 168 vials/min.
+12:44 - No new alarms.
+12:53 - Operator note: planning pressure cited for continuation.
+13:01 - Throughput 169 vials/min.
+13:09 - Batch packet prepared for handover.
+13:17 - Incomplete checklist remained unresolved.
+13:24 - No deviation form attached.
+13:31 - Handover briefing draft started.
+13:39 - Outgoing operator documented pending quality item.
+13:47 - Handover initiated.
+13:54 - Verbal transfer to Shift B operator R. Singh.
+13:58 - No signed written transfer for open item at handover close.
+
+14:07 - Shift B accepted line in running condition.
+14:14 - Operator R. Singh confirmed checklist still unsigned by witness.
+14:22 - Throughput 170 vials/min.
+14:30 - Decision made to continue and close paperwork during reconciliation.
+14:39 - No alarm escalation.
+14:47 - Throughput 169 vials/min.
+14:55 - In-process visual check remains acceptable.
+15:04 - Shift B requested QA support for retroactive review.
+15:13 - QA said review at end of run.
+15:21 - Throughput 168 vials/min.
+15:30 - No product-contact interventions.
+15:38 - Housekeeping round complete.
+15:47 - Throughput 166 vials/min.
+15:55 - Micro trend preliminary normal.
+16:03 - Stability retain sample pull confirmed.
+16:12 - Throughput 164 vials/min.
+16:20 - No deviation ticket open.
+16:29 - Checklist still pending witness close.
+16:38 - Throughput 161 vials/min.
+16:46 - Alarm count increment due short pause.
+16:55 - Hold duration 6 min logged.
+17:03 - Line resumed.
+17:12 - Throughput 158 vials/min.
+17:20 - No visible fibers in immediate line checks.
+17:29 - Throughput 154 vials/min.
+17:37 - Final filling phase started.
+17:46 - Reconciliation prep started.
+17:55 - Line stop planned at 18:30.
+18:04 - Final in-process checks complete.
+18:13 - No additional alarms.
+18:22 - End-of-run checklist compilation started.
+18:30 - Filling run stopped.
+18:39 - Batch packet review identified witness sign-off still missing.
+18:47 - Operator initiated delayed form completion.
+18:56 - Clearance completed field set true by operator.
+19:05 - Witness signature remained false.
+19:16 - QA notified for non-conformance review.
+19:24 - Batch set to conditional hold pending QA decision.
+19:33 - End-of-shift summary signed by R. Singh.
+19:40 - Logbook closed with note: documentation completion occurred post-run.
+
+SECTION 4 - COMPLIANCE OBSERVATIONS
+Observation 1: Restart after maintenance occurred before complete documented and witnessed line clearance.
+Observation 2: Open compliance item transferred via verbal handover.
+Observation 3: Deviation workflow not opened in real time despite policy triggers.
+Observation 4: Schedule recovery pressure repeatedly cited in operator comments.
+
+SECTION 5 - SIGNATURES
+Operator Shift A: J. Thomas
+Operator Shift B: R. Singh
+Supervisor: S. Patel
+QA Review Status: Pending at time of log closure
+
+END OF DOCUMENT

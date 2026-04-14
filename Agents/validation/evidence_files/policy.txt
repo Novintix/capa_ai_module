@@ -1,0 +1,152 @@
+﻿POLICY COMPENDIUM
+Document Title: Site Quality and Manufacturing Governance Policies
+Document File Name: policy.txt
+Master Reference: QMS-POL-COMPENDIUM-2025
+Effective Date: 2025-01-01
+Next Review Date: 2026-12-31
+Owned By: Quality Systems Office
+Approved By: Site Quality Council and Site Leadership Team
+
+INTRODUCTION
+This compendium consolidates operational policies applicable to deviation management, data integrity, line clearance, alarm handling, shift handover, documentation practice, CAPA, training, change control, and investigation governance. It is intended as a single-source policy reference for internal audit, investigation support, and mock-data simulation activities.
+
+POLICY 1 - DEVIATION MANAGEMENT AND ESCALATION
+Policy ID: POL-QA-005
+Purpose:
+- Define expectations for identification, recording, escalation, investigation, and closure of deviations.
+Requirements:
+1. Any departure from approved procedure or specification is a deviation.
+2. Deviations must be recorded in real time.
+3. Product-contact equipment interventions require immediate QA notification when restart controls are incomplete.
+4. A deviation cannot be closed without documented root cause and impact assessment.
+5. Major and Critical deviations require CAPA initiation within 5 business days.
+6. Repeat deviations trigger effectiveness review and management escalation.
+
+POLICY 2 - GOOD DOCUMENTATION PRACTICE (GDP)
+Policy ID: POL-QA-012
+Purpose:
+- Ensure records are attributable, legible, contemporaneous, original, accurate, complete, consistent, enduring, and available.
+Requirements:
+1. Entries must be made at time of activity.
+2. Backdating is prohibited.
+3. Corrections require single-line strike-through, reason, date, and signature.
+4. Blank mandatory fields are non-compliant records.
+5. Verbal claims without record support are not acceptable evidence.
+
+POLICY 3 - DATA INTEGRITY GOVERNANCE
+Policy ID: POL-QA-017
+Purpose:
+- Define controls preventing data manipulation, omission, unauthorized changes, or undocumented reconstruction.
+Requirements:
+1. Audit trails must remain enabled for electronic systems.
+2. Shared credentials are prohibited.
+3. Any delayed entry requires documented justification and supervisory approval.
+4. Data review must include exception and trend checks.
+5. Reconstructed records are classified as data integrity events unless justified and approved.
+
+POLICY 4 - LINE CLEARANCE AND POST-MAINTENANCE RESTART
+Policy ID: POL-MFG-044
+Purpose:
+- Ensure safe and compliant restart after interventions affecting product-contact pathways.
+Requirements:
+1. No restart before Clear-Clean-Check completion.
+2. Witness signature required prior to line release.
+3. Missing witness signature invalidates line clearance record.
+4. Open clearance item at shift boundary requires written handover and line hold unless QA waiver granted.
+5. Any restart without complete clearance triggers deviation and risk assessment.
+
+POLICY 5 - ALARM MANAGEMENT AND RESPONSE
+Policy ID: POL-ENG-031
+Purpose:
+- Standardize handling of equipment and process alarms.
+Requirements:
+1. Alarm acknowledgment is not corrective action.
+2. Recurring alarm without root action requires escalation.
+3. Critical alarm linked to product-contact operations requires immediate hold pending assessment.
+4. Alarm logs must be reconciled with batch chronology during review.
+
+POLICY 6 - SHIFT HANDOVER GOVERNANCE
+Policy ID: POL-MFG-031
+Purpose:
+- Ensure continuity and ownership across shifts.
+Requirements:
+1. Open quality, maintenance, or safety items must be transferred in signed written format.
+2. Verbal handover alone is prohibited for open compliance items.
+3. Incoming shift must acknowledge acceptance of each open item.
+4. Unassigned open item at handover is classified as control failure.
+
+POLICY 7 - INVESTIGATION AND ROOT CAUSE ANALYSIS
+Policy ID: POL-QA-021
+Purpose:
+- Govern investigation quality and root cause standards.
+Requirements:
+1. Investigations must include timeline, evidence matrix, and cause-contribution analysis.
+2. Hypotheses must be evidence-based and testable.
+3. Conclusions require corroboration from at least two independent evidence sources when feasible.
+4. Interim conclusions must be clearly marked and updated with final disposition.
+
+POLICY 8 - CAPA GOVERNANCE
+Policy ID: POL-QA-022
+Purpose:
+- Ensure corrective and preventive actions are timely, measurable, and effective.
+Requirements:
+1. CAPA shall include root cause, action owner, due date, and objective effectiveness criteria.
+2. Effectiveness checks must use measurable outcomes, not only activity completion.
+3. Delayed CAPA requires documented risk acceptance by Quality leadership.
+4. Repeat issue within 12 months triggers CAPA redesign review.
+
+POLICY 9 - TRAINING AND QUALIFICATION
+Policy ID: POL-HR-QMS-014
+Purpose:
+- Ensure personnel competence for GMP-critical tasks.
+Requirements:
+1. Task qualification required before independent execution.
+2. Annual refresher required for SOPs tagged high criticality.
+3. Training effectiveness must be monitored using deviations, audit findings, and observation trends.
+4. Shift supervisors must verify active qualification status before assignment.
+
+POLICY 10 - CHANGE CONTROL
+Policy ID: POL-QA-028
+Purpose:
+- Govern controlled implementation of process, procedure, and system changes.
+Requirements:
+1. Changes affecting product-contact flow require formal impact assessment.
+2. Temporary changes need expiry and rollback controls.
+3. Related SOP and form revisions must be synchronized.
+4. Training must be completed before change effective date.
+
+POLICY 11 - BATCH RECORD REVIEW AND RELEASE SUPPORT
+Policy ID: POL-QA-034
+Purpose:
+- Define minimum checks for record completeness supporting release decisions.
+Requirements:
+1. Mandatory checklist: signatures, timestamps, interventions, holds, alarms, deviations.
+2. Missing critical records prevent release recommendation.
+3. Late entries are reviewed for potential data integrity risk.
+
+POLICY 12 - RISK MANAGEMENT AND ESCALATION
+Policy ID: POL-QA-040
+Purpose:
+- Integrate risk principles into operational decisions.
+Requirements:
+1. Potential patient impact events must be escalated immediately.
+2. Risk scoring considers severity, occurrence likelihood, and detectability.
+3. Interim controls must be documented and tracked to closure.
+
+APPENDIX A - POLICY CROSSWALK
+- SOP-MFG-044 mapped to POL-MFG-044, POL-QA-005, POL-QA-012.
+- FRM-MFG-022 mapped to POL-MFG-044 and POL-QA-034.
+- FRM-MFG-031 mapped to POL-MFG-031 and POL-QA-012.
+- FRM-QA-DEV-01 mapped to POL-QA-005 and POL-QA-021.
+
+APPENDIX B - ENFORCEMENT PRINCIPLES
+- Non-compliance severity determines immediate containment requirements.
+- Repeat findings are treated as systemic risk indicators.
+- Policy exceptions require formal approval and documented rationale.
+
+APPENDIX C - INVESTIGATION SUPPORT NOTES FOR MOCK DATA
+- Include evidence of schedule pressure where relevant.
+- Include both procedural controls and execution failures.
+- Preserve chronology and signature logic for realistic simulation.
+
+END OF POLICY COMPENDIUM

@@ -296,17 +296,12 @@ def _flatten_or_load_file_evidence(payload: Any, source: str, prefix: str) -> Li
 			if _looks_like_file_path(file_path_str):
 				log_error("prepare_evidence", f"Evidence file not found: {file_path_str}")
 
-		# Remove path carrier keys and still keep any inline evidence content in this object.
-		filtered_payload = {
-			key: value
-			for key, value in payload.items()
-			if key not in {"file_path", "path"}
-		}
-		if filtered_payload:
-			records.extend(_flatten_evidence(filtered_payload, source, prefix))
-		return records
-
-		records.extend(_flatten_evidence(payload, source, prefix))
+		# Remove path carrier keys and recursively process remaining values so that
+		# nested file-path lists (e.g. evidence_files: [...]) are properly loaded.
+		for idx, (key, value) in enumerate(
+			{k: v for k, v in payload.items() if k not in {"file_path", "path"}}.items(), start=1
+		):
+			records.extend(_flatten_or_load_file_evidence(value, source, f"{prefix}.{key}"))
 		return records
 
 	text = str(payload).strip()
@@ -400,34 +395,6 @@ def prepare_evidence_node(state: AgentState) -> AgentState:
 		)
 
 		file_evidence_records = [record for record in evidence_records if record.get("file_path")]
-
-		loaded_file_paths = {
-			os.path.normcase(os.path.abspath(str(record.get("file_path"))))
-			for record in file_evidence_records
-			if record.get("file_path")
-		}
-
-		# Always include all files from the agent-level evidence_files folder.
-		# This guarantees every cause is validated against the same full file corpus.
-		for file_path in _list_default_evidence_files():
-			normalized_path = os.path.normcase(os.path.abspath(file_path))
-			if normalized_path in loaded_file_paths:
-				continue
-
-			try:
-				text = _extract_text_from_file(file_path)
-				if text and text.strip():
-					record = {
-						"reference_id": _to_file_reference_name(file_path),
-						"source": "evidence_file",
-						"content": text.strip(),
-						"file_path": file_path,
-					}
-					evidence_records.append(record)
-					file_evidence_records.append(record)
-					loaded_file_paths.add(normalized_path)
-			except Exception as exc:
-				log_error("prepare_evidence", f"Failed to parse evidence file {file_path}: {exc}")
 
 		if not evidence_records:
 			updates: AgentState = {
@@ -592,6 +559,7 @@ def validate_causes_node(state: AgentState) -> AgentState:
 
 				if status == "no_evidence":
 					references = []
+					confidence = 0.0
 				else:
 					references = [
 						_normalize_reference_to_filename(ref, reference_to_filename)
@@ -599,6 +567,11 @@ def validate_causes_node(state: AgentState) -> AgentState:
 					]
 					references = [ref for ref in references if ref]
 					references = list(dict.fromkeys(references))
+
+				# Guardrail: a non-no_evidence status must carry at least one valid reference.
+				if status in {"matched", "partially_matched"} and not references:
+					status = "no_evidence"
+					confidence = 0.0
 
 				normalized_results.append(
 					{
