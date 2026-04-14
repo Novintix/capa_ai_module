@@ -666,9 +666,18 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "qualified_causes": high_confidence_matched_causes,  # Only qualified
             "total_qualified": len(high_confidence_matched_causes),
             "selected_cause": None,  # Will be filled after human selection
+            "selected_cause_id": None,  # Will be filled after human selection
+            "human_decision": None,  # Will be filled after human selection
             "cause_generation_result": state.get("current_cause_generation_result"),
             "validation_result": state.get("validation_result"),
         }
+        
+        # Add to existing iteration outputs
+        existing_iterations = list(state.get("iteration_outputs", []))
+        # Check if this iteration already exists
+        has_current = any(output.get("iteration") == current_loop for output in existing_iterations)
+        if not has_current:
+            existing_iterations.append(iteration_output)
         
         # Build final output for paused state
         execution_time = round(time.time() - float(state.get("start_time") or time.time()), 4)
@@ -686,7 +695,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "validated_causes": high_confidence_matched_causes,  # Only send qualified causes for selection
             "root_cause": None,
             "why_chain": state.get("why_chain", []),
-            "iteration_outputs": [iteration_output],  # Include current iteration details
+            "iteration_outputs": existing_iterations,  # Include all iterations so far
             "validation_summary": {
                 "total_input_causes": (state.get("validation_result") or {}).get("total_input_causes", 0),
                 "total_validated_causes": (state.get("validation_result") or {}).get("total_validated_causes", 0),
@@ -704,6 +713,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "status": "awaiting_human_review",  # Set status in state
             "awaiting_human_review": True,
             "human_review_message": f"Please review and select one of the {len(high_confidence_matched_causes)} qualified cause(s) (≥90% confidence + matched evidence).",
+            "iteration_outputs": existing_iterations,  # Store in state for next iteration
             "final_output": deep_serialize(final_output),
             "node_log": [{"node": "human_review", "status": "awaiting_input", "timestamp": _now()}],
         }
@@ -769,6 +779,22 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
     print(f"   Selected : {selected_cause.get('cause_id')} (confidence: {confidence:.2f})")
     print(f"   Decision : {human_decision}")
     
+    # Update the current iteration output with the selected cause
+    current_loop = int(state.get("current_loop_count", 0))
+    existing_iterations = list(state.get("iteration_outputs", []))
+    
+    # Find and update the current iteration
+    updated_iterations = []
+    for iteration in existing_iterations:
+        if iteration.get("iteration") == current_loop:
+            # Update with selected cause
+            iteration["selected_cause"] = selected_cause
+            iteration["selected_cause_id"] = human_selected_id
+            iteration["human_decision"] = human_decision
+        updated_iterations.append(iteration)
+    
+    print(f"   [DEBUG] Updated iteration {current_loop} with selected cause: {human_selected_id}")
+    
     # Check if human wants to continue or end
     if human_decision == "continue":
         # Continue to next Why iteration
@@ -778,6 +804,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "current_selected_cause": selected_cause,
             "current_cause_confidence": confidence,
             "why_chain": chain_history,
+            "iteration_outputs": updated_iterations,  # Store updated iterations
             "awaiting_human_review": False,
             "human_review_message": None,
             "human_decision": None,  # Reset for next iteration
@@ -795,6 +822,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "current_selected_cause": selected_cause,
             "current_cause_confidence": confidence,
             "why_chain": chain_history,
+            "iteration_outputs": updated_iterations,  # Store updated iterations
             "awaiting_human_review": False,
             "human_review_message": None,
             "final_root_cause": {
@@ -909,11 +937,16 @@ def finalize_node(state: WhyAnalysisV3State) -> dict:
     execution_time = round(time.time() - float(state.get("start_time") or time.time()), 4)
     status = _safe_text(state.get("status"), "error")
     
-    # Build iteration outputs showing the full pipeline for each loop
-    iteration_outputs = []
+    # Get existing iteration outputs (already updated by human_review_node)
+    iteration_outputs = list(state.get("iteration_outputs", []))
     current_loop = int(state.get("current_loop_count", 0))
     
-    if current_loop > 0:
+    # Check if current iteration is already in outputs
+    has_current = any(output.get("iteration") == current_loop for output in iteration_outputs)
+    
+    # Only add if not present (shouldn't happen if human_review_node worked correctly)
+    if current_loop > 0 and not has_current:
+        print(f"   [WARNING] Current iteration {current_loop} not in outputs - adding now")
         # Add current iteration details
         iteration_output = {
             "iteration": current_loop,
@@ -925,10 +958,14 @@ def finalize_node(state: WhyAnalysisV3State) -> dict:
             "validated_causes": state.get("validated_causes_enriched", []),
             "total_validated": len(state.get("validated_causes_enriched", [])),
             "selected_cause": state.get("current_selected_cause"),
+            "selected_cause_id": state.get("current_selected_cause", {}).get("cause_id") if state.get("current_selected_cause") else None,
+            "human_decision": state.get("human_decision"),
             "cause_generation_result": state.get("current_cause_generation_result"),
             "validation_result": state.get("validation_result"),
         }
         iteration_outputs.append(iteration_output)
+    else:
+        print(f"   [INFO] Iteration outputs already complete ({len(iteration_outputs)} iterations)")
 
     final_output = {
         "complaint_id": state.get("complaint_id"),
@@ -958,10 +995,12 @@ def finalize_node(state: WhyAnalysisV3State) -> dict:
 
     print(f"   Final status : {final_output['status']}")
     print(f"   Execution time : {execution_time:.2f}s")
+    print(f"   Total iterations : {len(iteration_outputs)}")
     
     log_node_exit("finalize", {"status": "complete"})
     return {
         "final_output": deep_serialize(final_output),
+        "iteration_outputs": iteration_outputs,  # Also store in state for debugging
         "node_log": [{"node": "finalize", "status": "complete", "timestamp": _now()}],
     }
 
