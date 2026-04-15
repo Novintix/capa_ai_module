@@ -139,14 +139,237 @@ APPENDIX A - POLICY CROSSWALK
 - FRM-MFG-031 mapped to POL-MFG-031 and POL-QA-012.
 - FRM-QA-DEV-01 mapped to POL-QA-005 and POL-QA-021.
 
+POLICY 13 - MANAGEMENT REVIEW GOVERNANCE
+Policy ID: POL-QA-050
+Purpose:
+- Define requirements for effective periodic management review of the quality management system.
+Requirements:
+1. Monthly Manufacturing Quality Review must include standing agenda items for CAPA status, deviation trends, and open commitments.
+2. Open CAPA items must be tiered by residual risk level: Low, Medium, High.
+3. Medium residual risk CAPAs exceeding target closure date by more than 30 days require documented risk acceptance by QA Director.
+4. High residual risk CAPAs exceeding target closure date require immediate Site Director notification and formal risk acceptance within 5 business days.
+5. "In progress" status notation without risk assessment is not acceptable for items older than 60 days past original due date.
+6. Management review minutes must record decisions made, not only status updates.
+7. Any action item that was deprioritized from its original scope or timeline must be noted with risk impact assessment.
+8. Annual substantive review of QMS processes must be supplemented by event-triggered reviews when a critical process failure occurs within a previously reviewed area.
+Note on Policy 13 current status:
+- As of 2025 fiscal year, site management review conducted monthly but without tiered risk assessment criteria for overdue actions.
+- Management Review template last revised 2023; criteria for risk-tier differentiation not present.
+- This gap contributed to failure to escalate ITR-2024-0443 delay in 2025 management reviews.
+- POL-QA-050 is a proposed revision arising from INV-2026-0019; current version (effective date 2025-01-01) does not yet contain requirements 2-8 above.
+- Required revision target: 2026-Q1.
+
+POLICY 14 - IT SYSTEM PROJECT GOVERNANCE FOR QUALITY-CRITICAL CONTROLS
+Policy ID: POL-IT-QMS-015
+Purpose:
+- Ensure that IT project decisions affecting quality-critical system controls are subject to QA oversight and formal risk documentation.
+Requirements:
+1. Any IT project containing a quality system control action (e.g., system lock, audit trail, electronic signature, validation) must be registered in the Quality-Critical IT Project Register.
+2. Priority changes, timeline extensions, or scope reductions for Quality-Critical IT projects require mandatory QA review and written approval before the change takes effect.
+3. If a Quality-Critical IT project is delayed beyond its original target date, a formal risk acceptance document must be generated within 15 business days of identified delay.
+4. Risk acceptance for delayed Quality-Critical IT projects must be signed by QA Director.
+5. Compensating controls must be documented and placed under active monitoring for the duration of any gap period.
+6. QA reviews Quality-Critical IT project status monthly at the Management Review; delays are escalated per POL-QA-050.
+Note on Policy 14 current status:
+- No formal Quality-Critical IT Project Register existed at time of CF-882 event.
+- IT project prioritization process (managed by Operations/IT joint committee) had no mandatory QA approval step.
+- ITR-2024-0443 was downgraded in priority in Q2 2025 without QA notification.
+- This structural gap is identified as a root contributing factor in Why Level 7 of INV-2026-0019.
+- POL-IT-QMS-015 is a proposed new policy arising from INV-2026-0019.
+
+POLICY 15 - PRODUCTION PERFORMANCE KPI GOVERNANCE AND COMPLIANCE ALIGNMENT
+Policy ID: POL-OPS-QMS-022
+Purpose:
+- Ensure that production performance metrics do not create implicit incentive structures that discourage or penalize correct compliance behavior.
+Requirements:
+1. Shift performance scorecards must include compliance adherence as a minimum 25 percent weighting in the overall score.
+2. Compliance-mandated line holds, where the hold decision is confirmed as correct by QA, shall be recorded as a positive compliance action and shall not reduce throughput score proportionately.
+3. Production KPIs must be reviewed by Site Quality Council annually for potential compliance-inhibiting effects.
+4. Any KPI design change must include a formal assessment of compliance behavior impact before implementation.
+5. Production Director is jointly accountable with QA Director for compliance adherence KPI outcomes.
+6. Supervisors who initiate a compliance-mandated hold correctly and promptly are recognized in formal shift feedback.
+7. Failure to initiate a compliance-mandated hold when required is reflected in individual performance review.
+Note on Policy 15 current status:
+- Current production scorecard is 100 percent throughput-based. No compliance adherence weighting.
+- Site committed to KPI revision following Obs-2024-INS-07.
+- Revised KPI framework in draft as of 2025-Q4; not yet approved or implemented.
+- Throughput-only KPI was a directly-cited contributing factor in supervisor behavior analysis for INV-2026-0019.
+- POL-OPS-QMS-022 proposed as formal policy to replace informal direction; target effective date 2026-Q2.
+
+POLICY 16 - CAPA EFFECTIVENESS VERIFICATION STANDARDS
+Policy ID: POL-QA-022-EFF
+Purpose:
+- Supplement POL-QA-022 with minimum standards for what constitutes a valid CAPA effectiveness assessment.
+Requirements:
+1. CAPA effectiveness criteria must be defined at CAPA opening, not at closure review.
+2. For CAPAs involving technical controls (system locks, automated checks, IT-dependent features): effectiveness is not confirmed until control deployment is verified by a system test or QA audit observation.
+3. Activity completion (training done, SOP revised) is a necessary but not sufficient condition for effectiveness confirmation.
+4. Effectiveness reports must explicitly state: (a) what was verified, (b) the method of verification, (c) whether any underlying technical control has been deployed and confirmed.
+5. Residual risk notation requires accompanying risk tier assignment and, if Medium or High, formal risk acceptance documentation.
+6. Effectiveness reviews for CAPAs with "residual risk - medium" or higher must include a timeline for when residual risk is expected to be resolved and who is accountable.
+7. If a CAPA closed as effective is followed by a recurrence within 18 months, the prior effectiveness assessment is retrospectively reviewed for methodology gaps.
+Note on Policy 16 current status:
+- Current CAPA effectiveness review template (form FRM-QA-CAPA-EFF-01, version 2022) contains activity completion checkboxes only.
+- No field requiring technical control deployment confirmation.
+- No requirement for risk-tier assignment for residual risk notation.
+- CAPA-2024-0097-EFF used this template and was declared effective without verifying MES lock deployment.
+- Template revision (FRM-QA-CAPA-EFF-01) planned as part of CAPA from INV-2026-0019.
+
+POLICY 17 - WITNESS AVAILABILITY AND PRE-BOOKING FOR POST-MAINTENANCE RESTARTS
+Policy ID: POL-QA-MFG-WIT-001
+Purpose:
+- Prevent QA witness availability gaps that create conditions for restart control failure.
+Requirements:
+1. All planned post-maintenance interventions of type "Product-Contact Intervention" must have a QA witness pre-assigned at least 2 hours before planned restart window.
+2. QA resource planning for each shift must account for all open work orders involving planned product-contact maintenance on that shift.
+3. If QA witness is not available within 30 minutes of planned restart, shift supervisor must formally delay restart and notify QA Manager.
+4. QA Duty Manager is available on-call for witness-related escalations during all production shifts.
+5. Ad-hoc (unplanned) maintenance interventions on product-contact equipment must prompt immediate QA notification and witness assignment before any restart.
+6. QA witness availability record must appear in the shift planning log; gap in planning is a control deficiency.
+Note on Policy 17 current status:
+- No formal QA witness pre-booking process existed at time of CF-882 event.
+- QA floor monitor was assigned to another critical review at time of planned CF-882 restart.
+- Temporary control (pre-booking) introduced as immediate action following DEV-2026-0019.
+- POL-QA-MFG-WIT-001 is a proposed formal policy from INV-2026-0019 remediation.
+
+POLICY 18 - MATERIALS AND SUPPLIER QUALITY MANAGEMENT
+Policy ID: POL-QA-MAT-018
+Purpose:
+- Ensure all materials used in manufacturing are of confirmed quality and fully traceable from receipt through use.
+Requirements:
+1. All incoming materials must have a Certificate of Analysis (CoA) confirming specification compliance.
+2. Incoming inspection must be completed and approved before any material is released to manufacturing.
+3. Material traceability must be maintained from supplier lot to finished batch: supplier name, CoA reference, and incoming inspection report captured for every material used.
+4. Critical materials in product-contact pathways (seals, hoses, gaskets) must have a particle release risk assessment documented in their material qualification record.
+5. No like-for-like maintenance exemption applies to materials whose geometry, routing, or physical configuration affects particulate shed risk potential.
+6. Supplier change for any product-contact component requires formal change control and re-qualification.
+7. Material disposition records retained for 5 years or product shelf life + 1 year, whichever longer.
+Policy gap identified in INV-2026-0019:
+- Transfer hose exterior abrasion at routing clip zone was not part of any periodic material integrity review.
+- Hose routing change was not evaluated for particulate risk because no re-assessment was triggered.
+- POL-QA-MAT-018 Requirement 4 and 5 are new requirements arising from INV-2026-0019.
+
+POLICY 19 - CONTROLLED ENVIRONMENT AND CLEANROOM MANAGEMENT
+Policy ID: POL-ENV-019
+Purpose:
+- Define requirements for the manufacturing environment to prevent contamination from facility, HVAC, and cleanroom management failures.
+Requirements:
+1. Cleanroom EM must follow a site-validated sampling plan with defined alert and action limits for viable and non-viable contamination.
+2. EM exceedances require immediate investigation, containment, and documented CAPA.
+3. HVAC systems serving product-contact areas must be on a validated preventive maintenance schedule; no PM may lapse by more than 14 days.
+4. Differential pressure between cleanroom grades must be continuously monitored and alarmed; pressure exceedance is an immediate deviation trigger.
+5. Temperature and humidity must remain within validated ranges throughout production; any exceedance must be documented and assessed for product impact.
+6. EM is a supporting negative control: within-specification EM confirms room-level environmental control but does not substitute for in-process product-contact contamination monitoring.
+7. Areas where product-contact maintenance events occurred must have enhanced EM sampling for the next manufacturing campaign.
+Environment status for CF-882: All EM parameters within specification. Environmental contamination confirmed as eliminated cause.
+
+POLICY 20 - IN-PROCESS MEASUREMENT AND MONITORING
+Policy ID: POL-QC-IPC-020
+Purpose:
+- Define in-process measurement and monitoring requirements providing real-time product quality assurance.
+Requirements:
+1. Each production line must have a documented In-Process Control (IPC) plan specifying measurement type, frequency, acceptance limits, and response actions.
+2. IPC plans reviewed by QA and QC; updated annually and after any process or equipment change.
+3. Supplemental IPC must be activated for elevated-risk scenarios including post product-contact maintenance restart.
+4. Supplemental IPC for post-maintenance restart must include: enhanced visual inspection (100 percent for first 200 units), sub-visible particle spot-test, and extended process parameter trending.
+5. In-process measurement results must be recorded contemporaneously.
+6. IPC action-limit exceedance requires immediate HOLD and QA notification.
+7. IPC sampling must have a documented statistical basis; arbitrary reduced sampling without documented justification is a deviation.
+IPC gap identified in INV-2026-0019:
+- No supplemental IPC plan existed for post-maintenance restart.
+- Standard IPC was applied throughout Batch CF-882; elevated risk period was not addressed with heightened measurement.
+- Requirements 3 and 4 are new, arising from INV-2026-0019.
+
+POLICY 21 - EQUIPMENT QUALIFICATION AND CHANGE CONTROL FOR PRODUCT-CONTACT SYSTEMS
+Policy ID: POL-ENG-QUA-021
+Purpose:
+- Ensure product-contact equipment is qualified, change-controlled, and maintained in a validated state throughout operational life.
+Requirements:
+1. All product-contact equipment subject to IQ/OQ/PQ before first use.
+2. Post-maintenance verification (PMV) required after any product-contact intervention before return to production service.
+3. PMV failure constitutes equipment hold; production cannot commence until PMV passes.
+4. Any change to product-contact equipment geometry, material, routing, or support configuration requires formal change control regardless of whether described as maintenance.
+5. Like-for-like maintenance classification must be documented; it does not apply where position, routing, or load conditions are changed even if parts are identical.
+6. Equipment qualification plans must include a particulate-risk section evaluating shed potential for all wetted-path materials.
+7. Calibration schedules must specify accuracy requirements and criticality level; product-contact equipment sensors calibrated at frequency matching process parameter criticality.
+8. Equipment qualification status confirmed before batch start; batch must not start where any critical equipment qualification has lapsed.
+Equipment qualification gap identified in INV-2026-0019:
+- Transfer hose routing changed without change control; no particulate risk re-assessment performed.
+- PMV for P-17 pump-head replacement not completed before filling commenced.
+- Hose exterior inspection criteria not in FRM-MFG-022 or any qualification standard.
+
+POLICY 22 - HUMAN FACTORS AND ERGONOMIC RISK MANAGEMENT
+Policy ID: POL-HR-HF-022
+Purpose:
+- Integrate human factors and ergonomic risk principles into manufacturing process design, shift planning, and compliance system design.
+Requirements:
+1. Shift scheduling must guarantee minimum 8-hour rest intervals for personnel in safety-critical roles; exceptions require documented risk assessment and supervisory approval.
+2. Critical compliance decision points (restart authority, deviation initiation, hold enforcement) must be supported by minimized concurrent tasks and distraction.
+3. Documentation stations for critical control forms must be co-located with or digitally integrated into operator workstations to minimize physical friction of real-time documentation.
+4. Communications creating production urgency signals at critical shift decision windows must be reviewed by QA in incident investigations to assess whether they contributed to compliance decision errors.
+5. Senior management communications about production urgency must include a compliance-first reminder when issued within 24 hours of a planned post-maintenance restart or high-compliance-risk operation.
+6. Shift workload assessment must be performed for batches combining maintenance restart events with schedule-recovery pressure.
+7. Mentor selection for new employee onboarding must include a behavioral compliance assessment; mentors with documented deferred-documentation patterns must complete remedial behavioral training before mentoring duties are assigned.
+Human factors gaps identified in INV-2026-0019:
+- J. Thomas had insufficient rest interval. Document station spatially separated from fill station. Planning urgency email sent the day before a high-risk batch with no compliance qualifier. Mentor transmitted deferred-documentation behavioral norm to mentee without assessment or mitigation.
+
 APPENDIX B - ENFORCEMENT PRINCIPLES
 - Non-compliance severity determines immediate containment requirements.
 - Repeat findings are treated as systemic risk indicators.
 - Policy exceptions require formal approval and documented rationale.
+- Policy exception approvals must reference the specific risk accepted and include a time-bound resolution plan.
+- Verbal policy exception approvals are not permitted; all exceptions must be documented with time, date, approver identification, and scope of exception.
+- Repeat policy exceptions in the same area within 12 months trigger mandatory QA Manager review.
+- Policies are living documents; INV-2026-0019 identified 5 new policies (18-22) and 3 material revisions to existing policies. All listed with their INV-2026-0019 reference for traceability.
 
-APPENDIX C - INVESTIGATION SUPPORT NOTES FOR MOCK DATA
+APPENDIX C - POLICY INTERACTION MAP FOR BATCH CF-882 FAILURE CHAIN
+The following traces how policy obligations were sequentially unmet in the CF-882 event:
+
+Step 1 (2025-11-10 07:00): Restart without witness sign-off.
+  - Policy violated: POL-MFG-044 Section 4, Requirement 1 and 2.
+  - POL-QA-005 Requirement 3 (product-contact equipment intervention with incomplete restart control requires immediate QA notification).
+  - SOP-MFG-044 Section 7 (Step 5: obtain QA witness signature before Step 7: release HOLD).
+
+Step 2 (2025-11-10 07:00-12:11): Production continued for over 5 hours without deviation initiation.
+  - Policy violated: POL-QA-005 Requirement 2 (deviations must be recorded in real time).
+  - SOP-MFG-044 Section 11 (restart prior to witness sign-off is immediate deviation trigger).
+  - POL-QC-IPC-020 Requirement 3 (supplemental IPC not activated): gap policy now added.
+
+Step 3 (2025-11-10 13:54): Verbal handover of open compliance item.
+  - Policy violated: POL-MFG-031 Requirement 1 and 2.
+  - SOP-MFG-044 Section 10 (open checklist at handover requires written transfer and hold unless QA waiver granted).
+
+Step 4 (Equipment): Transfer hose routing changed without change control.
+  - Policy violated (retrospective): POL-QA-028.
+  - Gap policy now added: POL-ENG-QUA-021 Requirements 4 and 5.
+
+Step 5 (2025 throughout): MES lock not deployed for 11+ months.
+  - POL-QA-022 Requirement 3 (delayed CAPA risk acceptance) not invoked. Gap policy: POL-IT-QMS-015.
+
+Step 6 (2025 throughout): KPI reform not completed.
+  - Gap policy: POL-OPS-QMS-022.
+
+Step 7 (2025 management reviews): Repeated "in progress" without escalation.
+  - Gap policy: POL-QA-050.
+
+Step 8 (Training): Three overdue simulation modules for directly relevant scenarios.
+  - POL-HR-QMS-014 Requirement 4 not met (qualification not verified before batch assignment).
+  - Gap policy: POL-HR-HF-022 Requirements 1 and 7.
+
+Step 9 (Measurement): Standard IPC applied; no supplemental measurement for post-maintenance restart.
+  - Gap policy: POL-QC-IPC-020 Requirements 3 and 4.
+
+Step 10 (Human factors): Rest interval insufficient; spatially separated documentation; urgency communication without compliance reminder; mentor-transmitted behavioral norm.
+  - Gap policy: POL-HR-HF-022 Requirements 1, 3, 5, and 7.
+
+APPENDIX D - INVESTIGATION SUPPORT NOTES FOR MOCK DATA
 - Include evidence of schedule pressure where relevant.
 - Include both procedural controls and execution failures.
 - Preserve chronology and signature logic for realistic simulation.
+- Policy cross-references are consistent with SOP revision history and CAPA dossier dates.
+- Regulatory observation dates and response timelines are internally consistent.
+- All systemic gaps identified in Appendix C are traceable through the evidence files in this mock data set.
+- New policies 18-22 represent proposed instruments arising from INV-2026-0019; they did not exist on the batch event date.
+- Evidence files collectively cover all six Ishikawa categories: Man (employee_training_records, investigation Section 17.1), Machine (coating_process_log Sections 6/10/13, investigation Section 17.2), Method (film_coating_sop, investigation Section 17.3), Measurement (coating_process_log Sections 12-13, investigation Section 17.4), Material (coating_process_log Section 11, stability_report Appendix C, investigation Section 17.5), Environment (coating_process_log Section 7, stability_report Appendix F, investigation Section 17.6).
 
 END OF POLICY COMPENDIUM

@@ -92,4 +92,195 @@ RECOMMENDED PREVENTIVE CONTROLS FOR FUTURE BATCHES
 - Shift-end checklist with forced acknowledgment of open compliance actions.
 - Monthly recurrence review meeting involving Production, QA, and Engineering.
 
+CAPA RECORD 5
+CAPA ID: CAPA-2025-0038-EFF
+Date Opened: 2025-08-01
+Date Closed: 2025-10-30
+Area: Effectiveness review of CAPA-2025-0038 (data integrity and delayed recording)
+Background:
+- CAPA-2025-0038 introduced MES real-time checkpoint prompts and mid-shift documentation audits.
+- Effectiveness review initiated at 3-month mark.
+Effectiveness Findings:
+- Delayed entries reduced by 62 percent as reported; however, reduction was concentrated in non-critical documentation.
+- Critical control records (line clearance, restart verification) showed only 38 percent reduction in delayed entries.
+- Root of residual gap: MES checkpoint prompts were silenced by operators in high-throughput periods; system allowed mute without generating alert.
+Actions from Effectiveness Review:
+- Checkpoint muting now generates supervisory alert.
+- Critical record categories separated from general documentation in delay tracking.
+- Escalation added: two delayed critical records in one shift generates automatic QA notification.
+Residual Risk:
+- Behavioral tendency to defer documentation under schedule pressure remains; system prompts alone are insufficient without cultural reinforcement.
+Lessons Learned:
+- System-level prompts without enforcement teeth carry limited effectiveness.
+- Behavioral change requires management signaling that throughput is not valued over compliance.
+- This lesson was not yet translated into KPI reform at the time this CAPA closed.
+
+CAPA RECORD 6
+CAPA ID: CAPA-2025-0141
+Date Opened: 2025-10-14
+Date Closed: Open (pending)
+Area: MES system lock deployment for restart gating (ITR-2024-0443)
+Background:
+- Raised as formal CAPA to track implementation of the MES line-lock feature identified in CAPA-2024-0097.
+- ITR-2024-0443 was raised 2024-09-14; original go-live was 2025-Q1.
+- By Q3 2025 the feature had not been deployed due to UAT defects.
+Root Cause of Implementation Delay:
+- IT project prioritization: ITR-2024-0443 was downgraded in priority queue in Q2 2025 when a higher-priority ERP migration consumed IT capacity.
+- QA did not formally escalate the delay; CAPA tracking showed activity status as "in progress" without flagging schedule slip.
+- No formal risk acceptance document was generated when go-live slipped past 2025-Q1.
+Actions:
+- IT project restored to priority status in Q4 2025.
+- UAT scheduled for completion 2025-12-31.
+- Go-live target revised to 2026-Q1.
+- QA CAPA owner must sign off on go-live confirmation before this CAPA can close.
+- Compensating control (supervisor dual sign-off) codified in SOP-MFG-044 v4.3 until system lock live.
+Residual Risk:
+- Until deployment confirmed, restart control relies entirely on human compliance.
+- Pattern of slippage in this action indicates systemic project governance weakness.
+Status at time of batch CF-882 event (2025-11-10):
+- ITR-2024-0443 still in UAT. MES lock not deployed. This gap is a direct contributing factor to the batch event.
+
+CAPA RECORD 7
+CAPA ID: CAPA-2025-0189
+Date Opened: 2025-12-10
+Date Closed: Open
+Area: KPI governance misalignment - throughput pressure contributing to compliance failures
+Background:
+- Opened following 2024 regulatory inspection observation Obs-2024-INS-07 and subsequent internal trend analysis.
+- Observer noted implicit pressure created by production throughput KPIs that do not include compliance behavior weighting.
+Investigation Findings:
+- Current shift performance score is 100 percent throughput-based (vials produced vs. planned).
+- Compliance-related line holds reduce shift score regardless of whether the hold was a correct compliance action.
+- Supervisors reported informally that line holds for documentation reasons generate negative comments in daily operations reviews.
+- Three separate interviews in CAPA-2024-0097 and CAPA-2025-0038 cited "fear of negative performance impact" when asked about delay in compliance stops.
+Proposed Actions:
+- Revise shift performance scorecard to include 30 percent compliance adherence weighting.
+- Add specific positive credit for compliance-mandated holds executed correctly and timely.
+- Remove throughput penalty for holds where root cause is confirmed as compliance-mandated.
+- Implement communication campaign from site leadership reinforcing compliance-first culture.
+Actions Status:
+- Scorecard revision: draft submitted to Production Director and HR; pending approval.
+- Leadership communication: Site Director issued memo November 2025; QA assessing whether behavioral impact is measurable.
+- Formal KPI rollout: planned 2026-Q1.
+Connection to batch CF-882 event:
+- KPI misalignment is identified as a deep systemic contributing factor in INV-2026-0019.
+- This CAPA represents the organizational-level corrective action for the throughput-pressure layer of the causal chain.
+
+CAPA RECORD 8
+CAPA ID: CAPA-2024-0097-EFF
+Date Opened: 2024-12-06
+Date Closed: 2025-02-28
+Area: Effectiveness review for CAPA-2024-0097 (restart governance and handover)
+Background:
+- CAPA-2024-0097 added the no-restart clause to SOP-MFG-044 and required e-batch packet checklist validation.
+- Effectiveness check planned 3 months post-closure.
+Effectiveness Results:
+- 11 maintenance restarts audited in the 3-month window.
+- 10 restarts: complete paperwork before RUN status. Compliant.
+- 1 restart: delayed entry of witness sign-off; documented as minor deviation.
+- Effectiveness declaration: "Effective with residual risk."
+Critical Gap in Effectiveness Assessment:
+- The effectiveness check verified whether operators completed paperwork, but did not verify whether the MES system lock (ITR-2024-0443) had been deployed as the intended technical control.
+- Effectiveness checklist used activity completion (SOP revised, training done, 10/11 audits passed) rather than system control verification as primary criteria.
+- The "residual risk" notation was documented but did not trigger re-escalation or risk acceptance documentation.
+- No formal risk acceptance was signed by QA leadership for the period between CAPA-2024-0097 closure and MES lock deployment.
+What This Means:
+- CAPA-2024-0097 was closed while the core technical control (MES lock) was unconfirmed deployed.
+- This created a false assurance that the risk was adequately controlled.
+- 11 months later, when batch CF-882 event occurred, the same gap that CAPA-2024-0097 was designed to prevent was still present.
+Lesson:
+- Effectiveness criteria must explicitly confirm technical control deployment, not infer it from activity completion.
+- Management review should have caught this gap during the 11-month window between closure and recurrence.
+
+MANAGEMENT REVIEW MINUTES EXTRACT (RELEVANT PORTIONS)
+Meeting: Monthly Manufacturing Quality Review
+Date: 2025-03-15
+Attendees: QA Director D. Verma, Production Director A. Blum, Engineering Manager C. Roy, QA Manager (CAPA lead)
+Agenda Item 3 - CAPA Dashboard:
+  - CAPA-2024-0097-EFF: Declared effective. Residual risk noted as medium. No further action assigned.
+  - ITR-2024-0443: Reported as "in progress." No formal escalation of schedule slip. Meeting minutes do not record any discussion of risk implications of delayed MES lock.
+  - Action: None assigned regarding ITR-2024-0443 delay.
+Date: 2025-06-12
+Agenda Item 2 - Open CAPA Status:
+  - CAPA-2025-0141: Created to track ITR-2024-0443. Status: "In progress."
+  - Discussion: A. Blum asks about go-live timeline. C. Roy states Q3 reforecast due to ERP migration resource conflict.
+  - D. Verma notes risk but does not formally invoke risk escalation protocol.
+  - Action: C. Roy to provide updated schedule. (Schedule was updated; no formal risk acceptance document generated.)
+Date: 2025-09-18
+Agenda Item 4 - Trend Review:
+  - Restart compliance rate: 97.8 percent over last quarter. Within target (98 percent) threshold: borderline.
+  - Discussion: Noted as borderline but no escalation triggered.
+  - ITR-2024-0443: Q4 2025 go-live target stated. No discussion of compensating controls.
+  - Action: None assigned. Meeting notes record "monitoring."
+Date: 2025-12-11
+Agenda Item 2 - Incident Review (CF-882, DEV-2026-0019 pre-investigation):
+  - D. Verma presents summary of batch CF-882 event.
+  - A. Blum acknowledges throughput pressure context.
+  - Root cause discussion: premature restart, documentation failure, verbal handover.
+  - Decision: Open formal investigation under INV-2026-0019.
+  - MES lock deployment: C. Roy commits to January 2026 go-live. No contingency plan if delayed again.
+
+REGULATORY OBSERVATION HISTORY
+Observation 1 - Obs-2024-INS-07
+Inspection date: 2024-10-22
+Inspector: Regulatory Authority (site not publishing agency name in internal dossier)
+Observation text (paraphrased): "Site's production performance scorecard does not appear to include compliance behavioral indicators. Throughput-only KPIs may create implicit pressure to prioritize production continuity over compliance actions, particularly for line holds and documentation requirements."
+Site Response: Committed to KPI review within 12 months; formal response filed 2024-11-20.
+Status at batch CF-882 event: KPI review not yet completed. Open commitment 13 months post-observation.
+Observation 2 - Obs-2024-INS-08
+Inspection date: 2024-10-22
+Observer text (paraphrased): "SOP-MFG-044 references a planned MES system lock for witness sign-off verification, but the control has not been deployed. The compensating manual control was noted as dependent on supervisor judgment in schedule-pressured environments."
+Site Response: Confirmed deployment timeline (Q1 2025) and compensating controls in SOP v4.1.
+Status at batch CF-882 event: MES lock still not deployed 13 months post-observation. No formal documented risk acceptance for the extended gap period.
+
+TRAINING HISTORY AND EFFECTIVENESS DATA (CROSS-REFERENCE)
+SOP-MFG-044 training completions (FL-02 team):
+  - 2024-03-20: SOP v4.1 training following CAPA-2024-0097. Completion rate 100 percent. Assessment score average: 91 percent.
+  - 2024-11-15: SOP v4.2 training. Completion rate 100 percent. Assessment score average: 89 percent.
+  - 2025-03-28: SOP v4.3 training. Completion rate 100 percent. Assessment score average: 88 percent.
+Operator J. Thomas training record:
+  - SOP-MFG-044 v4.1: Completed 2024-03-22. Score: 87 percent.
+  - SOP-MFG-044 v4.2: Completed 2024-11-21. Score: 90 percent.
+  - SOP-MFG-044 v4.3: Completed 2025-04-02. Score: 91 percent.
+  - GDP refresher (CAPA-2025-0038 action): Completed 2025-06-14. Score: 88 percent.
+  - All training current at time of batch event.
+Observation audit results following v4.3 training (90-day audit per SOP Section 17.2):
+  - Audit period: 2025-04-15 to 2025-07-15.
+  - Audited restarts: 9.
+  - Compliant: 8 (89 percent). One delayed checklist closure (minor).
+  - Report to QA Manager: Noted as "near-target; monitor." No additional action assigned.
+  - Implication: Compliance rate slightly below 90 percent threshold but treated as adequate without follow-up.
+Key finding from training records:
+  - All operators were trained and scores were adequate.
+  - When behavioral compliance was audited, rate was borderline at 89 percent.
+  - Training system had no mechanism to differentiate between operators who understood the rule and those who would apply it under schedule pressure.
+  - This gap was identified theoretically in CAPA-2025-0038 but the corrective scenario-based training was not yet deployed by batch CF-882 event date.
+
+SYSTEMIC PATTERN ANALYSIS (UPDATED THROUGH 2025)
+Pattern A: Technical control deployment lag
+- MES lock identified as required control in CAPA-2024-0097 (closure Dec 2024).
+- MES lock still undeployed at batch CF-882 event (Nov 2025): 11-month gap.
+- Root: IT project prioritization; QA did not formally escalate schedule slippage; no risk acceptance document generated.
+- Indicator: When technical controls are dependent on IT project delivery, there is no adequate escalation mechanism to force resolution or document accepted risk.
+Pattern B: Effectiveness check inadequacy
+- CAPA-2024-0097-EFF declared effective based on activity completion, not technical control confirmation.
+- CAPA-2025-0038-EFF noted "residual risk" but did not trigger re-escalation.
+- Root: Effectiveness check templates focus on activity completion checkboxes rather than outcome verification.
+- Indicator: Systematic weakness in how effectiveness is defined and measured across the CAPA portfolio.
+Pattern C: Management review insufficient to catch systemic gaps
+- Monthly management review received consistent "in progress" status on delayed items.
+- No formal risk acceptance documentation generated for extended gaps.
+- Meeting minutes show awareness but no formal escalation for items at medium-high residual risk.
+- Root: Review process lacks decision criteria that differentiate "in progress and on track" from "in progress with acceptable delay" from "in progress with unacceptable risk requiring formal acceptance."
+Pattern D: KPI structure driving behavior
+- Throughput-based KPI: confirmed by regulatory observer and internal interview data.
+- Site committed to remedy in 2024; not remedied by batch CF-882 event in 2025.
+- Root: KPI redesign requires cross-functional leadership alignment; was deprioritized during ERP migration period.
+Pattern E: Repeat verbal handover failure
+- First verbal handover failure: CAPA-2024-0097.
+- Second verbal handover failure: batch CF-882 (2025).
+- Interval: approximately 15 months.
+- Process controls added after 2024 event did not prevent recurrence.
+- Root: Written handover requirement added to SOP but no system enforcement; behavioral culture continued from prior practice; no behavioral consequence for verbal carry-forward.
+
 END OF DOSSIER
