@@ -37,11 +37,47 @@ router = APIRouter(prefix="/capa", tags=["CAPA Risk Analysis"])
 # REQUEST MODELS
 # ══════════════════════════════════════════════════════════════════════════════
 
+class EnrichedInput(BaseModel):
+    """
+    Structured complaint fields provided directly by the UI from MongoDB data.
+    When present, the orchestrator skips the full LLM context extraction and
+    maps these fields straight into the `extracted` dict, saving one LLM call.
+    Only urgency and death_or_injury are still inferred via a lightweight LLM check.
+
+    All fields are optional — any missing field falls back to the raw_input text.
+    Field names mirror the EXTRACTION_PROMPT enriched output exactly.
+    """
+    core_issue:           Optional[str] = Field(None, description="Concise 1-sentence issue description")
+    complaint_id:         Optional[str] = Field(None, description="Business complaint ID e.g. CP-9902")
+    product:              Optional[str] = Field(None, description="Product name / identifier")
+    product_type:         Optional[str] = Field(None, description="Product type / category")
+    date:                 Optional[str] = Field(None, description="Date of complaint / awareness")
+    source:               Optional[str] = Field(None, description="Complaint source e.g. Customer, Internal")
+    market_country:       Optional[str] = Field(None, description="Market / country of origin")
+    severity_hint:        Optional[str] = Field(None, description="Severity level: Critical/High/Medium/Low")
+    issue_type:           Optional[str] = Field(None, description="Issue category e.g. Hardware Failure")
+    regulatory_standards: Optional[list] = Field(None, description="Applicable standards e.g. ['ISO 13485']")
+    suspected_cause:      Optional[str] = Field(None, description="Preliminary suspected cause")
+    urgency_reason:       Optional[str] = Field(None, description="Reason for urgency if applicable")
+    region:               Optional[str] = Field(None, description="Geographic region")
+    batch_number:         Optional[str] = Field(None, description="Batch / lot number if known")
+
+
 class CAPARequest(BaseModel):
-    raw_input:  str           = Field(..., min_length=1,
-                               description="Free-text engineer complaint or issue description")
-    thread_id:  Optional[str] = Field(None,
-                               description="Optional thread ID — auto-generated if not supplied")
+    raw_input:      Optional[str]  = Field(None,
+                                   description=(
+                                       "Free-text complaint description. "
+                                       "Optional when enriched_input is provided — "
+                                       "core_issue is used as the validation text in that case."
+                                   ))
+    thread_id:      Optional[str]  = Field(None,
+                                   description="Optional thread ID — auto-generated if not supplied")
+    enriched_input: Optional[EnrichedInput] = Field(None,
+                                   description=(
+                                       "Structured complaint fields from the UI/MongoDB. "
+                                       "When provided, raw_input is not required — core_issue "
+                                       "is used for validation and the LLM extraction step is skipped."
+                                   ))
 
 
 class CorrectionRequest(BaseModel):
@@ -211,17 +247,30 @@ async def analyze(request: CAPARequest):
     thread_id = request.thread_id or f"capa-{uuid.uuid4().hex[:12]}"
     config    = _config(thread_id)
 
-    try:
-        result = orchestrator_graph.invoke(
-            {
-                "raw_input":        request.raw_input,
-                "agent_results":    [],
-                "node_log":         [],
-                "errors":           [],
-                "correction_count": 0,
-            },
-            config=config,
+    # Resolve the text used for validation + LLM extraction.
+    # Priority: explicit raw_input → enriched_input.core_issue → error
+    raw_input = request.raw_input
+    if not raw_input and request.enriched_input:
+        raw_input = request.enriched_input.core_issue
+    if not raw_input:
+        raise HTTPException(
+            status_code=422,
+            detail="Provide either raw_input or enriched_input.core_issue."
         )
+
+    # Build initial state — include enriched_input if the UI provided it
+    initial_state = {
+        "raw_input":        raw_input,
+        "agent_results":    [],
+        "node_log":         [],
+        "errors":           [],
+        "correction_count": 0,
+    }
+    if request.enriched_input:
+        initial_state["enriched_input"] = request.enriched_input.model_dump(exclude_none=True)
+
+    try:
+        result = orchestrator_graph.invoke(initial_state, config=config)
     except Exception as exc:
         raise HTTPException(
             status_code=500,

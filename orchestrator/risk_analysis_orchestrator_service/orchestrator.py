@@ -65,7 +65,7 @@ from Agents.aireasoning.graph   import aireasoning_graph
 from Agents.similar_cases.graph import similar_cases_graph
 
 from config.aws_bedrock_config import get_llm
-from .prompts  import EXTRACTION_PROMPT, VALIDATION_PROMPT
+from .prompts  import EXTRACTION_PROMPT, VALIDATION_PROMPT, SAFETY_CHECK_PROMPT
 from .payloads import build_all_payloads
 from .state    import RiskAnalysisState
 
@@ -337,6 +337,10 @@ def request_correction_node(state: RiskAnalysisState) -> dict:
 
 def route_after_validation(state: RiskAnalysisState) -> str:
     if state.get("validation_passed"):
+        # If the UI already provided structured fields, skip the LLM extraction
+        # and go straight to the lightweight safety check node instead.
+        if state.get("enriched_input"):
+            return "enriched_context_node"
         return "context_node"
     if state.get("awaiting_correction"):
         return "request_correction_node"
@@ -380,6 +384,73 @@ def context_node(state: RiskAnalysisState) -> dict:
         "complaint_id": complaint_id,
         "node_log":     [{"node": "context_node", "urgency": urgency,
                           "complaint_id": complaint_id, "timestamp": _now()}],
+    }
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NODE 1b — ENRICHED CONTEXT NODE  (bypass path)
+# Used when the UI provides structured complaint fields directly (enriched_input).
+# Skips the full LLM extraction — only runs a lightweight safety check to
+# determine `urgency` and `death_or_injury`, which cannot be reliably inferred
+# from structured fields alone.
+# Maps enriched_input fields → `extracted` dict (same shape as context_node output).
+# ══════════════════════════════════════════════════════════════════════════════
+
+def enriched_context_node(state: RiskAnalysisState) -> dict:
+    print("\n[STEP 1b] ⚡ Enriched Context Node: using structured UI input (skipping LLM extraction)...")
+
+    ei = state.get("enriched_input", {}) or {}
+
+    # ── Lightweight LLM safety check ─────────────────────────────────────────
+    # Only infer the two flags the UI cannot provide reliably.
+    description = ei.get("core_issue") or state.get("raw_input", "")
+    urgency        = False
+    death_or_injury = False
+
+    try:
+        llm    = get_llm()
+        resp   = llm.invoke(f"{SAFETY_CHECK_PROMPT}\n\nComplaint: {description}")
+        clean  = resp.content.strip().replace("```json", "").replace("```", "")
+        parsed = json.loads(clean)
+        urgency         = bool(parsed.get("urgency", False))
+        death_or_injury = bool(parsed.get("death_or_injury", False))
+    except Exception as exc:
+        print(f"   ⚠ Safety check LLM error ({exc}) — defaulting to False")
+
+    # ── Map enriched_input → extracted (same shape as context_node output) ────
+    extracted = {
+        "core_issue":           ei.get("core_issue")           or description,
+        "complaint_id":         ei.get("complaint_id")         or state.get("complaint_id"),
+        "product":              ei.get("product"),
+        "product_type":         ei.get("product_type"),
+        "date":                 ei.get("date"),
+        "source":               ei.get("source"),
+        "market_country":       ei.get("market_country"),
+        "severity_hint":        ei.get("severity_hint"),
+        "issue_type":           ei.get("issue_type"),
+        "death_or_injury":      death_or_injury,          # from LLM
+        "regulatory_standards": ei.get("regulatory_standards", []),
+        "suspected_cause":      ei.get("suspected_cause"),
+        "urgency_reason":       ei.get("urgency_reason"),
+        "region":               ei.get("region"),
+        "batch_number":         ei.get("batch_number"),
+    }
+
+    complaint_id = extracted.get("complaint_id") or state.get("complaint_id") or "UNKNOWN"
+
+    print(f"   Urgency        : {urgency}")
+    print(f"   Death/Injury   : {death_or_injury}")
+    print(f"   Complaint ID   : {complaint_id}")
+    print(f"   Source         : {extracted.get('source')}")
+    print(f"   Severity hint  : {extracted.get('severity_hint')}")
+
+    return {
+        "urgency":      urgency,
+        "extracted":    extracted,
+        "complaint_id": complaint_id,
+        "node_log": [{"node": "enriched_context_node", "mode": "structured_bypass",
+                      "urgency": urgency, "death_or_injury": death_or_injury,
+                      "complaint_id": complaint_id, "timestamp": _now()}],
     }
 
 
@@ -926,6 +997,7 @@ def build_orchestrator():
     g.add_node("input_validator",         input_validator)
     g.add_node("request_correction_node", request_correction_node)
     g.add_node("context_node",            context_node)
+    g.add_node("enriched_context_node",   enriched_context_node)
     g.add_node("payload_builder_node",    payload_builder_node)
     g.add_node("A5_detection_agent",      A5_detection_agent)
     g.add_node("A1_similar_cases_agent",  A1_similar_cases_agent)
@@ -946,19 +1018,18 @@ def build_orchestrator():
         route_after_validation,
         {
             "context_node":            "context_node",
+            "enriched_context_node":   "enriched_context_node",
             "request_correction_node": "request_correction_node",
             END:                       END,
         }
     )
 
     # ── Correction node → END ─────────────────────────────────────────────────
-    # Workflow pauses here. correction_response written to state.
-    # router.py reads it and returns it as the API response.
-    # Resumes via POST /capa/correct/{thread_id}.
     g.add_edge("request_correction_node", END)
 
-    # ── Sequential: context → payload builder ─────────────────────────────────
-    g.add_edge("context_node", "payload_builder_node")
+    # ── Both context paths converge on payload_builder_node ──────────────────
+    g.add_edge("context_node",          "payload_builder_node")
+    g.add_edge("enriched_context_node", "payload_builder_node")
 
     # ── Fan-out: payload builder → A5, A1, A2, A3 in parallel ────────────────
     g.add_conditional_edges(
