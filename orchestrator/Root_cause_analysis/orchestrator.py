@@ -17,8 +17,12 @@ Flow:
                                 └─► finalize_node → END
 
 HITL Resume:
-  HITL #2: graph.invoke({"selected_category": "..."}, config)
-  HITL #3: graph.invoke({"action_plan_confirmed": True|False}, config)
+  HITL #2: graph.update_state(config, {"selected_category": "..."}); graph.invoke(None, config)
+  HITL #3: graph.update_state(config, {"action_plan_confirmed": True|False}); graph.invoke(None, config)
+
+Graph is compiled with interrupt_before=["await_category_selection", "await_action_plan"].
+This creates true LangGraph pause points so invoke(None) actually resumes execution
+rather than returning the completed-thread state unchanged.
 """
 
 from __future__ import annotations
@@ -173,6 +177,25 @@ def _common_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+# ── Retry helper for child orchestrator calls ────────────────────────────────────────
+_MAX_RETRIES = int(os.getenv("RCA_CHILD_RETRIES", "1"))
+
+
+def _retry_call(fn, *args, retries: int = _MAX_RETRIES):
+    """Call *fn* with automatic retry on failure."""
+    last_exc = None
+    for attempt in range(1 + retries):
+        try:
+            return fn(*args)
+        except Exception as exc:
+            last_exc = exc
+            if attempt < retries:
+                log_error("retry_call",
+                          f"Attempt {attempt + 1} failed: {exc}. Retrying...")
+                time.sleep(2)
+    raise last_exc
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # NODE 1 — INITIALIZE
 # Validates input and sets up state
@@ -233,7 +256,7 @@ def run_fishbone_node(state: RCAGraphState) -> dict:
 
     try:
         fishbone_input = FishboneV3Input(**_common_payload(original_input))
-        fishbone_output = _get_fishbone_orchestrator().analyze(fishbone_input)
+        fishbone_output = _retry_call(_get_fishbone_orchestrator().analyze, fishbone_input)
         fishbone_serialized = deep_serialize(fishbone_output)
         categories = _extract_categories(fishbone_serialized)
 
@@ -289,15 +312,24 @@ def run_fishbone_node(state: RCAGraphState) -> dict:
 def _resolve_fishbone_state(complaint_id: str, state: RCAGraphState) -> tuple:
     """Return (fishbone_final, categories) — fetching latest from Redis if available."""
     fishbone_final = state.get("fishbone_output") or {}
+    initial_status = (
+        fishbone_final.get("status", "") if isinstance(fishbone_final, dict) else ""
+    )
+    redis_succeeded = False
     fsm = _get_fishbone_session_manager()
     if fsm is not None:
         try:
             latest = fsm.get_state(complaint_id)
             if latest:
                 fishbone_final = latest
+                redis_succeeded = True
         except Exception as exc:
             log_error("_resolve_fishbone_state",
                       f"Could not read fishbone session: {exc}", complaint_id)
+    if not redis_succeeded and str(initial_status).upper() == "WAIT_FOR_HUMAN":
+        log_error("_resolve_fishbone_state",
+                  "WARNING: Using stale pre-decision fishbone data — Redis unavailable",
+                  complaint_id)
     cached = list(state.get("available_categories") or [])
     live = _extract_categories(fishbone_final)
     categories = live if live else cached
@@ -306,24 +338,40 @@ def _resolve_fishbone_state(complaint_id: str, state: RCAGraphState) -> tuple:
 
 def _build_enriched_evidence(fishbone_final: Dict[str, Any],
                              selected_category: str,
-                             original_input: Dict[str, Any]) -> str:
-    """Build evidence string enriched with fishbone category-cause context."""
-    categorized_causes = (
-        fishbone_final.get("all_categorized_causes")
-        or fishbone_final.get("causes")
-        or []
-    )
-    selected_causes = [
-        c for c in categorized_causes
-        if _category_from_cause(c) == selected_category
-    ]
-    cause_lines = [f"- {c.get('cause_text', 'Unknown cause')}" for c in selected_causes]
-    category_context = (
-        f"Fishbone selected category: {selected_category}.\n"
-        "Category causes considered:\n"
-        + ("\n".join(cause_lines) if cause_lines else "- No category-specific causes available")
-    )
+                             original_input: Dict[str, Any],
+                             selected_cause_text: Optional[str] = None,
+                             selected_cause_id: Optional[str] = None) -> str:
+    """Build evidence string enriched with fishbone cause context.
+
+    If a specific cause is provided (selected_cause_text / selected_cause_id),
+    the evidence focuses on that single cause.  Otherwise falls back to listing
+    all causes in the selected category.
+    """
     existing = str(original_input.get("evidence") or "").strip()
+
+    if selected_cause_text:
+        cause_id_label = f" [{selected_cause_id}]" if selected_cause_id else ""
+        category_context = (
+            f"Fishbone selected cause{cause_id_label}: {selected_cause_text}\n"
+            f"(Category: {selected_category})"
+        )
+    else:
+        categorized_causes = (
+            fishbone_final.get("all_categorized_causes")
+            or fishbone_final.get("causes")
+            or []
+        )
+        causes_in_cat = [
+            c for c in categorized_causes
+            if _category_from_cause(c) == selected_category
+        ]
+        cause_lines = [f"- {c.get('cause_text', 'Unknown cause')}" for c in causes_in_cat]
+        category_context = (
+            f"Fishbone selected category: {selected_category}.\n"
+            "Category causes considered:\n"
+            + ("\n".join(cause_lines) if cause_lines else "- No category-specific causes available")
+        )
+
     return (existing + "\n\n" + category_context) if existing else category_context
 
 
@@ -332,29 +380,41 @@ def _build_enriched_evidence(fishbone_final: Dict[str, Any],
 # Read live state from child orchestrators so the RCA can gate HITL transitions
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _check_fishbone_completion(complaint_id: str) -> Dict[str, Any]:
+def _check_fishbone_completion(complaint_id: str, initial_fishbone_status: str = "") -> Dict[str, Any]:
     """
     Read Fishbone V3 session from Redis and return completion status.
-    Returns {"found": bool, "completed": bool, "status": str}.
-    If Redis is unavailable or no session exists, optimistically returns completed=True
-    so the flow is not blocked on infrastructure issues.
+    Returns {"found": bool, "completed": bool, "status": str, "error": str|None}.
+    When the initial fishbone returned WAIT_FOR_HUMAN and Redis is unavailable,
+    returns completed=False (pessimistic) to prevent stale-data progression.
     """
+    requires_decision = str(initial_fishbone_status).upper() == "WAIT_FOR_HUMAN"
+
     fsm = _get_fishbone_session_manager()
     if fsm is None:
-        return {"found": False, "completed": True, "status": "UNKNOWN"}
+        if requires_decision:
+            return {"found": False, "completed": False, "status": "UNKNOWN",
+                    "error": "Cannot verify fishbone decisions — Redis unavailable"}
+        return {"found": False, "completed": True, "status": "UNKNOWN", "error": None}
     try:
         session_state = fsm.get_state(complaint_id)
     except Exception as exc:
         log_error("_check_fishbone_completion", str(exc), complaint_id)
-        return {"found": False, "completed": True, "status": "UNKNOWN"}
+        if requires_decision:
+            return {"found": False, "completed": False, "status": "UNKNOWN",
+                    "error": f"Cannot verify fishbone decisions — {exc}"}
+        return {"found": False, "completed": True, "status": "UNKNOWN", "error": None}
     if not session_state:
+        if requires_decision:
+            return {"found": False, "completed": False, "status": "UNKNOWN",
+                    "error": "Fishbone session not found — decisions may not be submitted yet"}
         # Session may have been cleaned up after completion — allow through
-        return {"found": False, "completed": True, "status": "UNKNOWN"}
+        return {"found": False, "completed": True, "status": "UNKNOWN", "error": None}
     status = str(session_state.get("status", "UNKNOWN")).upper()
     return {
         "found": True,
         "completed": status == "COMPLETED",
         "status": status,
+        "error": None,
     }
 
 
@@ -398,37 +458,58 @@ def await_category_selection_node(state: RCAGraphState) -> dict:
 
     complaint_id = state.get("complaint_id", "")
     selected_category = state.get("selected_category")
+    selected_cause_id   = state.get("selected_cause_id")
+    selected_cause_text = state.get("selected_cause_text")
 
-    if not selected_category:
-        # ── Pause: waiting for user to pick a category ────────────────────────
+    if not selected_category and not selected_cause_id and not selected_cause_text:
+        # ── Guard: node should only run after user provides a cause/category via update_state ──
         return {
-            "phase": "awaiting_category_selection",
-            "next_action": "select_category",
-            "message": "Fishbone complete. Select a category via POST /rca/select-category.",
-            "node_log": [{"node": "await_category_selection", "status": "awaiting_input",
-                          "timestamp": _now()}],
+            "phase": "error",
+            "error": "No cause or category provided. Call POST /rca/select-category before resuming.",
+            "node_log": [{"node": "await_category_selection", "status": "error",
+                          "error": "no_cause_provided", "timestamp": _now()}],
         }
 
     # ── Guard: Fishbone must be COMPLETED before we accept a category ─────────
-    fishbone_status = _check_fishbone_completion(complaint_id)
-    if fishbone_status.get("found") and not fishbone_status.get("completed"):
+    fishbone_output_raw = state.get("fishbone_output") or {}
+    initial_fishbone_status = (
+        fishbone_output_raw.get("status", "") if isinstance(fishbone_output_raw, dict) else ""
+    )
+    fishbone_status = _check_fishbone_completion(complaint_id, initial_fishbone_status)
+    if fishbone_status.get("error") or (fishbone_status.get("found") and not fishbone_status.get("completed")):
+        detail = fishbone_status.get("error") or (
+            f"Fishbone Analysis is still awaiting human decisions "
+            f"(status: {fishbone_status.get('status')}). "
+            "Submit cause decisions first via POST /fishbone-v3/decide, "
+            "then call POST /rca/select-category."
+        )
         return {
             "phase": "awaiting_category_selection",
             "next_action": "select_category",
-            "message": (
-                f"Fishbone Analysis is still awaiting human decisions "
-                f"(status: {fishbone_status.get('status')}). "
-                "Submit cause decisions first via POST /fishbone-v3/decide, "
-                "then call POST /rca/select-category."
-            ),
+            "message": detail,
             "node_log": [{"node": "await_category_selection", "status": "blocked",
                           "reason": "fishbone_not_complete",
                           "fishbone_status": fishbone_status.get("status"),
                           "timestamp": _now()}],
         }
 
-    # ── User has provided a category: validate + enrich evidence ─────────────
+    # ── Resolve fishbone state + derive/validate category ────────────────────
     fishbone_final, categories = _resolve_fishbone_state(complaint_id, state)
+
+    # Derive category from the specific cause when not explicitly provided
+    if not selected_category and (selected_cause_id or selected_cause_text):
+        all_causes = (
+            fishbone_final.get("all_categorized_causes")
+            or fishbone_final.get("causes")
+            or []
+        )
+        matched = None
+        if selected_cause_id:
+            matched = next((c for c in all_causes if c.get("cause_id") == selected_cause_id), None)
+        if matched is None and selected_cause_text:
+            matched = next((c for c in all_causes
+                            if c.get("cause_text") == selected_cause_text), None)
+        selected_category = _category_from_cause(matched) if matched else (categories[0] if categories else "Unknown")
 
     if not categories:
         return {
@@ -439,28 +520,37 @@ def await_category_selection_node(state: RCAGraphState) -> dict:
         }
 
     if selected_category not in categories:
-        return {
-            "phase": "error",
-            "error": f"Selected category '{selected_category}' is not valid. Available: {categories}",
-            "node_log": [{"node": "await_category_selection", "status": "error",
-                          "error": "invalid_category", "timestamp": _now()}],
-        }
+        if selected_cause_id or selected_cause_text:
+            # Specific cause provided — log warning but continue (category is informational)
+            print(f"[RCA] WARNING: derived category '{selected_category}' not in known list {categories}; continuing with cause-level input")
+        else:
+            return {
+                "phase": "error",
+                "error": f"Selected category '{selected_category}' is not valid. Available: {categories}",
+                "node_log": [{"node": "await_category_selection", "status": "error",
+                              "error": "invalid_category", "timestamp": _now()}],
+            }
 
     enriched_evidence = _build_enriched_evidence(
-        fishbone_final, selected_category, state.get("original_input") or {}
+        fishbone_final, selected_category, state.get("original_input") or {},
+        selected_cause_text=selected_cause_text,
+        selected_cause_id=selected_cause_id,
     )
 
-    log_transition(complaint_id, "awaiting_category_selection",
-                   "category_selected", f"category={selected_category}")
+    detail = f"cause={selected_cause_id or selected_cause_text or selected_category}"
+    log_transition(complaint_id, "awaiting_category_selection", "cause_selected", detail)
     return {
         "phase": "category_selected",
         "fishbone_output": deep_serialize(fishbone_final),
         "available_categories": categories,
+        "selected_category": selected_category,
+        "selected_cause_id": selected_cause_id,
+        "selected_cause_text": selected_cause_text,
         "enriched_evidence": enriched_evidence,
-        "audit_log": [{"time": time.time(), "action": "category_selected",
-                       "detail": f"category={selected_category}"}],
+        "audit_log": [{"time": time.time(), "action": "cause_selected", "detail": detail}],
         "node_log": [{"node": "await_category_selection", "status": "selected",
-                      "category": selected_category, "timestamp": _now()}],
+                      "category": selected_category, "cause_id": selected_cause_id,
+                      "timestamp": _now()}],
     }
 
 
@@ -479,13 +569,22 @@ def run_why_node(state: RCAGraphState) -> dict:
     try:
         base_payload = _common_payload(original_input)
 
-        # If coming from fishbone, use the enriched evidence (context + category causes)
-        if selected_category:
+        selected_cause_text = state.get("selected_cause_text")
+        selected_cause_id   = state.get("selected_cause_id")
+
+        if selected_cause_text:
+            # User picked a specific fishbone cause — use it as the Why Analysis complaint
+            base_payload["complaint"] = selected_cause_text
+            label = selected_cause_id or selected_cause_text[:60]
+            print(f"[RCA] Why Analysis complaint overridden with cause: {label}")
+
+        # Always enrich evidence with fishbone context when coming from fishbone
+        if selected_category or selected_cause_text:
             enriched = state.get("enriched_evidence") or base_payload.get("evidence") or ""
             base_payload["evidence"] = enriched
 
         why_input = WhyAnalysisV3Input(**base_payload)
-        why_output = _get_why_orchestrator().analyze(why_input)
+        why_output = _retry_call(_get_why_orchestrator().analyze, why_input)
         why_serialized = deep_serialize(why_output)
         why_session_id = (
             why_serialized.get("session_id")
@@ -493,9 +592,9 @@ def run_why_node(state: RCAGraphState) -> dict:
             else None
         )
 
-        log_transition(complaint_id, state.get("phase", "running"), "why_running", "why_started")
+        log_transition(complaint_id, state.get("phase", "running"), "why_awaiting_review", "why_started")
         return {
-            "phase": "why_running",
+            "phase": "why_awaiting_review",
             "why_output": why_serialized,
             "why_session_id": why_session_id,
             "next_action": "proceed_action_plan",
@@ -535,17 +634,12 @@ def await_action_plan_node(state: RCAGraphState) -> dict:
     action_plan_confirmed = state.get("action_plan_confirmed")
 
     if action_plan_confirmed is None:
-        # ── Pause: waiting for user confirmation ──────────────────────────────
+        # ── Guard: node should only run after user provides decision via update_state ──
         return {
-            "phase": "awaiting_action_plan_confirmation",
-            "next_action": "proceed_action_plan",
-            "message": (
-                "Why Analysis started. "
-                "Once Why Analysis (including /why-analysis-v3/human-review) is complete, "
-                "call POST /rca/proceed-action-plan to confirm or reject the Action Plan."
-            ),
-            "node_log": [{"node": "await_action_plan", "status": "awaiting_input",
-                          "timestamp": _now()}],
+            "phase": "error",
+            "error": "action_plan_confirmed not provided. Call POST /rca/proceed-action-plan before resuming.",
+            "node_log": [{"node": "await_action_plan", "status": "error",
+                          "error": "no_confirmation_provided", "timestamp": _now()}],
         }
 
     # ── Guard: Why Analysis must be complete before we allow action plan ──────
@@ -603,7 +697,7 @@ def await_action_plan_node(state: RCAGraphState) -> dict:
         "action_plan_endpoint": ACTION_PLAN_ENDPOINT,
         "why_output": refreshed_why_output or state.get("why_output"),
         "next_action": None,
-        "message": "RCA complete. Proceeding to Action Plan.",
+        "message": f"RCA complete. Call POST {ACTION_PLAN_ENDPOINT} to generate the Action Plan.",
         "audit_log": [{"time": time.time(), "action": "action_plan_confirmed",
                        "detail": "User confirmed handoff to action plan"}],
         "node_log": [{"node": "await_action_plan", "status": "confirmed",
@@ -623,6 +717,7 @@ def finalize_node(state: RCAGraphState) -> dict:
 
     final_output = deep_serialize({
         "complaint_id": state.get("complaint_id", ""),
+        "session_id": state.get("session_id"),
         "phase": state.get("phase", "idle"),
         "selected_method": state.get("method"),
         "message": state.get("message"),
@@ -669,8 +764,6 @@ def route_after_fishbone(state: RCAGraphState) -> str:
 def route_after_await_category_selection(state: RCAGraphState) -> str:
     if state.get("phase") == "error":
         return "finalize"
-    if state.get("phase") == "awaiting_category_selection":
-        return END
     return "run_why"
 
 
@@ -681,8 +774,6 @@ def route_after_run_why(state: RCAGraphState) -> str:
 
 
 def route_after_await_action_plan(state: RCAGraphState) -> str:
-    if state.get("phase") == "awaiting_action_plan_confirmation":
-        return END
     return "finalize"
 
 
@@ -751,7 +842,6 @@ def build_orchestrator():
         {
             "run_why": "run_why",
             "finalize": "finalize",
-            END: END,
         },
     )
 
@@ -769,7 +859,6 @@ def build_orchestrator():
         route_after_await_action_plan,
         {
             "finalize": "finalize",
-            END: END,
         },
     )
 
@@ -779,10 +868,13 @@ def build_orchestrator():
         {END: END},
     )
 
-    # ── Compile with Redis checkpointing ──────────────────────────────────────
+    # ── Compile with Redis checkpointing + HITL interrupt points ─────────────
     checkpointer = RedisSaver(_REDIS_URL)
     checkpointer.setup()
-    return g.compile(checkpointer=checkpointer)
+    return g.compile(
+        checkpointer=checkpointer,
+        interrupt_before=["await_category_selection", "await_action_plan"],
+    )
 
 
 # ── Module-level graph instance ───────────────────────────────────────────────

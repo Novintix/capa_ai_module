@@ -17,6 +17,7 @@ Child-orchestrator internal HITL is NOT proxied here:
 from __future__ import annotations
 
 import time
+import uuid
 from typing import Any, Dict
 
 from .orchestrator import deep_serialize, orchestrator_graph, ACTION_PLAN_ENDPOINT
@@ -40,7 +41,7 @@ class RootCauseAnalysisCoordinator:
 
     # ── HITL #1 ───────────────────────────────────────────────────────────────
 
-    def start(self, input_data: RCAStartInput) -> Dict[str, Any]:
+    def start(self, input_data: RCAStartInput, session_id: str | None = None) -> Dict[str, Any]:
         """
         HITL #1: User selects 'why' or 'fishbone' and kicks off the analysis.
 
@@ -55,9 +56,12 @@ class RootCauseAnalysisCoordinator:
           Call POST /rca/select-category once Fishbone + decisions are done.
         """
         complaint_id = input_data.complaint_id
+        if session_id is None:
+            session_id = f"{complaint_id}_{uuid.uuid4().hex[:8]}"
         try:
             initial_state = {
                 "complaint_id": complaint_id,
+                "session_id": session_id,
                 "complaint": input_data.complaint,
                 "evidence": input_data.evidence or "",
                 "sop": input_data.sop or "",
@@ -79,7 +83,7 @@ class RootCauseAnalysisCoordinator:
                 "audit_log": [],
                 "node_log": [],
             }
-            config = {"configurable": {"thread_id": complaint_id}}
+            config = {"configurable": {"thread_id": session_id}}
             final_state = self.graph.invoke(initial_state, config=config)
             return self._build_response(final_state)
 
@@ -87,6 +91,7 @@ class RootCauseAnalysisCoordinator:
             log_error("start", str(exc), complaint_id)
             return {
                 "complaint_id": complaint_id,
+                "session_id": session_id,
                 "phase": "error",
                 "error": f"Start failed: {exc}",
                 "message": "RCA analysis could not be started.",
@@ -104,10 +109,15 @@ class RootCauseAnalysisCoordinator:
         user selects which category to proceed with into Why Analysis.
         """
         complaint_id = input_data.complaint_id
+        thread_id = input_data.session_id or complaint_id
         try:
-            config = {"configurable": {"thread_id": complaint_id}}
-            update = {"selected_category": input_data.category}
-            final_state = self.graph.invoke(update, config=config)
+            config = {"configurable": {"thread_id": thread_id}}
+            self.graph.update_state(config, {
+                "selected_category":   input_data.category,
+                "selected_cause_id":   input_data.selected_cause_id,
+                "selected_cause_text": input_data.selected_cause_text,
+            })
+            final_state = self.graph.invoke(None, config=config)
             return self._build_response(final_state)
 
         except KeyError:
@@ -118,6 +128,7 @@ class RootCauseAnalysisCoordinator:
             log_error("select_category_and_start_why", str(exc), complaint_id)
             return {
                 "complaint_id": complaint_id,
+                "session_id": input_data.session_id,
                 "phase": "error",
                 "error": f"Category selection failed: {exc}",
                 "message": "Could not start Why Analysis from selected category.",
@@ -135,10 +146,11 @@ class RootCauseAnalysisCoordinator:
         user confirms whether to proceed to the Action Plan.
         """
         complaint_id = input_data.complaint_id
+        thread_id = input_data.session_id or complaint_id
         try:
-            config = {"configurable": {"thread_id": complaint_id}}
-            update = {"action_plan_confirmed": input_data.confirmed}
-            final_state = self.graph.invoke(update, config=config)
+            config = {"configurable": {"thread_id": thread_id}}
+            self.graph.update_state(config, {"action_plan_confirmed": input_data.confirmed})
+            final_state = self.graph.invoke(None, config=config)
             return self._build_response(final_state)
 
         except KeyError:
@@ -149,6 +161,7 @@ class RootCauseAnalysisCoordinator:
             log_error("proceed_to_action_plan", str(exc), complaint_id)
             return {
                 "complaint_id": complaint_id,
+                "session_id": input_data.session_id,
                 "phase": "error",
                 "error": f"Proceed to action plan failed: {exc}",
                 "message": "Could not proceed to action plan.",
@@ -160,20 +173,21 @@ class RootCauseAnalysisCoordinator:
 
     # ── Status ────────────────────────────────────────────────────────────────
 
-    def status(self, complaint_id: str) -> Dict[str, Any]:
+    def status(self, complaint_id: str, session_id: str | None = None) -> Dict[str, Any]:
         """Read current session state from the Redis checkpoint."""
+        thread_id = session_id or complaint_id
         try:
-            config = {"configurable": {"thread_id": complaint_id}}
+            config = {"configurable": {"thread_id": thread_id}}
             snapshot = self.graph.get_state(config)
             if not snapshot or not snapshot.values:
-                raise KeyError(f"No RCA session found for complaint_id '{complaint_id}'")
+                raise KeyError(f"No RCA session found for '{thread_id}'")
             return self._build_response(snapshot.values)
         except KeyError:
             raise
         except Exception as exc:
             log_error("status", str(exc), complaint_id)
             raise KeyError(
-                f"Could not retrieve RCA session for '{complaint_id}': {exc}"
+                f"Could not retrieve RCA session for '{thread_id}': {exc}"
             ) from exc
 
     # ── Internal helpers ──────────────────────────────────────────────────────
@@ -185,6 +199,7 @@ class RootCauseAnalysisCoordinator:
             return state["final_output"]
         return {
             "complaint_id": state.get("complaint_id", ""),
+            "session_id": state.get("session_id"),
             "phase": state.get("phase", "idle"),
             "selected_method": state.get("method"),
             "message": state.get("message"),

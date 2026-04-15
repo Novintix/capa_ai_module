@@ -7,8 +7,9 @@ Phases:
   fishbone_running                  -- fishbone orchestrator called
   awaiting_category_selection       -- HITL #2 pause: user picks a fishbone category
   category_selected                 -- category validated, proceeding to Why
-  why_running                       -- why orchestrator called
+  why_awaiting_review               -- why orchestrator returned, awaiting human review
   awaiting_action_plan_confirmation -- HITL #3 pause: user confirms action plan
+  processing                        -- async timeout, still running in background
   completed
   error
 """
@@ -41,6 +42,7 @@ class RCAGraphState(TypedDict, total=False):
     original_input: Dict[str, Any]
 
     # ── Runtime ────────────────────────────────────────────────────────────────
+    session_id: Optional[str]
     start_time: float
     phase: str
 
@@ -52,6 +54,8 @@ class RCAGraphState(TypedDict, total=False):
 
     # ── HITL #2 — user-provided via POST /rca/select-category ─────────────────
     selected_category: Optional[str]
+    selected_cause_id: Optional[str]
+    selected_cause_text: Optional[str]
 
     # ── Why stage ──────────────────────────────────────────────────────────────
     why_output: Optional[Dict[str, Any]]

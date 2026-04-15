@@ -48,10 +48,16 @@ class RCAStartInput(RCACommonInput):
 class RCASelectCategoryInput(BaseModel):
     """
     HITL #2 (fishbone path only) — After Fishbone analysis + cause decisions are
-    complete, user selects which category to dig into with Why Analysis.
+    complete, user selects a specific cause to investigate with Why Analysis.
     """
     complaint_id: str = Field(..., description="Complaint identifier")
-    category: str = Field(..., description="Selected fishbone category")
+    category: Optional[str] = Field(default=None, description="Fishbone category (derived from cause if omitted)")
+    selected_cause_id: Optional[str] = Field(default=None, description="ID of the specific cause to investigate")
+    selected_cause_text: Optional[str] = Field(default=None, description="Text of the specific cause to investigate")
+    session_id: Optional[str] = Field(
+        default=None,
+        description="Session ID from /rca/start response. Falls back to complaint_id if omitted.",
+    )
 
 
 # ── HITL #3: User confirms to proceed to Action Plan ────────────────────────
@@ -63,12 +69,17 @@ class RCAProceedActionPlanInput(BaseModel):
     """
     complaint_id: str = Field(..., description="Complaint identifier")
     confirmed: bool = Field(default=True, description="User confirmed proceed to action plan")
+    session_id: Optional[str] = Field(
+        default=None,
+        description="Session ID from /rca/start response. Falls back to complaint_id if omitted.",
+    )
 
 
 # ── Response ─────────────────────────────────────────────────────────────────
 
 class RCAResponse(BaseModel):
     complaint_id: str
+    session_id: Optional[str] = None
     phase: str
     selected_method: Optional[str] = None
     message: Optional[str] = None

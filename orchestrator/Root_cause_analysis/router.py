@@ -11,6 +11,11 @@ Child-orchestrator internal HITL is handled by their own routes:
   POST /why-analysis-v3/human-review     (why cause selection)
 """
 
+import asyncio
+import os
+import time
+import uuid
+
 from fastapi import APIRouter, HTTPException
 
 from .agent import RootCauseAnalysisCoordinator
@@ -22,6 +27,8 @@ from .schemas import (
     RCAStartInput,
 )
 
+RCA_TIMEOUT_SECONDS = int(os.getenv("RCA_TIMEOUT_SECONDS", "300"))
+
 router = APIRouter(prefix="/rca", tags=["root-cause-analysis"])
 
 _coordinator: RootCauseAnalysisCoordinator | None = None
@@ -32,6 +39,23 @@ def _get_coordinator() -> RootCauseAnalysisCoordinator:
     if _coordinator is None:
         _coordinator = RootCauseAnalysisCoordinator()
     return _coordinator
+
+
+def _timeout_response(complaint_id: str, session_id: str) -> dict:
+    """Build a partial response when the request times out."""
+    return {
+        "complaint_id": complaint_id,
+        "session_id": session_id,
+        "phase": "processing",
+        "message": (
+            "Analysis is still running in the background. "
+            f"Poll GET /rca/status/{complaint_id}?session_id={session_id} for updates."
+        ),
+        "available_categories": [],
+        "action_plan_ready": False,
+        "next_action": "poll_status",
+        "updated_at": time.time(),
+    }
 
 
 # ── HITL #1 ───────────────────────────────────────────────────────────────────
@@ -51,9 +75,17 @@ def _get_coordinator() -> RootCauseAnalysisCoordinator:
     ),
     responses={400: {"description": "Invalid input"}, 500: {"description": "Internal error"}},
 )
-def start(input_data: RCAStartInput):
+async def start(input_data: RCAStartInput):
+    coordinator = _get_coordinator()
+    session_id = f"{input_data.complaint_id}_{uuid.uuid4().hex[:8]}"
     try:
-        return _get_coordinator().start(input_data)
+        result = await asyncio.wait_for(
+            asyncio.to_thread(coordinator.start, input_data, session_id),
+            timeout=RCA_TIMEOUT_SECONDS,
+        )
+        return result
+    except asyncio.TimeoutError:
+        return _timeout_response(input_data.complaint_id, session_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
@@ -79,9 +111,17 @@ def start(input_data: RCAStartInput):
         500: {"description": "Internal error"},
     },
 )
-def select_category(input_data: RCASelectCategoryInput):
+async def select_category(input_data: RCASelectCategoryInput):
+    coordinator = _get_coordinator()
     try:
-        return _get_coordinator().select_category_and_start_why(input_data)
+        result = await asyncio.wait_for(
+            asyncio.to_thread(coordinator.select_category_and_start_why, input_data),
+            timeout=RCA_TIMEOUT_SECONDS,
+        )
+        return result
+    except asyncio.TimeoutError:
+        session_id = input_data.session_id or input_data.complaint_id
+        return _timeout_response(input_data.complaint_id, session_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
@@ -106,9 +146,17 @@ def select_category(input_data: RCASelectCategoryInput):
         500: {"description": "Internal error"},
     },
 )
-def proceed_action_plan(input_data: RCAProceedActionPlanInput):
+async def proceed_action_plan(input_data: RCAProceedActionPlanInput):
+    coordinator = _get_coordinator()
     try:
-        return _get_coordinator().proceed_to_action_plan(input_data)
+        result = await asyncio.wait_for(
+            asyncio.to_thread(coordinator.proceed_to_action_plan, input_data),
+            timeout=RCA_TIMEOUT_SECONDS,
+        )
+        return result
+    except asyncio.TimeoutError:
+        session_id = input_data.session_id or input_data.complaint_id
+        return _timeout_response(input_data.complaint_id, session_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
@@ -124,9 +172,9 @@ def proceed_action_plan(input_data: RCAProceedActionPlanInput):
     response_model=RCAResponse,
     responses={404: {"description": "Session not found"}, 500: {"description": "Internal error"}},
 )
-def status(complaint_id: str):
+async def status(complaint_id: str, session_id: str | None = None):
     try:
-        return _get_coordinator().status(complaint_id)
+        return _get_coordinator().status(complaint_id, session_id=session_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:
