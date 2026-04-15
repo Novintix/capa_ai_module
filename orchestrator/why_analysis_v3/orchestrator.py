@@ -233,11 +233,11 @@ def _normalized_cause(cause: Dict[str, Any], fallback_id: str) -> Dict[str, Any]
         "cause_text": _safe_text(cause.get("cause_text"), "Unspecified cause description"),
         "process_step": _safe_text(cause.get("process_step"), "Unknown process step"),
         "failure_mode": _safe_text(cause.get("failure_mode"), "Unspecified failure mode"),
-        "potential_effects": _safe_text(cause.get("potential_effects"), "Potential operational impact"),
-        "severity": _safe_int(cause.get("severity"), 5),
-        "occurrence": _safe_int(cause.get("occurrence"), 5),
-        "detection": _safe_int(cause.get("detection"), 5),
-        "current_controls": _safe_text(cause.get("current_controls"), "Not provided"),
+        "potential_effects": cause.get("potential_effects"),  # Can be null
+        "severity": cause.get("severity"),  # Can be null
+        "occurrence": cause.get("occurrence"),  # Can be null
+        "detection": cause.get("detection"),  # Can be null
+        "current_controls": cause.get("current_controls"),  # Can be null
         "source": _safe_text(cause.get("source"), "unknown"),
     }
 
@@ -253,8 +253,8 @@ def _build_fallback_causes(question: str) -> List[Dict[str, Any]]:
             "failure_mode": "Default value overwrite",
             "potential_effects": "Incorrect output values shown in generated records",
             "severity": 8,
-            "occurrence": 5,
-            "detection": 4,
+            "occurrence": None,
+            "detection": None,
             "current_controls": "Add rule-based validation before final record generation",
             "source": "Fallback_Generated",
         },
@@ -265,8 +265,8 @@ def _build_fallback_causes(question: str) -> List[Dict[str, Any]]:
             "failure_mode": "Field mapping error",
             "potential_effects": "Critical values populated from stale or wrong source",
             "severity": 9,
-            "occurrence": 4,
-            "detection": 5,
+            "occurrence": None,
+            "detection": None,
             "current_controls": "Schema contract checks and end-to-end reconciliation tests",
             "source": "Fallback_Generated",
         },
