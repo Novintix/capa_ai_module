@@ -53,8 +53,6 @@ import datetime
 from typing import Annotated, Optional
 from typing_extensions import TypedDict
 
-import redis
-import redis.asyncio as async_redis
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
 
@@ -73,18 +71,10 @@ from .state    import RiskAnalysisState
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# REDIS
+# REDIS — use centralised config (reads REDIS_URL from .env)
 # ══════════════════════════════════════════════════════════════════════════════
 
-redis_client = redis.Redis(
-    host="localhost", port=6379, db=0, decode_responses=False
-)
-
-async_redis_client = async_redis.Redis(
-    host="localhost", port=6379, db=0, decode_responses=False
-)
-
-async_pool = async_redis.ConnectionPool.from_url("redis://localhost:6379", decode_responses=False)
+from config.redis_config import redis_client, REDIS_URL  # noqa: E402
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -382,11 +372,14 @@ def context_node(state: RiskAnalysisState) -> dict:
     print(f"   Issue   : {e.get('core_issue', raw)}")
     print(f"   Enriched: {json.dumps(e, indent=2)}")
 
+    complaint_id = e.get("complaint_id") or state.get("complaint_id") or "UNKNOWN"
+
     return {
-        "urgency":   urgency,
-        "extracted": e,
-        "node_log":  [{"node": "context_node", "urgency": urgency,
-                       "timestamp": _now()}],
+        "urgency":      urgency,
+        "extracted":    e,
+        "complaint_id": complaint_id,
+        "node_log":     [{"node": "context_node", "urgency": urgency,
+                          "complaint_id": complaint_id, "timestamp": _now()}],
     }
 
 
@@ -457,16 +450,27 @@ def A1_similar_cases_agent(state: dict) -> dict:
     count       = final_output.get("similarCount", 0)
     top_matches = final_output.get("topMatches",   [])
 
-    print(f"     Similar cases found: {count}")
+    # Compute avg_historical_rpn from actual match data (rpn or rpn_value field).
+    # Falls back to None if the source documents don't carry an RPN field.
+    rpn_values = [
+        m.get("rpn") or m.get("rpn_value") or m.get("riskScore")
+        for m in top_matches
+        if m.get("rpn") or m.get("rpn_value") or m.get("riskScore")
+    ]
+    avg_historical_rpn = round(sum(rpn_values) / len(rpn_values)) if rpn_values else None
+
+    print(f"     Similar cases found  : {count}")
+    print(f"     Avg historical RPN   : {avg_historical_rpn if avg_historical_rpn is not None else 'N/A (no RPN in source)'}")
     return {
         "agent_results": [{"agent": "A1", "type": "similar_cases",
                            "full": {
                                "similar_cases":      top_matches,
                                "total_similar":      count,
-                               "avg_historical_rpn": 250,
+                               "avg_historical_rpn": avg_historical_rpn,
                                "source":             "mongodb",
                            }}],
-        "node_log": [{"node": "A1", "total_similar": count, "timestamp": _now()}],
+        "node_log": [{"node": "A1", "total_similar": count,
+                      "avg_historical_rpn": avg_historical_rpn, "timestamp": _now()}],
     }
 
 
@@ -984,9 +988,9 @@ def build_orchestrator():
 
     # ── Compile with sync Redis checkpointing ─────────────────────────────────
     # RedisSaver (sync) works at module-level import time — no event loop needed.
-    # AsyncRedisSaver requires get_running_loop() which fails at import time.
+    # Uses centralised redis_client from config (reads REDIS_URL from .env).
     from langgraph.checkpoint.redis import RedisSaver
-    checkpointer = RedisSaver("redis://localhost:6379")
+    checkpointer = RedisSaver(redis_client=redis_client)
     checkpointer.setup()
     return g.compile(checkpointer=checkpointer)
 
