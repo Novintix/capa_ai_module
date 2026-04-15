@@ -17,6 +17,7 @@ class RiskAnalysisState(TypedDict, total=False):
 
     # ── Input ─────────────────────────────────────────────────────────────────
     raw_input:              str
+    complaint_id:           Optional[str]   # business-level ID — set by context_node from extracted data
 
     # ── Validation ────────────────────────────────────────────────────────────
     validation_passed:      bool

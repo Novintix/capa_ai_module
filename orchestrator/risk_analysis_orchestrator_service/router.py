@@ -148,6 +148,7 @@ def _build_full_response(thread_id: str, result: dict) -> dict:
 
     return {
         "thread_id":    thread_id,
+        "complaint_id": result.get("complaint_id"),
         "status":       "completed",
 
         # ── Top-level RPN summary for quick access ────────────────────────────
@@ -335,6 +336,7 @@ async def get_status(thread_id: str):
 
     response = {
         "thread_id":       thread_id,
+        "complaint_id":    state.get("complaint_id"),
         "status":          status,
         "nodes_completed": nodes_completed,
         "rpn_value":       state.get("rpn_value"),
@@ -406,8 +408,9 @@ async def get_state(thread_id: str):
     status          = _derive_status(state, nodes_completed)
 
     response = {
-        "thread_id":       thread_id,
-        "status":          status,
+        "thread_id":    thread_id,
+        "complaint_id": state.get("complaint_id"),
+        "status":       status,
         "nodes_completed": nodes_completed,
         "rpn": {
             "severity_score":   state.get("severity_score"),
