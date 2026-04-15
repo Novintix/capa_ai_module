@@ -633,6 +633,47 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
         
         print(f"   Awaiting selection from {len(high_confidence_matched_causes)} qualified causes")
         
+        # CRITICAL: Use actual current iteration from iteration_outputs, not stale current_loop_count
+        iteration_history = list(state.get("iteration_outputs", []))
+        actual_current_iteration = max([io.get("iteration", 0) for io in iteration_history], default=0) if iteration_history else int(state.get("current_loop_count", 0))
+        
+        # If we have iteration_history but current_loop_count is higher, use current_loop_count
+        # This handles the case where we just completed a new iteration
+        state_loop_count = int(state.get("current_loop_count", 0))
+        if state_loop_count > actual_current_iteration:
+            actual_current_iteration = state_loop_count
+        
+        print(f"   [DEBUG] Building iteration_output for iteration {actual_current_iteration}")
+        print(f"   [DEBUG] Existing iteration_outputs has {len(iteration_history)} entries: {[io.get('iteration') for io in iteration_history]}")
+        
+        # Build iteration_outputs for current iteration
+        current_iteration_output = {
+            "iteration": actual_current_iteration,
+            "question": state.get("current_why_question", ""),
+            "generated_causes": state.get("current_causes", []),  # ALL causes from cause generation
+            "validated_causes": all_validated_causes,  # ALL validated causes
+            "qualified_causes": high_confidence_matched_causes,  # Only qualified causes (≥90% + matched)
+            "selected_cause_id": None,  # Will be updated when human selects
+        }
+        
+        # Check if this iteration already exists (avoid duplicates)
+        existing_idx = None
+        for idx, iter_out in enumerate(iteration_history):
+            if iter_out.get("iteration") == actual_current_iteration:
+                existing_idx = idx
+                break
+        
+        if existing_idx is not None:
+            # Update existing iteration
+            print(f"   [DEBUG] Updating existing iteration {actual_current_iteration}")
+            iteration_history[existing_idx] = current_iteration_output
+        else:
+            # Add new iteration
+            print(f"   [DEBUG] Adding new iteration {actual_current_iteration}")
+            iteration_history.append(current_iteration_output)
+        
+        print(f"   [DEBUG] After update, iteration_outputs has {len(iteration_history)} entries: {[io.get('iteration') for io in iteration_history]}")
+        
         # Build final output for paused state
         execution_time = round(time.time() - float(state.get("start_time") or time.time()), 4)
         final_output = {
@@ -649,6 +690,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "validated_causes": high_confidence_matched_causes,  # Only send qualified causes
             "root_cause": None,
             "why_chain": state.get("why_chain", []),
+            "iteration_outputs": iteration_history,  # ADD THIS - complete iteration history
             "validation_summary": {
                 "total_input_causes": (state.get("validation_result") or {}).get("total_input_causes", 0),
                 "total_validated_causes": (state.get("validation_result") or {}).get("total_validated_causes", 0),
@@ -666,6 +708,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "status": "awaiting_human_review",  # Set status in state
             "awaiting_human_review": True,
             "human_review_message": f"Please review and select one of the {len(high_confidence_matched_causes)} qualified cause(s) (≥90% confidence + matched evidence).",
+            "iteration_outputs": iteration_history,  # Store in state for next iteration
             "final_output": deep_serialize(final_output),
             "node_log": [{"node": "human_review", "status": "awaiting_input", "timestamp": _now()}],
         }
@@ -679,6 +722,16 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
         if cause.get("validation_confidence", 0) >= 0.90 
         and cause.get("evidence_match_status", "").lower() == "matched"
     ]
+    
+    # CRITICAL FIX: Use the LATEST iteration number from iteration_outputs, not current_loop_count
+    # because current_loop_count might be stale from Redis
+    iteration_history = list(state.get("iteration_outputs", []))
+    actual_current_iteration = max([io.get("iteration", 0) for io in iteration_history], default=0) if iteration_history else int(state.get("current_loop_count", 0))
+    
+    print(f"   [DEBUG] Current loop count from state: {state.get('current_loop_count', 0)}")
+    print(f"   [DEBUG] Actual current iteration (from iteration_outputs): {actual_current_iteration}")
+    print(f"   [DEBUG] Existing iteration_outputs: {len(iteration_history)} entries")
+    print(f"   [DEBUG] iteration_outputs: {[io.get('iteration') for io in iteration_history]}")
     
     selected_cause = None
     
@@ -732,20 +785,36 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
     
     # Check if human wants to continue or end
     if human_decision == "continue":
+        # Update iteration_outputs with selected cause using ACTUAL current iteration
+        current_iter_num = actual_current_iteration
+        
+        print(f"   [DEBUG] Before update - iteration_history has {len(iteration_history)} entries")
+        
+        # Find and update the current iteration with selected_cause_id
+        for iter_out in iteration_history:
+            if iter_out.get("iteration") == current_iter_num:
+                iter_out["selected_cause_id"] = human_selected_id
+                print(f"   [DEBUG] Updated iteration {current_iter_num} with selected_cause_id: {human_selected_id}")
+                break
+        
+        print(f"   [DEBUG] After update - iteration_history has {len(iteration_history)} entries")
+        print(f"   [DEBUG] Iterations: {[io.get('iteration') for io in iteration_history]}")
+        
         # Continue to next Why iteration
-        print(f"   Action   : Continue to next Why iteration (loop {int(state.get('current_loop_count', 0)) + 1})")
+        print(f"   Action   : Continue to next Why iteration (loop {actual_current_iteration + 1})")
         log_node_exit("human_review", {"status": "continue", "selected_id": human_selected_id})
         return {
             "current_selected_cause": selected_cause,
             "current_cause_confidence": confidence,
             "why_chain": chain_history,
+            "iteration_outputs": iteration_history,  # CRITICAL: Preserve iteration history for next iteration
             "awaiting_human_review": False,
             "human_review_message": None,
             "human_decision": None,  # Reset for next iteration
             "human_selected_cause_id": None,  # Reset for next iteration
             "status": "running",
             "node_log": [{"node": "human_review", "status": "continue", 
-                         "selected_id": human_selected_id, "next_loop": int(state.get("current_loop_count", 0)) + 1, 
+                         "selected_id": human_selected_id, "next_loop": actual_current_iteration + 1, 
                          "timestamp": _now()}],
         }
     else:
@@ -780,6 +849,10 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
 def zero_evidence_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 5-ALT] Zero Evidence Agent: selecting by criticality...")
     log_node_entry("zero_evidence_agent", state)
+
+    print(f"   [DEBUG] Current loop count: {state.get('current_loop_count', 0)}")
+    print(f"   [DEBUG] Existing iteration_outputs: {len(state.get('iteration_outputs', []))} entries")
+    print(f"   [DEBUG] iteration_outputs: {[io.get('iteration') for io in state.get('iteration_outputs', [])]}")
 
     # Rebuild zero_evidence payload with current causes
     # (Causes are generated dynamically, so we can't pre-build this payload)
@@ -829,12 +902,44 @@ def zero_evidence_agent_node(state: WhyAnalysisV3State) -> dict:
             }
 
             print(f"   Selected : {selected_cause_id} (confidence: {confidence:.2f})")
+            
+            # Build iteration_outputs for current iteration (Zero Evidence path)
+            all_validated_causes = state.get("validated_causes_enriched") or []
+            current_iteration_output = {
+                "iteration": int(state.get("current_loop_count", 0)),
+                "question": state.get("current_why_question", ""),
+                "generated_causes": state.get("current_causes", []),  # ALL causes from cause generation
+                "validated_causes": all_validated_causes,  # ALL validated causes
+                "qualified_causes": [],  # No qualified causes (that's why Zero Evidence ran)
+                "zero_evidence_selected": final_root,  # The cause selected by Zero Evidence
+                "selected_cause_id": selected_cause_id,  # The cause ID selected by Zero Evidence
+            }
+            
+            # Append to iteration_outputs history
+            iteration_history = list(state.get("iteration_outputs", []))
+            
+            # Check if this iteration already exists (avoid duplicates)
+            current_iter_num = int(state.get("current_loop_count", 0))
+            existing_idx = None
+            for idx, iter_out in enumerate(iteration_history):
+                if iter_out.get("iteration") == current_iter_num:
+                    existing_idx = idx
+                    break
+            
+            if existing_idx is not None:
+                # Update existing iteration
+                iteration_history[existing_idx] = current_iteration_output
+            else:
+                # Add new iteration
+                iteration_history.append(current_iteration_output)
+            
             log_node_exit("zero_evidence_agent", {"status": "success", "selected_id": selected_cause_id})
             return {
                 "zero_evidence_result": result_serialized,
                 "current_selected_cause": selected_source,
                 "current_cause_confidence": confidence,
                 "final_root_cause": final_root,
+                "iteration_outputs": iteration_history,  # ADD THIS - store iteration history
                 "status": "ai_flagged",
                 "ai_flagged": True,
                 "stopping_reason": "no_validated_cause_zero_evidence",
@@ -884,6 +989,7 @@ def finalize_node(state: WhyAnalysisV3State) -> dict:
         "validated_causes": state.get("validated_causes_enriched", []) if state.get("awaiting_human_review") else None,
         "root_cause": state.get("final_root_cause"),
         "why_chain": state.get("why_chain", []),
+        "iteration_outputs": state.get("iteration_outputs", []),  # ADD THIS - include all iteration outputs
         "validation_summary": {
             "total_input_causes": (state.get("validation_result") or {}).get("total_input_causes", 0),
             "total_validated_causes": (state.get("validation_result") or {}).get("total_validated_causes", 0),
@@ -966,14 +1072,10 @@ def route_after_human_review(state: WhyAnalysisV3State) -> str:
     if state.get("awaiting_human_review"):
         return END  # Pause workflow
     if state.get("status") == "running":
-        # Check if we need to go to zero_evidence (no qualified causes)
-        # This happens when human_review finds 0 qualified causes in iteration 2+
-        all_causes = state.get("validated_causes_enriched") or []
-        if len(all_causes) > 0:
-            # Has causes but none qualified - go to zero evidence
-            return "zero_evidence_agent"
         # Human chose to continue - go back to payload_builder for next iteration
+        print(f"   [ROUTING] Human chose continue -> going to payload_builder for next iteration")
         return "payload_builder"
+    # Human chose root_cause or workflow completed
     return "finalize"
 
 
