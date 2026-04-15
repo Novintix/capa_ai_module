@@ -327,6 +327,72 @@ def _build_enriched_evidence(fishbone_final: Dict[str, Any],
     return (existing + "\n\n" + category_context) if existing else category_context
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# SUB-ORCHESTRATOR STATUS HELPERS
+# Read live state from child orchestrators so the RCA can gate HITL transitions
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _check_fishbone_completion(complaint_id: str) -> Dict[str, Any]:
+    """
+    Read Fishbone V3 session from Redis and return completion status.
+    Returns {"found": bool, "completed": bool, "status": str}.
+    If Redis is unavailable or no session exists, optimistically returns completed=True
+    so the flow is not blocked on infrastructure issues.
+    """
+    fsm = _get_fishbone_session_manager()
+    if fsm is None:
+        return {"found": False, "completed": True, "status": "UNKNOWN"}
+    try:
+        session_state = fsm.get_state(complaint_id)
+    except Exception as exc:
+        log_error("_check_fishbone_completion", str(exc), complaint_id)
+        return {"found": False, "completed": True, "status": "UNKNOWN"}
+    if not session_state:
+        # Session may have been cleaned up after completion — allow through
+        return {"found": False, "completed": True, "status": "UNKNOWN"}
+    status = str(session_state.get("status", "UNKNOWN")).upper()
+    return {
+        "found": True,
+        "completed": status == "COMPLETED",
+        "status": status,
+    }
+
+
+def _check_why_completion(why_session_id: str) -> Dict[str, Any]:
+    """
+    Read Why Analysis V3 LangGraph checkpoint from Redis and return completion status.
+    Returns {"found": bool, "completed": bool, "awaiting_human_review": bool,
+             "status": str, "final_output": dict|None}.
+    If the checkpoint cannot be read, optimistically returns found=False so the flow
+    is not blocked — the user can still proceed.
+    """
+    try:
+        # Lazy import avoids a circular import at module load time
+        from orchestrator.why_analysis_v3.orchestrator import (
+            orchestrator_graph as _why_graph,
+        )
+        snapshot = _why_graph.get_state({"configurable": {"thread_id": why_session_id}})
+        if snapshot is None or not snapshot.values:
+            return {"found": False, "completed": False, "awaiting_human_review": False,
+                    "status": "unknown", "final_output": None}
+        values = snapshot.values
+        status = str(values.get("status", "unknown"))
+        awaiting = bool(values.get("awaiting_human_review", False))
+        # completed = terminal status with no pending human review
+        completed = status in ("completed", "ai_flagged") and not awaiting
+        return {
+            "found": True,
+            "completed": completed,
+            "awaiting_human_review": awaiting,
+            "status": status,
+            "final_output": values.get("final_output"),
+        }
+    except Exception as exc:
+        log_error("_check_why_completion", str(exc))
+        return {"found": False, "completed": False, "awaiting_human_review": False,
+                "status": "unknown", "final_output": None, "error": str(exc)}
+
+
 def await_category_selection_node(state: RCAGraphState) -> dict:
     print("\n[RCA] Await Category Selection (HITL #2)...")
 
@@ -340,6 +406,24 @@ def await_category_selection_node(state: RCAGraphState) -> dict:
             "next_action": "select_category",
             "message": "Fishbone complete. Select a category via POST /rca/select-category.",
             "node_log": [{"node": "await_category_selection", "status": "awaiting_input",
+                          "timestamp": _now()}],
+        }
+
+    # ── Guard: Fishbone must be COMPLETED before we accept a category ─────────
+    fishbone_status = _check_fishbone_completion(complaint_id)
+    if fishbone_status.get("found") and not fishbone_status.get("completed"):
+        return {
+            "phase": "awaiting_category_selection",
+            "next_action": "select_category",
+            "message": (
+                f"Fishbone Analysis is still awaiting human decisions "
+                f"(status: {fishbone_status.get('status')}). "
+                "Submit cause decisions first via POST /fishbone-v3/decide, "
+                "then call POST /rca/select-category."
+            ),
+            "node_log": [{"node": "await_category_selection", "status": "blocked",
+                          "reason": "fishbone_not_complete",
+                          "fishbone_status": fishbone_status.get("status"),
                           "timestamp": _now()}],
         }
 
@@ -464,6 +548,37 @@ def await_action_plan_node(state: RCAGraphState) -> dict:
                           "timestamp": _now()}],
         }
 
+    # ── Guard: Why Analysis must be complete before we allow action plan ──────
+    why_session_id = state.get("why_session_id")
+    refreshed_why_output: Optional[Dict[str, Any]] = None
+
+    if why_session_id:
+        why_status = _check_why_completion(why_session_id)
+        print(f"   [RCA] Why status check: {why_status.get('status')} "
+              f"| awaiting_human_review={why_status.get('awaiting_human_review')} "
+              f"| completed={why_status.get('completed')}")
+        if why_status.get("found") and not why_status.get("completed"):
+            return {
+                "phase": "awaiting_action_plan_confirmation",
+                "next_action": "proceed_action_plan",
+                "message": (
+                    f"Why Analysis is still in progress "
+                    f"(status: {why_status.get('status')}, "
+                    f"awaiting_human_review: {why_status.get('awaiting_human_review')}). "
+                    "Complete Why Analysis via POST /why-analysis-v3/human-review, "
+                    "then call POST /rca/proceed-action-plan."
+                ),
+                "node_log": [{"node": "await_action_plan", "status": "blocked",
+                              "reason": "why_not_complete",
+                              "why_status": why_status.get("status"),
+                              "awaiting_human_review": why_status.get("awaiting_human_review"),
+                              "timestamp": _now()}],
+            }
+        # Sync in the latest completed Why output so finalize has the full result
+        if why_status.get("found") and why_status.get("final_output"):
+            refreshed_why_output = deep_serialize(why_status["final_output"])
+            print(f"   [RCA] Refreshed why_output from completed checkpoint.")
+
     # ── User has decided ──────────────────────────────────────────────────────
     if not action_plan_confirmed:
         log_transition(complaint_id, "awaiting_action_plan_confirmation",
@@ -471,6 +586,7 @@ def await_action_plan_node(state: RCAGraphState) -> dict:
         return {
             "phase": "completed",
             "action_plan_ready": False,
+            "why_output": refreshed_why_output or state.get("why_output"),
             "next_action": None,
             "message": "Action plan was not confirmed. RCA session remains open.",
             "audit_log": [{"time": time.time(), "action": "action_plan_rejected",
@@ -485,6 +601,7 @@ def await_action_plan_node(state: RCAGraphState) -> dict:
         "phase": "completed",
         "action_plan_ready": True,
         "action_plan_endpoint": ACTION_PLAN_ENDPOINT,
+        "why_output": refreshed_why_output or state.get("why_output"),
         "next_action": None,
         "message": "RCA complete. Proceeding to Action Plan.",
         "audit_log": [{"time": time.time(), "action": "action_plan_confirmed",
