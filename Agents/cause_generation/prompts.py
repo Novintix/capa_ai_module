@@ -64,9 +64,27 @@ FOR CAUSE GENERATION:
       "detection": 4,
       "current_controls": "Typical controls",
       "source": "Generated"
+    },
+    {
+      "cause_text": "Another cause description",
+      "process_step": "Different process step",
+      "failure_mode": "Different failure mode",
+      "potential_effects": "Different impact",
+      "severity": 8,
+      "occurrence": 6,
+      "detection": 7,
+      "current_controls": "Different controls",
+      "source": "Generated"
     }
   ]
 }
+
+RPN SCORING INSTRUCTIONS:
+- Severity: Based on impact severity (1=minor, 10=critical)
+- Occurrence: Based on how likely this cause is (1=rare, 10=frequent)
+- Detection: Based on how hard to detect (1=easy to detect, 10=hard to detect)
+- Analyze each cause individually and assign appropriate scores
+- Scores should reflect the specific characteristics of each cause
 
 CRITICAL INSTRUCTIONS FOR FAILURE_MODE:
 - Describe the EFFECT or CONSEQUENCE of the cause
@@ -385,10 +403,16 @@ CONTEXT CONSIDERATIONS:
 - If evidence shows the failure already happened: Occurrence should be higher (6-9)
 - If evidence shows it reached customer/production: Detection should be higher (7-10)
 
+SCORING GUIDELINES:
+- Severity: Impact of the failure (1=minor, 10=critical)
+- Occurrence: Likelihood of this cause happening (1=rare, 10=frequent)
+- Detection: Ability to detect before impact (1=easy to detect, 10=hard to detect)
+
 IMPORTANT:
 - Scores must be integers from 1 to 10
 - Consider the specific context provided
 - Be realistic and consistent
+- Analyze each cause individually
 - Higher scores = higher risk"""
 
 SCORING_OUTPUT_FORMAT = """OUTPUT FORMAT:
