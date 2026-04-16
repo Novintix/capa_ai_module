@@ -46,6 +46,8 @@ except Exception:
 QUALIFIED_CONFIDENCE = 0.90
 MAX_NODE_RETRIES = int(os.getenv("RCA_V2_NODE_RETRIES", "1"))
 MAX_AGENT_LOG_CHARS = int(os.getenv("RCA_V2_AGENT_LOG_CHARS", "12000"))
+# default_ttl is in MINUTES in langgraph-checkpoint-redis v0.4.x
+RCA_V2_SESSION_TTL_MINUTES = int(os.getenv("RCA_V2_SESSION_TTL_MINUTES", str(7 * 24 * 60)))  # 7 days
 RCA_V2_LOG_ROOT = os.path.join(os.path.dirname(__file__), "logs")
 RCA_V2_AGENT_IO_LOG_FILE = os.path.join(
     RCA_V2_LOG_ROOT,
@@ -165,7 +167,8 @@ def _write_structured_log(event_type: str, context: Dict[str, Any], payload: Any
     if not RCA_V2_FILE_DEBUG_LOG_ENABLED:
         return
 
-    if event_type not in ("agent_input", "agent_output"):
+    # allow both agent and node related event types to be written
+    if event_type not in ("agent_input", "agent_output", "node_input", "node_output", "node_exception"):
         return
 
     try:
@@ -1659,7 +1662,7 @@ def build_orchestrator_v2():
 
     graph.add_conditional_edges("finalize", route_after_finalize, {END: END})
 
-    checkpointer = RedisSaver(_REDIS_URL)
+    checkpointer = RedisSaver(_REDIS_URL, ttl={"default_ttl": RCA_V2_SESSION_TTL_MINUTES})
     checkpointer.setup()
 
     return graph.compile(
@@ -1668,4 +1671,13 @@ def build_orchestrator_v2():
     )
 
 
-orchestrator_graph_v2 = build_orchestrator_v2()
+# Lazy singleton — built on first request so Redis failures don't crash app import.
+_orchestrator_graph_v2 = None
+
+
+def get_orchestrator_graph_v2():
+    """Return the compiled RCA v2 orchestrator graph, building it on first call."""
+    global _orchestrator_graph_v2
+    if _orchestrator_graph_v2 is None:
+        _orchestrator_graph_v2 = build_orchestrator_v2()
+    return _orchestrator_graph_v2

@@ -68,6 +68,8 @@ async def resume_fishbone_selection_v2(input_data: RCAFishboneSelectionInputV2):
         )
     except asyncio.TimeoutError as exc:
         raise HTTPException(status_code=504, detail="Fishbone resume timed out.") from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
@@ -87,6 +89,8 @@ async def resume_why_decision_v2(input_data: RCAWhyDecisionInputV2):
         )
     except asyncio.TimeoutError as exc:
         raise HTTPException(status_code=504, detail="Why resume timed out.") from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:

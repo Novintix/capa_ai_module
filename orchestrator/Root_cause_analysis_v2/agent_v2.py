@@ -9,7 +9,7 @@ import uuid
 from typing import Any, Dict
 
 from orchestrator.Root_cause_analysis.logger import log_error
-from .orchestrator_v2 import deep_serialize, orchestrator_graph_v2
+from .orchestrator_v2 import deep_serialize, get_orchestrator_graph_v2
 from .schemas_v2 import (
     RCAFishboneSelectionInputV2,
     RCAStartInputV2,
@@ -21,7 +21,7 @@ class RootCauseAnalysisCoordinatorV2:
     """Thin coordinator around RCA v2 LangGraph with Redis checkpointing."""
 
     def __init__(self):
-        self.graph = orchestrator_graph_v2
+        self.graph = get_orchestrator_graph_v2()
 
     def start_v2(self, input_data: RCAStartInputV2, session_id: str | None = None) -> Dict[str, Any]:
         complaint_id = input_data.complaint_id
@@ -93,6 +93,12 @@ class RootCauseAnalysisCoordinatorV2:
     def resume_fishbone_selection_v2(self, input_data: RCAFishboneSelectionInputV2) -> Dict[str, Any]:
         try:
             config = {"configurable": {"thread_id": input_data.session_id}}
+            snapshot = self.graph.get_state(config)
+            if snapshot is None or not snapshot.values:
+                raise KeyError(
+                    f"No RCA v2 session found for '{input_data.session_id}'. "
+                    "The session may have expired or never been created."
+                )
             self.graph.update_state(config, {"fishbone_selected_cause_id": input_data.selected_cause_id})
             final_state = self.graph.invoke(None, config=config)
             return self._build_response(final_state)
@@ -124,6 +130,12 @@ class RootCauseAnalysisCoordinatorV2:
     def resume_why_decision_v2(self, input_data: RCAWhyDecisionInputV2) -> Dict[str, Any]:
         try:
             config = {"configurable": {"thread_id": input_data.session_id}}
+            snapshot = self.graph.get_state(config)
+            if snapshot is None or not snapshot.values:
+                raise KeyError(
+                    f"No RCA v2 session found for '{input_data.session_id}'. "
+                    "The session may have expired or never been created."
+                )
             self.graph.update_state(
                 config,
                 {
@@ -169,7 +181,7 @@ class RootCauseAnalysisCoordinatorV2:
             raise
         except Exception as exc:
             log_error("status_v2", str(exc))
-            raise KeyError(f"Could not retrieve RCA v2 session for '{session_id}': {exc}") from exc
+            raise
 
     @staticmethod
     def _build_response(state: Dict[str, Any]) -> Dict[str, Any]:
