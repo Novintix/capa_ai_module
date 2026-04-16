@@ -1,0 +1,174 @@
+﻿ASSEMBLY LOGBOOK AND SHIFT RECORD
+Document ID: MFG-LOG-NP410-D317
+Site: NOVINTIX Medical Devices Campus - Building 4
+Manufacturing Unit: Implantable Device Assembly - Line MDA-02
+Product: NeuroPulse Implantable Infusion Controller (Model NP-410)
+Lot Number: MD-317
+Legacy Cross Reference: D-317
+Date of Manufacture: 2026-02-18
+Prepared By: Device Manufacturing Operations
+Reviewed By: Shift Supervisor Team
+
+SECTION 1 - LOT CONTEXT
+- Planned lot size: 1,200 devices
+- Line: MDA-02
+- Critical station: Ultrasonic Weld Station UWS-3
+- Maintenance work order linked: WO-MNT-77124
+- Triggering event: Weld horn WH-22 replacement after wear alert
+- Mandatory restart requirement: Sterile-path clearance and witness verification before RUN
+
+SECTION 2 - PRE-SHIFT STARTUP DETAILS
+06:00 - Shift A huddle completed.
+06:04 - PPE and gowning verification completed.
+06:08 - Environmental panel reviewed; humidity stable at 41 percent RH.
+06:11 - Maintenance confirms WH-22 replacement complete.
+06:15 - Mechanical test pulse run passed.
+06:19 - Operator L. Moreno requests sterile-path clearance form FRM-MDT-041.
+06:24 - Batch packet assembled; witness section open.
+06:29 - Clearance checklist started by operator; witness unavailable.
+06:33 - Production planning call flags dispatch urgency for implant case backlog.
+06:37 - Supervisor R. Ahmed asks team to prepare for rapid restart.
+06:42 - Line moved HOLD to READY; witness field still blank.
+06:46 - QA witness request placed through floor dispatch queue.
+06:51 - No QA arrival yet.
+06:56 - Team discusses continuing and closing witness at first hold window.
+07:00 - Assembly resumed.
+
+SECTION 3 - DETAILED EVENT TIMELINE (SHIFT A)
+07:05 - Device feed rate 22 units/hour.
+07:09 - Torque station readings stable.
+07:14 - Cure oven setpoint 58.0 C.
+07:18 - Humidity climbs to 44 percent RH.
+07:22 - First in-process flow check pass.
+07:27 - Clearance witness still pending.
+07:33 - No deviation initiated.
+07:38 - Feed rate increased to 24 units/hour for schedule recovery.
+07:44 - Micro-stop for alignment adjustment; witness not obtained.
+07:49 - Supervisor reminder issued to close packet before handover.
+07:55 - Humidity 46 percent RH.
+08:01 - Optical inline monitor flags minor particulate blips; below action threshold.
+08:07 - Operator notes pending witness in comments.
+08:14 - Second QA dispatch call made.
+08:20 - QA reports ongoing critical review on adjacent line.
+08:26 - Feed rate increased to 25 units/hour.
+08:31 - Torque variance warning at station TS-4, auto-corrected.
+08:37 - No line hold initiated.
+08:43 - Documentation still incomplete.
+08:49 - Third request for witness sent.
+08:55 - Humidity 47 percent RH.
+09:02 - In-process flow check pass.
+09:08 - Feed rate 26 units/hour.
+09:14 - Scheduling note entered: maintain output to meet surgical allocation date.
+09:21 - Optical monitor shows 2 short particulate alerts; below threshold.
+09:29 - Supervisor notes intent to resolve by midday.
+09:36 - No deviation form opened.
+09:44 - Humidity 48 percent RH.
+09:52 - Torque mean drifts upward by 0.04 Nm; still in tolerance.
+10:00 - Feed rate 27 units/hour.
+10:08 - QA callback: witness available after 12:00.
+10:17 - Operator note: clearance still open.
+10:26 - In-process flow check marginal but passing.
+10:34 - No stop initiated.
+10:43 - Humidity remains elevated.
+10:51 - Shift team reminded to avoid verbal-only carry-forward.
+11:00 - Feed rate 27 units/hour.
+11:09 - Optical monitor particulate alerts now 5 cumulative.
+11:18 - Supervisor logs schedule pressure from planning.
+11:27 - Packet still missing witness sign-off.
+11:36 - QA corridor walk notes incomplete form and requests immediate closure.
+11:45 - Team acknowledges request; no hold executed.
+11:54 - Humidity 49 percent RH.
+12:03 - In-process flow check near lower acceptance boundary.
+12:12 - Feed rate 28 units/hour.
+12:24 - QA engineer N. Patel physically reviews packet; witness unsigned.
+12:31 - N. Patel requests escalation if unresolved within 30 min.
+12:38 - Shift A continues operation.
+12:46 - No deviation opened.
+12:55 - Handover prep started.
+13:03 - Open item listed in draft notes.
+13:12 - Humidity 48 percent RH.
+13:20 - Shift B briefing draft finalized.
+13:29 - Outgoing team states witness still pending.
+13:37 - Handover starts.
+13:56 - Open compliance item transferred verbally to Shift B operator T. Huang.
+13:59 - No signed transfer for open critical item.
+
+SECTION 4 - SHIFT B CONTINUATION
+14:05 - Shift B confirms awareness of pending witness sign-off.
+14:09 - Supervisor M. Okafor reviews packet; no stop initiated.
+14:15 - Feed rate remains 28 units/hour.
+14:22 - Humidity 47 percent RH.
+14:28 - Second optical monitor spike event.
+14:36 - T. Huang requests QA witness update.
+14:43 - QA dispatch reports delay due complaint hold review.
+14:50 - No deviation initiated.
+14:58 - In-process flow check shows 1 fail in 25 sample, recheck pass.
+15:06 - Feed rate raised to 29 units/hour.
+15:14 - Humidity 48 percent RH.
+15:22 - Supervisor notes dispatch cutoff at 18:00.
+15:29 - Operator asks whether to place hold; advised to continue while awaiting QA.
+15:37 - Optical alerts continue, still below hard stop threshold.
+15:46 - Third QA escalation call from Shift B.
+15:54 - QA confirms arrival around 16:20.
+16:02 - No hold yet.
+16:10 - Flow check shows 2 fails in 30 sample, trend concern logged.
+16:20 - QA engineer N. Patel arrives at line.
+16:24 - Packet review confirms witness field blank since 06:29.
+16:27 - QA refuses retroactive witness sign-off.
+16:31 - Deviation DEV-2026-0173 opened; line set to HOLD.
+16:35 - Feed rate zero.
+16:39 - QA Manager notified.
+16:44 - Quarantine tag initiated for all assembled units since 07:00 restart.
+16:52 - Decision made to restart only after fresh verified clearance.
+17:01 - New form FRM-MDT-041B opened.
+17:07 - QA performs full sterile-path verification.
+17:11 - Witness signs FRM-MDT-041B.
+17:14 - Line returned to RUN.
+17:20 - Feed rate resumed at 24 units/hour.
+17:28 - Enhanced in-process flow test frequency doubled.
+17:36 - Sample shows 1 fail in 40; retained for engineering review.
+17:45 - Optical particulate check intensified; 2 suspect units retained.
+17:54 - Feed rate 25 units/hour.
+18:03 - Final assembly count reached planned 1,200 units.
+18:11 - Line shutdown initiated.
+18:17 - Batch packet completed with open deviation reference.
+18:25 - Shift B to C handover performed in signed written format.
+18:31 - Open actions assigned to Shift C engineering support.
+
+SECTION 5 - POST-ASSEMBLY QUALITY ACTIVITIES
+18:45 - Quarantine location confirmation completed.
+18:52 - Flow-failure units segregated for root-cause lab.
+19:00 - Weld horn and fixture inspected; no gross damage found.
+19:08 - Polymer transfer tubing inspected; surface abrasion at clip contact noted.
+19:16 - Sample clipping retained for microscopy.
+19:25 - Environmental logs archived; humidity trend highlighted.
+19:33 - Deviation record updated with shift chronology.
+19:42 - QA manager requests expanded final acceptance test plan.
+19:51 - Reliability engineering notified for failure analysis support.
+
+SECTION 6 - MAINTENANCE BACKGROUND
+Equipment ID: UWS-3 weld station
+Work Order WO-MNT-77124:
+- Opened: 2026-02-17 after horn wear trend alarm.
+- Type: Planned critical maintenance.
+- Technician: E. Cole.
+- Replacement part: WH-22 Rev C, Lot 260211.
+- Mechanical completion: 06:11 on 2026-02-18.
+- Functional dry-run: Pass.
+- Known gap: Work order lacked mandatory field linking closure to FRM-MDT-041 witness completion.
+
+Prior history (last 12 months):
+- 2025-11-03: Horn replacement, compliant restart.
+- 2025-08-19: Clamp fixture replacement, delayed witness by 22 minutes, no deviation.
+- 2025-05-11: Routine PM, no critical restart event.
+- 2025-02-02: Horn replacement, compliant restart.
+Pattern: 1 delayed-critical restart in prior 4 interventions before MD-317 event.
+
+SECTION 7 - ENVIRONMENTAL SNAPSHOT
+- 06:00-08:00 RH range: 41-46 percent.
+- 08:00-12:00 RH range: 46-49 percent.
+- 12:00-16:00 RH range: 47-48 percent.
+- 16:00-18:00 RH range: 45-47 percent.
+Observation: Elevated RH coincided with increased particulate optical hits and marginal low-dose flow test behavior.
+
+END OF LOGBOOK

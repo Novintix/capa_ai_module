@@ -1,0 +1,103 @@
+HISTORICAL CAPA DOSSIER - MEDTECH ASSEMBLY
+File: historical_capa_medtech.txt
+Compiled By: Quality Systems Analyst Team
+Purpose: Provide related prior events for recurrence analysis and control design.
+
+CAPA RECORD 1
+CAPA ID: CAPA-MDT-2024-0061
+Date Opened: 2024-06-18
+Date Closed: 2024-10-04
+Area: Post-maintenance readiness documentation
+Event Summary:
+- Restart attempted before readiness checklist closure.
+Root Cause:
+- Ownership ambiguity between operations and maintenance.
+Actions:
+- Role matrix clarified.
+- Supervisor verification added.
+Effectiveness:
+- Initial improvement observed; minor delayed entry recurrence remained.
+
+CAPA RECORD 2
+CAPA ID: CAPA-MDT-2025-0112
+Date Opened: 2025-03-11
+Date Closed: 2025-08-21
+Area: Restart governance and handover control
+Event Summary:
+- Open critical item transferred verbally at shift handover.
+Root Cause:
+- Weak handover discipline and delayed escalation behavior.
+Actions:
+- SOP update with no-restart clause.
+- Added handover written transfer requirement.
+Effectiveness:
+- 9 of 10 audited events compliant.
+Residual Risk:
+- Medium risk remained at shift boundaries.
+
+CAPA RECORD 3
+CAPA ID: CAPA-MDT-2025-0149
+Date Opened: 2025-05-27
+Date Closed: 2025-11-30
+Area: Real-time documentation compliance
+Event Summary:
+- Critical records completed at end-of-shift instead of contemporaneous entry.
+Root Cause:
+- Throughput prioritization and staffing compression.
+Actions:
+- Mid-shift documentation checks.
+- GDP refresher and supervisor prompts.
+Effectiveness:
+- Delayed entry rate reduced 58 percent.
+
+CAPA RECORD 4
+CAPA ID: CAPA-MDT-2025-0195
+Date Opened: 2025-08-10
+Date Closed: Open
+Area: MES restart lock deployment
+Background:
+- ITR-MDT-2025-0314 raised to enforce witness-field lock before RUN.
+Status:
+- Deployment delayed due IT reprioritization and ERP transition.
+Gap:
+- No formal risk acceptance documented when due date slipped.
+Event Relevance:
+- Direct contributing factor to IPC-117A event.
+
+CAPA RECORD 5
+CAPA ID: CAPA-MDT-2025-0221
+Date Opened: 2025-10-03
+Date Closed: Open
+Area: KPI governance alignment
+Background:
+- Throughput-only metrics were linked to delayed compliance holds.
+Actions Planned:
+- Add compliance adherence weighting to supervisor scorecard.
+- Remove penalty for validated compliance-mandated holds.
+Status:
+- Draft approved in principle; rollout pending.
+
+TREND ANALYSIS SUMMARY
+Trend 1: Handover governance failures appear repeatedly in critical events.
+Trend 2: Delayed critical documentation persists under schedule pressure.
+Trend 3: Technical controls identified in CAPA are closed administratively before deployment verification.
+Trend 4: Production KPI structures have not consistently reinforced compliance-first behavior.
+
+LESSONS LEARNED
+1. Human-only controls are insufficient for restart gates.
+2. Written handover transfer is an effective barrier only when strictly enforced.
+3. CAPA effectiveness must verify control outcomes, not only action completion.
+4. IT priority decisions affecting quality controls require formal QA governance.
+
+MANAGEMENT REVIEW EXTRACTS
+- 2025-09 review: restart compliance borderline, no escalation initiated.
+- 2025-11 review: MES lock still delayed, no risk-tier action documented.
+- 2026-02 review: IPC-117A event triggered formal investigation and governance redesign actions.
+
+RECOMMENDED PREVENTIVE CONTROLS
+- Mandatory QA witness pre-assignment for all planned maintenance restarts.
+- MES lock with no bypass except dual executive approval and auto-deviation.
+- Risk-tier escalation in management review for overdue high-risk actions.
+- KPI redesign with compliance-weighted scoring.
+
+END OF DOSSIER

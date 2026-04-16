@@ -1,0 +1,149 @@
+﻿POLICY COMPENDIUM
+Document Title: Medical Device Quality and Manufacturing Governance Policies
+Document File Name: policy.txt
+Master Reference: QMS-MDT-POL-2026
+Effective Date: 2026-01-01
+Next Review Date: 2027-12-31
+Owned By: Device Quality Systems Office
+Approved By: Site Quality Council and Device Operations Leadership
+
+INTRODUCTION
+This compendium consolidates policies for deviation management, documentation integrity, restart controls, handover governance, CAPA effectiveness, training, change control, risk escalation, and quality-critical IT governance in implantable device manufacturing.
+
+POLICY 1 - DEVIATION MANAGEMENT AND ESCALATION
+Policy ID: POL-QA-005
+Requirements:
+1. Any departure from approved process or control is a deviation.
+2. Deviations are recorded in real time.
+3. Critical restart control gaps require immediate QA notification.
+4. Major/Critical deviations require CAPA initiation within 5 business days.
+5. Repeat deviations trigger management escalation and effectiveness review.
+
+POLICY 2 - GOOD DOCUMENTATION PRACTICE
+Policy ID: POL-QA-012
+Requirements:
+1. Entries must be contemporaneous.
+2. Backdating is prohibited.
+3. Corrections require documented GDP method.
+4. Blank mandatory fields are noncompliant.
+5. Verbal claims without records are not acceptable evidence.
+
+POLICY 3 - DATA INTEGRITY GOVERNANCE
+Policy ID: POL-QA-017
+Requirements:
+1. Electronic audit trails remain enabled.
+2. Shared credentials are prohibited.
+3. Delayed entries require supervisory justification.
+4. Data review includes exception trends and outliers.
+5. Reconstructed records are integrity events unless formally justified.
+
+POLICY 4 - POST-MAINTENANCE RESTART CONTROL
+Policy ID: POL-MDT-041
+Requirements:
+1. No restart before sterile-path clearance completion.
+2. Witness sign-off required before line release.
+3. Missing witness signature invalidates restart record.
+4. Open clearance at handover requires signed transfer and hold.
+5. Restart without completed clearance triggers deviation and risk assessment.
+
+POLICY 5 - ENVIRONMENTAL CONTROL RESPONSE
+Policy ID: POL-ENG-039
+Requirements:
+1. Humidity and temperature warning excursions require documented decision.
+2. Critical-zone environmental drift cannot be treated as informational only.
+3. Repeated warning excursions trigger engineering review.
+
+POLICY 6 - SHIFT HANDOVER GOVERNANCE
+Policy ID: POL-MDT-031
+Requirements:
+1. Open critical items require signed written transfer.
+2. Verbal-only transfer is prohibited.
+3. Incoming shift must accept ownership in writing.
+4. Unassigned open critical item is a control failure.
+
+POLICY 7 - INVESTIGATION AND ROOT CAUSE QUALITY
+Policy ID: POL-QA-021
+Requirements:
+1. Investigation must include timeline and evidence matrix.
+2. Conclusions must be evidence-based and testable.
+3. At least two independent evidence sources required when feasible.
+4. Interim conclusions must be clearly labeled.
+
+POLICY 8 - CAPA GOVERNANCE
+Policy ID: POL-QA-022
+Requirements:
+1. CAPA includes root cause, owner, due date, and measurable effectiveness criteria.
+2. Effectiveness checks require outcome verification, not activity completion only.
+3. Delayed CAPA on high-risk issues requires formal risk acceptance.
+4. Recurrence within 12 months triggers CAPA redesign review.
+
+POLICY 9 - TRAINING AND QUALIFICATION
+Policy ID: POL-HR-QMS-014
+Requirements:
+1. Qualification required before independent task execution.
+2. Annual refresher for high-criticality SOPs.
+3. Behavioral effectiveness measured through observation audits.
+4. Overdue critical modules require supervisory escalation.
+
+POLICY 10 - CHANGE CONTROL
+Policy ID: POL-QA-028
+Requirements:
+1. Quality-impacting changes require risk assessment.
+2. Temporary changes need expiry and rollback controls.
+3. SOP, forms, and training updates must be synchronized.
+4. Pre-implementation training completion mandatory.
+
+POLICY 11 - LOT RECORD REVIEW
+Policy ID: POL-QA-034
+Requirements:
+1. Critical checklist: signatures, timestamps, maintenance links, holds, deviations.
+2. Missing critical records block release recommendation.
+3. Late entries are reviewed for integrity risk.
+
+POLICY 12 - RISK MANAGEMENT AND ESCALATION
+Policy ID: POL-QA-040
+Requirements:
+1. Potential patient-impact events are escalated immediately.
+2. Risk scoring includes severity, occurrence, detectability.
+3. Interim controls are documented and tracked to closure.
+
+POLICY 13 - MANAGEMENT REVIEW GOVERNANCE
+Policy ID: POL-QA-050
+Requirements:
+1. Monthly review includes CAPA status, deviation trends, and overdue actions.
+2. Open actions tiered by residual risk.
+3. Medium risk overdue >30 days requires QA Director risk acceptance.
+4. High risk overdue requires Site Director notification within 5 business days.
+5. Status-only reporting without risk decision is unacceptable for overdue critical actions.
+
+POLICY 14 - QUALITY-CRITICAL IT PROJECT GOVERNANCE
+Policy ID: POL-IT-QMS-015
+Requirements:
+1. Quality-critical IT controls are listed in formal register.
+2. Priority changes require QA approval before effect.
+3. Delay beyond committed date requires risk acceptance document.
+4. Compensating controls must be monitored until deployment.
+
+POLICY 15 - KPI GOVERNANCE AND COMPLIANCE ALIGNMENT
+Policy ID: POL-OPS-QMS-022
+Requirements:
+1. Shift scorecard includes minimum 25 percent compliance weighting.
+2. Correct compliance holds are positive performance actions.
+3. Throughput-only scoring is not permitted for high-criticality lines.
+4. Annual KPI review by Site Quality Council is mandatory.
+
+POLICY 16 - CAPA EFFECTIVENESS STANDARDS
+Policy ID: POL-QA-022-EFF
+Requirements:
+1. Effectiveness protocols must verify technical control deployment status.
+2. Residual-risk notes require explicit management action.
+3. Failed effectiveness checks require immediate extension or redesign.
+4. Closure decision requires evidence package with outcome metrics.
+
+APPENDIX A - POLICY CROSSWALK
+- SOP-MDT-041 mapped to POL-MDT-041, POL-QA-005, POL-QA-012.
+- FRM-MDT-041 mapped to POL-MDT-041 and POL-QA-034.
+- FRM-MDT-051 mapped to POL-MDT-031 and POL-QA-012.
+- FRM-QA-DEV-02 mapped to POL-QA-005 and POL-QA-021.
+
+END OF COMPENDIUM

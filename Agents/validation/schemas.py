@@ -34,7 +34,7 @@ class ValidationInput(BaseModel):
 		None,
 		description=(
 			"Operational logs or event logs. "
-			"Accepted formats: plain text string, absolute file path string, "
+			"Accepted formats: plain text string, absolute or relative file path string, "
 			"or a list of any combination of the above (e.g. ['path/log1.txt', 'path/log2.txt', 'inline text'])."
 		),
 	)
@@ -42,49 +42,49 @@ class ValidationInput(BaseModel):
 		None,
 		description=(
 			"Investigation reports and test reports. "
-			"Accepted formats: plain text string, absolute file path string, or a list of either."
+			"Accepted formats: plain text string, absolute or relative file path string, or a list of either."
 		),
 	)
 	process_data: Optional[Any] = Field(
 		None,
 		description=(
 			"Manufacturing/process data records. "
-			"Accepted formats: plain text string, absolute file path string, or a list of either."
+			"Accepted formats: plain text string, absolute or relative file path string, or a list of either."
 		),
 	)
 	historical_capa: Optional[Any] = Field(
 		None,
 		description=(
 			"Historical CAPA references. "
-			"Accepted formats: plain text string, absolute file path string, or a list of either."
+			"Accepted formats: plain text string, absolute or relative file path string, or a list of either."
 		),
 	)
 	policies: Optional[Any] = Field(
 		None,
 		description=(
 			"Policies related to process/compliance. "
-			"Accepted formats: plain text string, absolute file path string, or a list of either."
+			"Accepted formats: plain text string, absolute or relative file path string, or a list of either."
 		),
 	)
 	sop: Optional[Any] = Field(
 		None,
 		description=(
 			"SOP/work instructions. "
-			"Accepted formats: plain text string, absolute file path string, or a list of either."
+			"Accepted formats: plain text string, absolute or relative file path string, or a list of either."
 		),
 	)
 	investigation_records: Optional[Any] = Field(
 		None,
 		description=(
 			"General investigation records. "
-			"Accepted formats: plain text string, absolute file path string, or a list of either."
+			"Accepted formats: plain text string, absolute or relative file path string, or a list of either."
 		),
 	)
 	supporting_system_information: Optional[Any] = Field(
 		None,
 		description=(
 			"Additional system context. "
-			"Accepted formats: plain text string, absolute file path string, or a list of either."
+			"Accepted formats: plain text string, absolute or relative file path string, or a list of either."
 		),
 	)
 

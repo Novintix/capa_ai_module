@@ -47,6 +47,10 @@ SUPPORTED_EVIDENCE_EXTENSIONS = {
 	".md",
 }
 
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+_AGENT_BASE_DIR = _THIS_DIR
+_PROJECT_ROOT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
+
 
 def _normalize_text(value: Any) -> str:
 	if value is None:
@@ -147,6 +151,40 @@ def _normalize_reference_to_filename(reference: Any, reference_to_filename: Dict
 	return ref
 
 
+def _resolve_existing_file_path(value: str) -> str | None:
+	"""Resolve an input path to an existing file.
+
+	Supports:
+	- absolute paths
+	- workspace-relative paths (e.g. Agents\\validation\\evidence_files\\file.txt)
+	- validation-agent-relative paths (e.g. evidence_files\\file.txt)
+	"""
+	raw = value.strip().strip('"').strip("'")
+	if not raw:
+		return None
+
+	normalized = os.path.normpath(raw)
+	candidates: List[str] = [normalized]
+
+	if not os.path.isabs(normalized):
+		candidates.append(os.path.normpath(os.path.join(os.getcwd(), normalized)))
+		candidates.append(os.path.normpath(os.path.join(_PROJECT_ROOT_DIR, normalized)))
+		candidates.append(os.path.normpath(os.path.join(_AGENT_BASE_DIR, normalized)))
+
+	seen: set[str] = set()
+	for candidate in candidates:
+		if candidate in seen:
+			continue
+		seen.add(candidate)
+		try:
+			if os.path.isfile(candidate):
+				return candidate
+		except OSError:
+			continue
+
+	return None
+
+
 def _is_file_path(value: Any) -> bool:
 	"""Check if a string value points to an existing local file."""
 	if not isinstance(value, str):
@@ -154,10 +192,7 @@ def _is_file_path(value: Any) -> bool:
 	path = value.strip()
 	if not path:
 		return False
-	try:
-		return os.path.isfile(path)
-	except OSError:
-		return False
+	return _resolve_existing_file_path(path) is not None
 
 
 def _flatten_or_load_file_evidence(payload: Any, source: str, prefix: str) -> List[Dict[str, str]]:
@@ -172,16 +207,17 @@ def _flatten_or_load_file_evidence(payload: Any, source: str, prefix: str) -> Li
 		if not value:
 			return records
 
-		if _is_file_path(value):
+		resolved_file_path = _resolve_existing_file_path(value)
+		if resolved_file_path:
 			try:
-				text = _extract_text_from_file(value)
+				text = _extract_text_from_file(resolved_file_path)
 				if text and text.strip():
 					records.append(
 						{
 							"reference_id": _to_file_reference_name(value),
 							"source": source,
 							"content": text.strip(),
-							"file_path": value,
+							"file_path": resolved_file_path,
 						}
 					)
 			except Exception as exc:
@@ -215,16 +251,17 @@ def _flatten_or_load_file_evidence(payload: Any, source: str, prefix: str) -> Li
 		file_path = payload.get("file_path") or payload.get("path")
 		if isinstance(file_path, str) and file_path.strip():
 			file_path_str = file_path.strip()
-			if _is_file_path(file_path_str):
+			resolved_file_path = _resolve_existing_file_path(file_path_str)
+			if resolved_file_path:
 				try:
-					text = _extract_text_from_file(file_path_str)
+					text = _extract_text_from_file(resolved_file_path)
 					if text and text.strip():
 						records.append(
 							{
 								"reference_id": _to_file_reference_name(file_path_str),
 								"source": source,
 								"content": text.strip(),
-								"file_path": file_path_str,
+								"file_path": resolved_file_path,
 							}
 						)
 				except Exception as exc:

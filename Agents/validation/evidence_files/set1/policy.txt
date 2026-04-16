@@ -1,0 +1,109 @@
+POLICY COMPENDIUM
+Document Title: Site Quality and MedTech Manufacturing Governance Policies
+Document File Name: policy.txt
+Master Reference: QMS-POL-COMPENDIUM-MDT-2026
+Effective Date: 2026-01-01
+Next Review Date: 2027-12-31
+Owned By: Quality Systems Office
+Approved By: Site Quality Council and Site Leadership Team
+
+INTRODUCTION
+This compendium consolidates policies relevant to deviation management, GDP, data integrity, post-maintenance restart, handover governance, CAPA, training, change control, and management review for sterile medical device assembly operations.
+
+POLICY 1 - DEVIATION MANAGEMENT AND ESCALATION
+Policy ID: POL-QA-005
+Requirements:
+1. Any procedural departure is a deviation.
+2. Deviation must be recorded in real time.
+3. Restart without completed witness sign-off is an immediate deviation trigger.
+4. Major and critical deviations require CAPA initiation within 5 business days.
+
+POLICY 2 - GOOD DOCUMENTATION PRACTICE
+Policy ID: POL-QA-012
+Requirements:
+1. Entries are contemporaneous.
+2. Backdating is prohibited.
+3. Blank mandatory fields are non-compliant records.
+4. Verbal claims without records are not acceptable evidence.
+
+POLICY 3 - DATA INTEGRITY GOVERNANCE
+Policy ID: POL-QA-017
+Requirements:
+1. Audit trails remain enabled in all GMP systems.
+2. Shared credentials are prohibited.
+3. Delayed entries require documented reason and supervisory acknowledgment.
+
+POLICY 4 - POST-MAINTENANCE RESTART CONTROL
+Policy ID: POL-MDT-058
+Requirements:
+1. No restart before readiness checklist completion and witness sign-off.
+2. Missing witness signature invalidates release readiness.
+3. Any breach requires immediate line hold and risk assessment.
+
+POLICY 5 - SHIFT HANDOVER GOVERNANCE
+Policy ID: POL-MFG-031
+Requirements:
+1. Open critical items must be transferred in signed written format.
+2. Verbal-only transfer is prohibited.
+3. Incoming shift must acknowledge ownership.
+
+POLICY 6 - CAPA GOVERNANCE
+Policy ID: POL-QA-022
+Requirements:
+1. CAPA must define measurable effectiveness criteria.
+2. Effectiveness verification must confirm control outcomes.
+3. Overdue high-risk CAPA requires documented risk acceptance.
+
+POLICY 7 - TRAINING AND QUALIFICATION
+Policy ID: POL-HR-QMS-014
+Requirements:
+1. Role qualification required before independent execution.
+2. Annual refresher required for critical SOPs.
+3. Behavioral effectiveness monitored via observation audits.
+
+POLICY 8 - CHANGE CONTROL
+Policy ID: POL-QA-028
+Requirements:
+1. Changes affecting particulate risk require formal impact assessment.
+2. IT controls affecting quality require QA approval for priority changes.
+3. Training must be complete before change effective date.
+
+POLICY 9 - MANAGEMENT REVIEW GOVERNANCE
+Policy ID: POL-QA-050
+Requirements:
+1. Monthly review includes CAPA status, trend signals, and overdue high-risk actions.
+2. High-risk overdue items require formal escalation and risk acceptance.
+3. Minutes must record decisions and accountability, not status-only updates.
+
+POLICY 10 - QUALITY-CRITICAL IT PROJECT GOVERNANCE
+Policy ID: POL-IT-QMS-015
+Requirements:
+1. Quality-critical IT controls tracked in dedicated register.
+2. Priority downgrade requires QA written approval.
+3. Delay beyond committed date requires risk acceptance within 15 business days.
+
+POLICY 11 - KPI GOVERNANCE AND COMPLIANCE ALIGNMENT
+Policy ID: POL-OPS-QMS-022
+Requirements:
+1. Shift scorecards must include compliance weighting of at least 25 percent.
+2. Validated compliance-hold actions must not be scored as production failure.
+3. KPI design changes require compliance impact assessment.
+
+POLICY 12 - MATERIALS AND PARTICULATE RISK MANAGEMENT
+Policy ID: POL-QA-MAT-018
+Requirements:
+1. Product-contact and adjacent movement components require particulate-shed risk review.
+2. Any geometry or routing change with shed-risk implication requires change control.
+3. Periodic integrity checks required for sleeves, guides, and interfaces in moving feed paths.
+
+APPENDIX A - POLICY CROSSWALK
+- SOP-MDT-058 mapped to POL-MDT-058, POL-QA-005, POL-QA-012.
+- FRM-MDT-041 mapped to POL-MDT-058 and POL-QA-034.
+- FRM-MFG-031 mapped to POL-MFG-031 and POL-QA-012.
+
+APPENDIX B - KNOWN POLICY GAPS IDENTIFIED IN IPC-117A
+- IT priority changes were not consistently routed for QA approval.
+- Management review lacked enforced risk-tier escalation for overdue controls.
+- KPI model remained throughput-heavy at time of event.
+
+END OF POLICY COMPENDIUM

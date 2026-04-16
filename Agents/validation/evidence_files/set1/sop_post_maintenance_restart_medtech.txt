@@ -1,0 +1,181 @@
+STANDARD OPERATING PROCEDURE
+Title: Controlled Line Readiness and Restart After Product-Contact Maintenance Interventions
+SOP Number: SOP-MDT-058
+Version: 3.4
+Effective Date: 2026-01-15
+Supersedes: SOP-MDT-058 v3.3
+Department: Manufacturing Operations - Medical Device Assembly
+
+1. PURPOSE
+Define mandatory controls to ensure sterile assembly lines are safe and compliant for restart after maintenance affecting product-contact or product-contact-adjacent pathways.
+
+2. SCOPE
+Applies to all sterile assembly lines where maintenance opens, repositions, replaces, or disturbs components that may affect fluid-path cleanliness, seal integrity, or particulate risk.
+
+3. REFERENCES
+- POL-QA-005 Deviation Management and Escalation
+- POL-QA-012 Good Documentation Practice
+- POL-MFG-031 Shift Handover Governance
+- FRM-MDT-041 Line Readiness Checklist
+- FRM-MFG-031 Shift Handover Form
+- FRM-QA-DEV-01 Deviation Record
+
+4. DEFINITIONS
+- Line Readiness: Verified state in which line can restart after maintenance with documented evidence and QA witness confirmation.
+- Witness: Authorized QA professional who verifies checklist completion and physical line condition.
+- Hold State: Status where operation cannot continue until release criteria are met.
+
+5. ROLE RESPONSIBILITIES
+5.1 Operator
+- Execute checklist in real time.
+- Record findings contemporaneously.
+- Do not initiate RUN before witness sign-off.
+
+5.2 Maintenance Technician
+- Confirm intervention complete and tools/components accounted for.
+- Ensure work order includes handoff to operations and readiness checklist initiation status.
+
+5.3 QA Witness
+- Verify physical line condition and checklist completion.
+- Sign witness field before line release.
+
+5.4 Shift Supervisor
+- Enforce hold if any critical field is incomplete.
+- Ensure written handover for unresolved critical items.
+
+6. TRIGGER EVENTS REQUIRING FULL LINE READINESS CHECK
+- Ultrasonic weld horn replacement.
+- Tubing feed guide replacement or realignment.
+- Product-path connector replacement.
+- Valve or manifold service affecting fluid path.
+- Any intervention that may increase particulate shed risk.
+
+7. PRE-RESTART CONTROL FLOW
+Step 1: Set line status to HOLD.
+Step 2: Verify maintenance closure and intervention summary.
+Step 3: Perform physical line readiness checks using FRM-MDT-041.
+Step 4: Complete operator timestamped checklist entries.
+Step 5: Obtain QA witness sign-off.
+Step 6: Supervisor verifies readiness form in active batch packet.
+Step 7: Change line status from HOLD to RUN.
+
+8. CHECKLIST EXECUTION DETAIL
+8.1 Cleanliness and Particulate Risk
+- Confirm no visible fibers, residues, or loose fragments in product-contact and adjacent movement paths.
+- Confirm protective sleeves and guide interfaces are intact.
+
+8.2 Product-Contact Path Integrity
+- Confirm connections, seals, and tubing alignment.
+- Confirm no temporary fixtures remain in critical path.
+
+8.3 Documentation Completeness
+- Confirm current form revision.
+- Confirm no blank mandatory fields.
+
+8.4 Alarm and Status Review
+- Confirm no unresolved alarms linked to maintained station.
+
+9. DOCUMENTATION RULES
+- Entries must be contemporaneous.
+- Blank mandatory fields are non-compliant.
+- Corrections must follow GDP controls.
+- Delayed entries require reason, time, and supervisor acknowledgment.
+
+10. SHIFT HANDOVER REQUIREMENT
+If readiness checklist remains open at shift boundary:
+- Line remains HOLD unless QA grants documented exception.
+- Open item must be transferred via signed FRM-MFG-031.
+- Incoming shift must accept ownership in writing.
+- Verbal-only transfer is prohibited.
+
+11. DEVIATION TRIGGERS
+Immediate deviation required when:
+- Restart occurs before witness sign-off.
+- Mandatory readiness records are missing in active packet.
+- Open critical item is transferred verbally only.
+- Critical control step is reconstructed post-facto.
+
+12. RISK CONTAINMENT GUIDANCE
+- Quarantine affected units from uncontrolled restart period.
+- Expand particulate and visual checks.
+- Pause similar maintenance-restart events for targeted briefing when trend indicates recurrence.
+
+13. TRAINING REQUIREMENTS
+- Initial qualification for operators, supervisors, QA witnesses, and maintenance technicians.
+- Annual refresher for all roles.
+- Scenario-based module required for escalation under schedule pressure.
+
+14. EFFECTIVENESS METRICS
+- Target: 100 percent restart events with complete witness sign-off before RUN.
+- Target: Zero verbal-only transfers of open critical items for three consecutive months.
+- Target: No delayed critical entries across six audit cycles.
+- Review cadence: Monthly Manufacturing Quality Review.
+
+15. MES SYSTEM LOCK REQUIREMENT
+15.1 Requirement
+MES must block HOLD to RUN transition when FRM-MDT-041 witness field is blank for any active maintenance-linked batch.
+
+15.2 Override Governance
+Any override requires dual approval from QA Director and Manufacturing Director, with automatic deviation creation.
+
+15.3 Implementation Status
+ITR-MDT-2025-0314 remains in staged deployment. Until full release, manual controls in Sections 7 and 10 remain mandatory.
+
+16. ESCALATION MATRIX
+Scenario A - Witness unavailable at planned restart:
+- Restart delay mandatory.
+- Escalate to QA Duty Manager within 30 minutes.
+
+Scenario B - Restart discovered without witness sign-off:
+- Immediate HOLD.
+- Deviation within 30 minutes.
+- QA Manager notification within 1 hour.
+
+Scenario C - Open readiness item at handover:
+- Written transfer mandatory.
+- If transfer cannot be completed, maintain HOLD and escalate.
+
+Scenario D - Repeated event pattern:
+- CAPA trigger within 5 business days.
+- Site leadership review within 10 business days.
+
+17. COMPETENCY FRAMEWORK
+17.1 Operators
+- Classroom SOP qualification and practical supervised restarts.
+- Scenario assessment covering schedule pressure decision points.
+
+17.2 Supervisors
+- Authority and accountability simulation for compliance holds.
+- Annual behavioral calibration with QA.
+
+17.3 Maintenance
+- Work order closure plus readiness-link awareness module.
+- Confirmation that handoff obligations are complete before departure.
+
+17.4 QA Witness
+- Calibration workshops to ensure uniform witness standards.
+
+18. MANAGEMENT REVIEW INTEGRATION
+- Restart compliance appears as standing KPI.
+- Overdue high-risk actions require formal risk acceptance and escalation.
+- Recurrent failures trigger cross-functional governance review.
+
+19. REVISION HISTORY
+v3.1 - Added explicit no-restart rule.
+v3.2 - Added handover control and deviation triggers.
+v3.3 - Added scenario-based training expectation.
+v3.4 - Added management review risk-tier requirements and MES lock governance detail.
+
+20. OPEN COMMITMENTS
+- Complete MES lock deployment validation on all sterile assembly lines.
+- Implement KPI alignment to avoid compliance-hold penalties.
+- Add particulate-shed checks for guide rail sleeve PM tasks.
+
+21. PROCESS RISK REGISTER
+R-01: Restart without witness sign-off.
+R-02: Verbal handover of unresolved critical item.
+R-03: Schedule pressure causing delayed escalation.
+R-04: Deferred technical control deployment.
+R-05: Training completion without behavioral adoption.
+
+END OF SOP

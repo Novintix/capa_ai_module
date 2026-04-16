@@ -67,25 +67,25 @@
   ],
 
   "logs": [
-    "z:\\NOVINTIX\\capa_ai_module\\Agents\\validation\\evidence_files\\coating_process_log_B-202.txt"
+    "Agents\\validation\\evidence_files\\coating_process_log_B-202.txt"
   ],
   "reports": [
-    "z:\\NOVINTIX\\capa_ai_module\\Agents\\validation\\evidence_files\\stability_report_B-202.txt"
+    "Agents\\validation\\evidence_files\\stability_report_B-202.txt"
   ],
   "process_data": [
-    "z:\\NOVINTIX\\capa_ai_module\\Agents\\validation\\evidence_files\\pan_speed_temp_B-202-process_data.csv"
+    "Agents\\validation\\evidence_files\\pan_speed_temp_B-202-process_data.csv"
   ],
   "historical_capa": [
-    "z:\\NOVINTIX\\capa_ai_module\\Agents\\validation\\evidence_files\\historical_capa_coating.txt"
+    "Agents\\validation\\evidence_files\\historical_capa_coating.txt"
   ],
   "policies": [
-    "z:\\NOVINTIX\\capa_ai_module\\Agents\\validation\\evidence_files\\policy.txt"
+    "Agents\\validation\\evidence_files\\policy.txt"
   ],
   "sop": [
-    "z:\\NOVINTIX\\capa_ai_module\\Agents\\validation\\evidence_files\\film_coating_sop.txt"
+    "Agents\\validation\\evidence_files\\film_coating_sop.txt"
   ],
   "investigation_records": [
-    "z:\\NOVINTIX\\capa_ai_module\\Agents\\validation\\evidence_files\\investigation_record_B-202.txt"
+    "Agents\\validation\\evidence_files\\investigation_record_B-202.txt"
   ],
 
   "supporting_system_information": {
