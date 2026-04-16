@@ -30,6 +30,7 @@ from orchestrator.rca_v2.router import router as rca_v2_router #updated why anal
 from orchestrator.fishbone_v2.router import router as fishbone_v2_router  # NEW: Single-depth fishbone with 6M categorization
 from orchestrator.fishbone_v3.router import router as fishbone_v3_router  # NEW: HITL Fishbone
 from orchestrator.Root_cause_analysis.router import router as root_cause_analysis_router
+from orchestrator.Root_cause_analysis_v2.router_v2 import router as root_cause_analysis_v2_router
 from orchestrator.capa_director.router import router as director_router
 from orchestrator.dynamic_builder.router import router as dynamic_builder_router
 
@@ -63,6 +64,7 @@ def register_routes(app: FastAPI):
     app.include_router(fishbone_v2_router)  # NEW: Fishbone v2
     app.include_router(fishbone_v3_router)  # NEW: Fishbone v3 (HITL)
     app.include_router(root_cause_analysis_router)
+    app.include_router(root_cause_analysis_v2_router)
     app.include_router(similar_cases_router)
     app.include_router(ranking_router)
     app.include_router(pattern_router)
