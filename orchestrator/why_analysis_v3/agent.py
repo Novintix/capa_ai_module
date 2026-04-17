@@ -101,8 +101,9 @@ class WhyAnalysisV3Orchestrator:
                 "human_selected_cause_id": selected_cause_id,
                 "human_decision": decision,
             }
-            
-            final_state = self.graph.invoke(update_state, config=config)
+
+            self.graph.update_state(config, update_state)
+            final_state = self.graph.invoke(None, config=config)
             return deep_serialize(final_state.get("final_output") or final_state)
 
         except Exception as exc:

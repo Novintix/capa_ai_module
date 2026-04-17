@@ -1098,7 +1098,7 @@ def build_orchestrator():
     # ── Compile with Redis checkpointing ──────────────────────────────────────
     # Using sync RedisSaver (same pattern as risk_analysis_orchestrator)
     from langgraph.checkpoint.redis import RedisSaver
-    checkpointer = RedisSaver("redis://localhost:6379")
+    checkpointer = RedisSaver(_REDIS_URL)
     checkpointer.setup()
     return g.compile(checkpointer=checkpointer)
 

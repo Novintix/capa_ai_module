@@ -109,7 +109,9 @@ class RootCauseAnalysisCoordinator:
         user selects which category to proceed with into Why Analysis.
         """
         complaint_id = input_data.complaint_id
-        thread_id = input_data.session_id or complaint_id
+        if not input_data.session_id:
+            raise ValueError("session_id is required. Use the session_id returned by POST /rca/start.")
+        thread_id = input_data.session_id
         try:
             config = {"configurable": {"thread_id": thread_id}}
             self.graph.update_state(config, {
@@ -146,7 +148,9 @@ class RootCauseAnalysisCoordinator:
         user confirms whether to proceed to the Action Plan.
         """
         complaint_id = input_data.complaint_id
-        thread_id = input_data.session_id or complaint_id
+        if not input_data.session_id:
+            raise ValueError("session_id is required. Use the session_id returned by POST /rca/start.")
+        thread_id = input_data.session_id
         try:
             config = {"configurable": {"thread_id": thread_id}}
             self.graph.update_state(config, {"action_plan_confirmed": input_data.confirmed})

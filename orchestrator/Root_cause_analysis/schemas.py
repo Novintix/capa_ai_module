@@ -54,9 +54,9 @@ class RCASelectCategoryInput(BaseModel):
     category: Optional[str] = Field(default=None, description="Fishbone category (derived from cause if omitted)")
     selected_cause_id: Optional[str] = Field(default=None, description="ID of the specific cause to investigate")
     selected_cause_text: Optional[str] = Field(default=None, description="Text of the specific cause to investigate")
-    session_id: Optional[str] = Field(
-        default=None,
-        description="Session ID from /rca/start response. Falls back to complaint_id if omitted.",
+    session_id: str = Field(
+        ...,
+        description="Session ID from /rca/start response.",
     )
 
 
@@ -69,9 +69,9 @@ class RCAProceedActionPlanInput(BaseModel):
     """
     complaint_id: str = Field(..., description="Complaint identifier")
     confirmed: bool = Field(default=True, description="User confirmed proceed to action plan")
-    session_id: Optional[str] = Field(
-        default=None,
-        description="Session ID from /rca/start response. Falls back to complaint_id if omitted.",
+    session_id: str = Field(
+        ...,
+        description="Session ID from /rca/start response.",
     )
 
 

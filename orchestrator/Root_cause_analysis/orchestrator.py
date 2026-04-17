@@ -266,7 +266,7 @@ def run_fishbone_node(state: RCAGraphState) -> dict:
             else ""
         )
 
-        if fishbone_status == "WAIT_FOR_HUMAN":
+        if fishbone_status in {"WAIT_FOR_HUMAN", "IN_PROGRESS"}:
             message = (
                 "Fishbone Analysis paused — causes require review. "
                 "Submit cause decisions via POST /fishbone-v3/decide (use same complaint_id). "
@@ -384,10 +384,11 @@ def _check_fishbone_completion(complaint_id: str, initial_fishbone_status: str =
     """
     Read Fishbone V3 session from Redis and return completion status.
     Returns {"found": bool, "completed": bool, "status": str, "error": str|None}.
-    When the initial fishbone returned WAIT_FOR_HUMAN and Redis is unavailable,
+    When the initial fishbone returned a non-terminal status and Redis is unavailable,
     returns completed=False (pessimistic) to prevent stale-data progression.
     """
-    requires_decision = str(initial_fishbone_status).upper() == "WAIT_FOR_HUMAN"
+    initial_status_upper = str(initial_fishbone_status).upper()
+    requires_decision = initial_status_upper not in {"", "COMPLETED", "ERROR"}
 
     fsm = _get_fishbone_session_manager()
     if fsm is None:
@@ -423,8 +424,7 @@ def _check_why_completion(why_session_id: str) -> Dict[str, Any]:
     Read Why Analysis V3 LangGraph checkpoint from Redis and return completion status.
     Returns {"found": bool, "completed": bool, "awaiting_human_review": bool,
              "status": str, "final_output": dict|None}.
-    If the checkpoint cannot be read, optimistically returns found=False so the flow
-    is not blocked — the user can still proceed.
+    If the checkpoint cannot be read, returns an error so the parent flow fails closed.
     """
     try:
         # Lazy import avoids a circular import at module load time
@@ -433,8 +433,14 @@ def _check_why_completion(why_session_id: str) -> Dict[str, Any]:
         )
         snapshot = _why_graph.get_state({"configurable": {"thread_id": why_session_id}})
         if snapshot is None or not snapshot.values:
-            return {"found": False, "completed": False, "awaiting_human_review": False,
-                    "status": "unknown", "final_output": None}
+            return {
+                "found": False,
+                "completed": False,
+                "awaiting_human_review": False,
+                "status": "unknown",
+                "final_output": None,
+                "error": "Why Analysis session not found in checkpoint store",
+            }
         values = snapshot.values
         status = str(values.get("status", "unknown"))
         awaiting = bool(values.get("awaiting_human_review", False))
@@ -449,8 +455,14 @@ def _check_why_completion(why_session_id: str) -> Dict[str, Any]:
         }
     except Exception as exc:
         log_error("_check_why_completion", str(exc))
-        return {"found": False, "completed": False, "awaiting_human_review": False,
-                "status": "unknown", "final_output": None, "error": str(exc)}
+        return {
+            "found": False,
+            "completed": False,
+            "awaiting_human_review": False,
+            "status": "unknown",
+            "final_output": None,
+            "error": f"Cannot verify Why Analysis completion: {exc}",
+        }
 
 
 def await_category_selection_node(state: RCAGraphState) -> dict:
@@ -651,17 +663,18 @@ def await_action_plan_node(state: RCAGraphState) -> dict:
         print(f"   [RCA] Why status check: {why_status.get('status')} "
               f"| awaiting_human_review={why_status.get('awaiting_human_review')} "
               f"| completed={why_status.get('completed')}")
-        if why_status.get("found") and not why_status.get("completed"):
+        if why_status.get("error") or (why_status.get("found") and not why_status.get("completed")):
+            detail = why_status.get("error") or (
+                f"Why Analysis is still in progress "
+                f"(status: {why_status.get('status')}, "
+                f"awaiting_human_review: {why_status.get('awaiting_human_review')}). "
+                "Complete Why Analysis via POST /why-analysis-v3/human-review, "
+                "then call POST /rca/proceed-action-plan."
+            )
             return {
                 "phase": "awaiting_action_plan_confirmation",
                 "next_action": "proceed_action_plan",
-                "message": (
-                    f"Why Analysis is still in progress "
-                    f"(status: {why_status.get('status')}, "
-                    f"awaiting_human_review: {why_status.get('awaiting_human_review')}). "
-                    "Complete Why Analysis via POST /why-analysis-v3/human-review, "
-                    "then call POST /rca/proceed-action-plan."
-                ),
+                "message": detail,
                 "node_log": [{"node": "await_action_plan", "status": "blocked",
                               "reason": "why_not_complete",
                               "why_status": why_status.get("status"),
@@ -764,6 +777,8 @@ def route_after_fishbone(state: RCAGraphState) -> str:
 def route_after_await_category_selection(state: RCAGraphState) -> str:
     if state.get("phase") == "error":
         return "finalize"
+    if state.get("phase") == "awaiting_category_selection":
+        return END
     return "run_why"
 
 
@@ -774,6 +789,8 @@ def route_after_run_why(state: RCAGraphState) -> str:
 
 
 def route_after_await_action_plan(state: RCAGraphState) -> str:
+    if state.get("phase") == "awaiting_action_plan_confirmation":
+        return END
     return "finalize"
 
 
@@ -842,6 +859,7 @@ def build_orchestrator():
         {
             "run_why": "run_why",
             "finalize": "finalize",
+            END: END,
         },
     )
 
@@ -859,6 +877,7 @@ def build_orchestrator():
         route_after_await_action_plan,
         {
             "finalize": "finalize",
+            END: END,
         },
     )
 

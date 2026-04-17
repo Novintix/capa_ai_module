@@ -120,8 +120,7 @@ async def select_category(input_data: RCASelectCategoryInput):
         )
         return result
     except asyncio.TimeoutError:
-        session_id = input_data.session_id or input_data.complaint_id
-        return _timeout_response(input_data.complaint_id, session_id)
+        return _timeout_response(input_data.complaint_id, input_data.session_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
@@ -155,8 +154,7 @@ async def proceed_action_plan(input_data: RCAProceedActionPlanInput):
         )
         return result
     except asyncio.TimeoutError:
-        session_id = input_data.session_id or input_data.complaint_id
-        return _timeout_response(input_data.complaint_id, session_id)
+        return _timeout_response(input_data.complaint_id, input_data.session_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
