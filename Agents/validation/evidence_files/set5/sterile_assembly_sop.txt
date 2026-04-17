@@ -1,0 +1,168 @@
+STANDARD OPERATING PROCEDURE
+Title: Post-Maintenance Release Control for Sterile Fluid-Path Device Assembly
+SOP Number: SOP-ASM-061
+Version: 3.2
+Effective Date: 2026-01-15
+Department: MedTech Manufacturing Operations
+
+1. PURPOSE
+Define mandatory controls for safe and compliant restart after maintenance activities that affect sterile fluid-path assembly lines.
+
+2. SCOPE
+Applies to all assembly lines producing infusion sets, extension lines, and other sterile single-use devices where maintenance can affect fluid-path integrity, traceability, or particulate risk.
+
+3. REFERENCES
+- POL-QA-MD-005 Deviation Management
+- POL-QA-MD-012 Good Documentation Practice
+- POL-OPS-MD-031 Shift Handover Governance
+- FRM-ASM-109 Post-Maintenance Release Form
+- FRM-OPS-041 Shift Handover Form
+- FRM-QA-DEV-07 MedTech Deviation Form
+
+4. DEFINITIONS
+- Post-Maintenance Release: Required pre-RUN verification sequence after maintenance intervention.
+- Witness: Authorized QA personnel validating release criteria.
+- DHR: Device History Record for the batch.
+- Lot Reconciliation: Verification that scanned component lots match approved BOM mapping.
+
+5. ROLES AND RESPONSIBILITIES
+5.1 Operator
+- Complete FRM-ASM-109 in real time.
+- Verify lot mapping status is green before restart.
+- Do not restart without witness sign-off.
+
+5.2 Maintenance Technician
+- Complete intervention tasks and mechanical checks.
+- Confirm no temporary tools/components remain.
+- Trigger QA notification workflow prior to area release.
+
+5.3 QA Witness
+- Verify physical and documentation controls.
+- Confirm traceability warning status is resolved.
+- Sign witness field prior to restart.
+
+5.4 Shift Supervisor
+- Enforce HOLD if any critical release field is incomplete.
+- Ensure open critical items are transferred in signed written form.
+
+6. TRIGGER EVENTS REQUIRING FULL RELEASE CONTROL
+- Manifold/nozzle replacement
+- Tubing lane guide replacement
+- Fluid-path seal replacement
+- Any intervention opening sterile boundary
+- Any maintenance event changing lot-scanning path configuration
+
+7. PRE-RESTART CONTROL FLOW
+Step 1: Set line to HOLD.
+Step 2: Verify maintenance completion signature.
+Step 3: Complete FRM-ASM-109 physical checks.
+Step 4: Confirm lot reconciliation status is green for all lanes.
+Step 5: QA witness verifies and signs.
+Step 6: Supervisor verifies DHR attachment completeness.
+Step 7: Release HOLD and restart.
+
+8. REQUIRED CHECKLIST ITEMS
+8.1 Physical integrity checks
+- No debris in tubing channels or connector interfaces.
+- Guide inserts and clips intact with no abrasion edges.
+- UV manifold seated and leak-free.
+
+8.2 Traceability checks
+- All lots scanned and mapped to active DHR.
+- No unresolved traceability warnings.
+
+8.3 Documentation checks
+- FRM-ASM-109 complete, no blank mandatory fields.
+- Timestamped and attributable entries only.
+
+8.4 Alarm status checks
+- No unresolved alarms linked to restart area.
+
+9. DOCUMENTATION RULES
+- All entries must be contemporaneous.
+- Backfilling critical fields is non-compliant and requires deviation.
+- Corrections must follow GDP requirements.
+
+10. SHIFT HANDOVER RULES
+- Open critical item requires signed FRM-OPS-041 transfer.
+- Verbal-only transfer is prohibited.
+- If signed transfer unavailable, line remains HOLD.
+
+11. DEVIATION TRIGGERS
+Immediate deviation is required when:
+- Restart occurs before witness sign-off.
+- Restart occurs with unresolved lot-reconciliation warning.
+- Critical release item transferred verbally only.
+- Critical field reconstructed post-facto.
+
+12. IMMEDIATE CONTAINMENT GUIDANCE
+- HOLD affected line.
+- Quarantine units produced during non-compliant interval.
+- Increase visual and flow verification sampling.
+- Notify QA manager within 60 minutes.
+
+13. TRAINING REQUIREMENTS
+- Initial qualification before independent operation.
+- Annual refresher for all affected roles.
+- Scenario training covering stop authority under schedule pressure.
+- 90-day post-training observation audit with follow-up for <90 percent compliance.
+
+14. EFFECTIVENESS METRICS
+- 100 percent witness sign-off before RUN on maintenance-triggered restarts.
+- Zero unresolved lot warnings at restart.
+- Zero verbal-only critical handovers.
+- Monthly trend review at MedTech Quality Review Board.
+
+15. MES LOCK REQUIREMENT
+15.1 Required behavior
+- Prevent HOLD to RUN transition when FRM-ASM-109 witness field is blank.
+- Prevent HOLD to RUN transition if lot reconciliation warning unresolved.
+- Any override requires dual QA leadership approval and auto-deviation creation.
+
+15.2 Implementation status
+- Change request CR-IT-2025-188 specified in 2025.
+- Target go-live revised to 2026-Q2.
+- Until deployment, manual compensating controls remain mandatory.
+
+16. ESCALATION MATRIX
+Scenario A: Witness unavailable
+- Delay restart and escalate to QA duty manager after 30 minutes.
+
+Scenario B: Restart already occurred without complete controls
+- Immediate HOLD, deviation initiation, QA manager notification, risk assessment.
+
+Scenario C: Open critical item at handover
+- Mandatory written transfer; no written transfer means HOLD.
+
+Scenario D: Recurrence trend
+- CAPA review within five business days.
+
+17. POST-MAINTENANCE VERIFICATION (PMV) DETAILS
+PMV-1: Physical inspection of fluid-path components.
+PMV-2: Flush and flow pre-check.
+PMV-3: Commissioning run and alarm check.
+PMV-4: QA witness confirmation.
+Minimum planned PMV window: 30 to 40 minutes.
+
+18. IN-PROCESS ENHANCED CHECKS AFTER RESTART
+- First 200 units: enhanced visual inspection.
+- 15-minute flow verification for first 2 hours.
+- Immediate HOLD if particulate or flow anomaly exceeds limits.
+
+19. ALARM RESPONSE PRINCIPLE
+Alarm acknowledgment is not corrective action. Documented response and, when required, escalation are mandatory.
+
+20. CHANGE CONTROL LINKAGE
+Any routing, guide insert, or support geometry change affecting fluid-path risk requires formal change control and QA approval.
+
+21. REVISION HISTORY
+v3.0 - Added lot reconciliation checkpoint and enhanced restart checks.
+v3.1 - Added traceability lock requirement and escalation clarification.
+v3.2 - Added behavioral scenario training and management review linkage.
+
+22. OPEN COMMITMENTS
+- Complete CR-IT-2025-188 deployment.
+- Update effectiveness template to require technical-control verification.
+- Implement KPI compliance weighting.
+
+END OF SOP

@@ -27,7 +27,8 @@ from config.aws_bedrock_config import get_llm
 # ---------------------------------------------------------------------------
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
-REDIS_TTL_SECONDS = 7 * 24 * 60 * 60  # 7 days
+# langgraph-checkpoint-redis v0.4.x interprets default_ttl as MINUTES
+REDIS_TTL_MINUTES = 7 * 24 * 60  # 7 days = 10080 minutes
 
 
 # ---------------------------------------------------------------------------
@@ -53,7 +54,7 @@ class WhyQuestionAgent:
         try:
             self.checkpointer = RedisSaver(
                 redis_url=REDIS_URL,
-                ttl={"default_ttl": REDIS_TTL_SECONDS}
+                ttl={"default_ttl": REDIS_TTL_MINUTES}
             )
             self.checkpointer.setup()
         except Exception as exc:

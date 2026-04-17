@@ -160,6 +160,16 @@ class FishboneOrchestratorV3:
                     "error": f"Session expired or not found for {decision_input.complaint_id}. Please call /analyze first.", 
                     "status": "ERROR"
                 }
+
+            # Idempotency: if already completed, return persisted final result
+            if state_data.get("completed"):
+                completed_result = state_data.get("result")
+                if completed_result:
+                    return completed_result
+                return {
+                    "error": f"Session {decision_input.complaint_id} is already completed but final result is missing.",
+                    "status": "ERROR",
+                }
             
             # 2. Re-initialize state machine from persisted data
             input_data = state_data["input"]
@@ -205,9 +215,18 @@ class FishboneOrchestratorV3:
             log_hitl_action(decision_input.complaint_id, len(cached_result["causes"]), len(decision_input.decisions))
             
             final_result = state_machine.get_final_result()
-            
-            # Delete intermediate state if complete
-            self.session_manager.delete_session(decision_input.complaint_id)
+
+            # Persist terminal completion marker so parent orchestrators can verify child completion.
+            self.session_manager.save_state(
+                decision_input.complaint_id,
+                {
+                    **state_data,
+                    "completed": True,
+                    "status": "COMPLETED",
+                    "result": final_result,
+                    "completed_at": time.time(),
+                },
+            )
             
             log_orchestrator_complete(decision_input.complaint_id, "COMPLETED", final_result["execution_time_seconds"])
             

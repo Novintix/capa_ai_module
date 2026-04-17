@@ -47,6 +47,10 @@ SUPPORTED_EVIDENCE_EXTENSIONS = {
 	".md",
 }
 
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+_AGENT_BASE_DIR = _THIS_DIR
+_PROJECT_ROOT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
+
 
 def _normalize_text(value: Any) -> str:
 	if value is None:
@@ -82,55 +86,6 @@ def clean_llm_response(response_text: str) -> str:
 	raise ValueError("No valid JSON object found in response")
 
 
-def _flatten_evidence(payload: Any, source: str, prefix: str) -> List[Dict[str, str]]:
-	"""Flatten mixed evidence payload (str/list/dict) into records with IDs."""
-	records: List[Dict[str, str]] = []
-
-	if payload is None:
-		return records
-
-	if isinstance(payload, str):
-		if payload.strip():
-			records.append({
-				"reference_id": prefix,
-				"source": source,
-				"content": payload.strip(),
-			})
-		return records
-
-	if isinstance(payload, list):
-		for idx, item in enumerate(payload, start=1):
-			records.extend(_flatten_evidence(item, source, f"{prefix}.{idx}"))
-		return records
-
-	if isinstance(payload, dict):
-		record_id = payload.get("reference_id") or payload.get("id")
-		text_bits: List[str] = []
-		for key, value in payload.items():
-			if key in {"reference_id", "id"}:
-				continue
-			if isinstance(value, (str, int, float)):
-				text_bits.append(f"{key}: {value}")
-		content = " | ".join(text_bits).strip()
-		if content:
-			records.append({
-				"reference_id": str(record_id or prefix),
-				"source": source,
-				"content": content,
-			})
-		return records
-
-	# Fallback for unknown types
-	text = str(payload).strip()
-	if text:
-		records.append({
-			"reference_id": prefix,
-			"source": source,
-			"content": text,
-		})
-	return records
-
-
 def _extract_text_from_file(file_path: str) -> str:
 	"""Extract text from supported evidence file types."""
 	ext = os.path.splitext(file_path)[1].lower()
@@ -152,49 +107,31 @@ def _extract_text_from_file(file_path: str) -> str:
 	raise ValueError(f"Unsupported evidence file type: {ext}")
 
 
-def _default_evidence_dir() -> str:
-	"""Return the built-in evidence directory for validation agent."""
-	return os.path.join(os.path.dirname(__file__), "evidence_files")
-
-
-def _list_default_evidence_files() -> List[str]:
-	"""List supported files from validation/evidence_files folder."""
-	dir_path = _default_evidence_dir()
-	if not os.path.isdir(dir_path):
-		return []
-
-	file_paths: List[str] = []
-	for name in sorted(os.listdir(dir_path)):
-		path = os.path.join(dir_path, name)
-		if not os.path.isfile(path):
-			continue
-		ext = os.path.splitext(path)[1].lower()
-		if ext in SUPPORTED_EVIDENCE_EXTENSIONS:
-			file_paths.append(path)
-
-	return file_paths
-
-
 def _to_file_reference_name(path: str) -> str:
 	"""Convert a file path to the filename used in output references."""
 	return os.path.basename(path.strip())
 
 
 def _looks_like_file_path(value: str) -> bool:
-	"""Heuristic to distinguish likely file paths from plain text evidence."""
+	"""Return True only for strings that are clearly filesystem paths (not plain text).
+
+	Only matches drive-letter paths (C:\\...), UNC paths (\\\\server\\...), or
+	strings whose file extension is a supported evidence type. Plain text that
+	happens to contain '/' or '\\' (e.g. 'temp 50/100°C') is intentionally NOT
+	matched so it is kept as text evidence.
+	"""
 	text = value.strip()
 	if not text:
 		return False
 
-	# Drive-letter path, UNC path, or clear path separators.
-	if re.match(r"^[A-Za-z]:[\\/]", text):
+	# Drive-letter path (C:\ or C:/)
+	if re.match(r"^[A-Za-z]:[/\\]", text):
 		return True
+	# UNC path
 	if text.startswith("\\\\"):
 		return True
-	if "\\" in text or "/" in text:
-		return True
 
-	# File-like token with a supported extension.
+	# Bare filename / relative path with a recognised evidence extension
 	_, ext = os.path.splitext(text)
 	return ext.lower() in SUPPORTED_EVIDENCE_EXTENSIONS
 
@@ -214,6 +151,40 @@ def _normalize_reference_to_filename(reference: Any, reference_to_filename: Dict
 	return ref
 
 
+def _resolve_existing_file_path(value: str) -> str | None:
+	"""Resolve an input path to an existing file.
+
+	Supports:
+	- absolute paths
+	- workspace-relative paths (e.g. Agents\\validation\\evidence_files\\file.txt)
+	- validation-agent-relative paths (e.g. evidence_files\\file.txt)
+	"""
+	raw = value.strip().strip('"').strip("'")
+	if not raw:
+		return None
+
+	normalized = os.path.normpath(raw)
+	candidates: List[str] = [normalized]
+
+	if not os.path.isabs(normalized):
+		candidates.append(os.path.normpath(os.path.join(os.getcwd(), normalized)))
+		candidates.append(os.path.normpath(os.path.join(_PROJECT_ROOT_DIR, normalized)))
+		candidates.append(os.path.normpath(os.path.join(_AGENT_BASE_DIR, normalized)))
+
+	seen: set[str] = set()
+	for candidate in candidates:
+		if candidate in seen:
+			continue
+		seen.add(candidate)
+		try:
+			if os.path.isfile(candidate):
+				return candidate
+		except OSError:
+			continue
+
+	return None
+
+
 def _is_file_path(value: Any) -> bool:
 	"""Check if a string value points to an existing local file."""
 	if not isinstance(value, str):
@@ -221,10 +192,7 @@ def _is_file_path(value: Any) -> bool:
 	path = value.strip()
 	if not path:
 		return False
-	try:
-		return os.path.isfile(path)
-	except OSError:
-		return False
+	return _resolve_existing_file_path(path) is not None
 
 
 def _flatten_or_load_file_evidence(payload: Any, source: str, prefix: str) -> List[Dict[str, str]]:
@@ -239,16 +207,17 @@ def _flatten_or_load_file_evidence(payload: Any, source: str, prefix: str) -> Li
 		if not value:
 			return records
 
-		if _is_file_path(value):
+		resolved_file_path = _resolve_existing_file_path(value)
+		if resolved_file_path:
 			try:
-				text = _extract_text_from_file(value)
+				text = _extract_text_from_file(resolved_file_path)
 				if text and text.strip():
 					records.append(
 						{
 							"reference_id": _to_file_reference_name(value),
 							"source": source,
 							"content": text.strip(),
-							"file_path": value,
+							"file_path": resolved_file_path,
 						}
 					)
 			except Exception as exc:
@@ -256,9 +225,14 @@ def _flatten_or_load_file_evidence(payload: Any, source: str, prefix: str) -> Li
 			return records
 
 		if _looks_like_file_path(value):
-			log_error("prepare_evidence", f"Evidence file not found: {value}")
+			# Looks like an absolute/relative file path but file does not exist on disk.
+			# Skip it — do NOT add the raw path string as evidence text.
+			log_error("prepare_evidence", f"Evidence file not found or not accessible: {value}")
 			return records
 
+		# Plain text evidence — keep as-is.
+		# Strings that contain '/' or '\\' but are NOT path-like (e.g. 'ratio 50/100°C')
+		# correctly fall through here because _looks_like_file_path returned False.
 		records.append(
 			{
 				"reference_id": prefix,
@@ -277,36 +251,29 @@ def _flatten_or_load_file_evidence(payload: Any, source: str, prefix: str) -> Li
 		file_path = payload.get("file_path") or payload.get("path")
 		if isinstance(file_path, str) and file_path.strip():
 			file_path_str = file_path.strip()
-			if _is_file_path(file_path_str):
+			resolved_file_path = _resolve_existing_file_path(file_path_str)
+			if resolved_file_path:
 				try:
-					text = _extract_text_from_file(file_path_str)
+					text = _extract_text_from_file(resolved_file_path)
 					if text and text.strip():
 						records.append(
 							{
 								"reference_id": _to_file_reference_name(file_path_str),
 								"source": source,
 								"content": text.strip(),
-								"file_path": file_path_str,
+								"file_path": resolved_file_path,
 							}
 						)
 				except Exception as exc:
 					log_error("prepare_evidence", f"Failed to parse evidence file {file_path_str}: {exc}")
 				return records
 
-			if _looks_like_file_path(file_path_str):
-				log_error("prepare_evidence", f"Evidence file not found: {file_path_str}")
-
-		# Remove path carrier keys and still keep any inline evidence content in this object.
-		filtered_payload = {
-			key: value
-			for key, value in payload.items()
-			if key not in {"file_path", "path"}
-		}
-		if filtered_payload:
-			records.extend(_flatten_evidence(filtered_payload, source, prefix))
-		return records
-
-		records.extend(_flatten_evidence(payload, source, prefix))
+		# Remove path carrier keys and recursively process remaining values so that
+		# nested file-path lists (e.g. evidence_files: [...]) are properly loaded.
+		for idx, (key, value) in enumerate(
+			{k: v for k, v in payload.items() if k not in {"file_path", "path"}}.items(), start=1
+		):
+			records.extend(_flatten_or_load_file_evidence(value, source, f"{prefix}.{key}"))
 		return records
 
 	text = str(payload).strip()
@@ -401,33 +368,17 @@ def prepare_evidence_node(state: AgentState) -> AgentState:
 
 		file_evidence_records = [record for record in evidence_records if record.get("file_path")]
 
-		loaded_file_paths = {
-			os.path.normcase(os.path.abspath(str(record.get("file_path"))))
-			for record in file_evidence_records
-			if record.get("file_path")
-		}
-
-		# Always include all files from the agent-level evidence_files folder.
-		# This guarantees every cause is validated against the same full file corpus.
-		for file_path in _list_default_evidence_files():
-			normalized_path = os.path.normcase(os.path.abspath(file_path))
-			if normalized_path in loaded_file_paths:
-				continue
-
-			try:
-				text = _extract_text_from_file(file_path)
-				if text and text.strip():
-					record = {
-						"reference_id": _to_file_reference_name(file_path),
-						"source": "evidence_file",
-						"content": text.strip(),
-						"file_path": file_path,
-					}
-					evidence_records.append(record)
-					file_evidence_records.append(record)
-					loaded_file_paths.add(normalized_path)
-			except Exception as exc:
-				log_error("prepare_evidence", f"Failed to parse evidence file {file_path}: {exc}")
+		# Deduplicate: drop records whose (source, content) pair has already been seen.
+		# This prevents the same text appearing twice when evidence is supplied via
+		# multiple fields (e.g. investigation_records AND investigation_evidence).
+		seen: set = set()
+		deduped: List[Dict[str, str]] = []
+		for record in evidence_records:
+			key = (record.get("source", ""), record.get("content", "")[:300])
+			if key not in seen:
+				seen.add(key)
+				deduped.append(record)
+		evidence_records = deduped
 
 		if not evidence_records:
 			updates: AgentState = {
@@ -439,9 +390,11 @@ def prepare_evidence_node(state: AgentState) -> AgentState:
 			log_node_exit("prepare_evidence", updates)
 			return updates
 
-		# Build in-memory semantic index: chunk all records and embed them once
+		# Build in-memory semantic index: chunk all records and embed them once.
+		# Use complaint_id as request_id so concurrent requests never share an index.
+		request_id = str(state.get("complaint_id") or "default")
 		try:
-			chunk_count = build_evidence_index(evidence_records)
+			chunk_count = build_evidence_index(evidence_records, request_id=request_id)
 			logger.info(
 				f"[prepare_evidence] Semantic index built: {chunk_count} chunks "
 				f"from {len(evidence_records)} records ({len(file_evidence_records)} files)"
@@ -454,6 +407,7 @@ def prepare_evidence_node(state: AgentState) -> AgentState:
 			"evidence_records": evidence_records,
 			"file_evidence_records": file_evidence_records,
 			"evidence_chunk_count": chunk_count,
+			"request_id": request_id,
 			"notes": (
 				f"Prepared {len(evidence_records)} evidence records "
 				f"({len(file_evidence_records)} from files, {chunk_count} chunks indexed)."
@@ -507,6 +461,8 @@ def validate_causes_node(state: AgentState) -> AgentState:
 			return updates
 
 		llm = get_llm()
+		max_retries = state.get("max_iterations", 5)
+		request_id = str(state.get("request_id") or state.get("complaint_id") or "default")
 
 		normalized_results: List[Dict[str, Any]] = []
 		allowed_status = {"matched", "partially_matched", "no_evidence"}
@@ -539,8 +495,8 @@ def validate_causes_node(state: AgentState) -> AgentState:
 				str(cause.get("failure_mode") or ""),
 			]))
 
-			# Retrieve top-6 semantically relevant evidence chunks
-			retrieved_chunks = retrieve_relevant_chunks(semantic_query, top_k=6)
+			# Retrieve top-6 semantically relevant evidence chunks for this request
+			retrieved_chunks = retrieve_relevant_chunks(semantic_query, request_id=request_id, top_k=6)
 
 			# Fallback: if semantic index empty, surface short non-file records
 			if not retrieved_chunks:
@@ -566,58 +522,71 @@ def validate_causes_node(state: AgentState) -> AgentState:
 
 			full_prompt = f"{VALIDATION_SYSTEM_PROMPT}\n\n---\n\n{user_prompt}"
 
-			try:
-				response = llm.invoke(full_prompt)
-				response_text = clean_llm_response(response.content)
-				parsed = json.loads(response_text)
-
-				validation_results = parsed.get("cause_validation_results", [])
-				if not isinstance(validation_results, list) or not validation_results:
-					raise ValueError("LLM output missing valid 'cause_validation_results' for single-cause validation")
-
-				item = validation_results[0]
-				status = str(item.get("evidence_match_status", "no_evidence")).strip().lower().replace(" ", "_")
-				if status not in allowed_status:
-					status = "no_evidence"
-
-				references = item.get("supporting_evidence_references", [])
-				if not isinstance(references, list):
-					references = []
-
+			# Retry up to max_retries times on LLM / parse failures.
+			last_exc: Exception | None = None
+			succeeded = False
+			for attempt in range(max_retries):
 				try:
-					confidence = float(item.get("confidence", 0.0))
-				except (TypeError, ValueError):
-					confidence = 0.0
-				confidence = max(0.0, min(1.0, confidence))
+					response = llm.invoke(full_prompt)
+					response_text = clean_llm_response(response.content)
+					parsed = json.loads(response_text)
 
-				if status == "no_evidence":
-					references = []
-				else:
-					references = [
-						_normalize_reference_to_filename(ref, reference_to_filename)
-						for ref in references
-					]
-					references = [ref for ref in references if ref]
-					references = list(dict.fromkeys(references))
+					validation_results = parsed.get("cause_validation_results", [])
+					if not isinstance(validation_results, list) or not validation_results:
+						raise ValueError("LLM output missing valid 'cause_validation_results'")
 
-				normalized_results.append(
-					{
-						**cause_payload,
-						"evidence_match_status": status,
-						"supporting_evidence_references": [str(ref) for ref in references],
-						"confidence": round(confidence, 3),
-						"rationale": str(item.get("rationale", "Evidence assessment completed.")).strip(),
-					}
-				)
+					item = validation_results[0]
+					status = str(item.get("evidence_match_status", "no_evidence")).strip().lower().replace(" ", "_")
+					if status not in allowed_status:
+						status = "no_evidence"
 
-			except Exception as cause_exc:
+					references = item.get("supporting_evidence_references", [])
+					if not isinstance(references, list):
+						references = []
+
+					try:
+						confidence = float(item.get("confidence", 0.0))
+					except (TypeError, ValueError):
+						confidence = 0.0
+					confidence = max(0.0, min(1.0, confidence))
+
+					if status == "no_evidence":
+						references = []
+						confidence = 0.0
+					else:
+						references = [
+							_normalize_reference_to_filename(ref, reference_to_filename)
+							for ref in references
+						]
+						references = [ref for ref in references if ref]
+						references = list(dict.fromkeys(references))
+
+					normalized_results.append(
+						{
+							**cause_payload,
+							"evidence_match_status": status,
+							"supporting_evidence_references": [str(ref) for ref in references],
+							"confidence": round(confidence, 3),
+							"rationale": str(item.get("rationale", "Evidence assessment completed.")).strip(),
+						}
+					)
+					succeeded = True
+					break
+
+				except Exception as exc:
+					last_exc = exc
+					logger.warning(
+						f"[validate_causes] cause={cause_id} attempt={attempt + 1}/{max_retries} failed: {exc}"
+					)
+
+			if not succeeded:
 				normalized_results.append(
 					{
 						**cause_payload,
 						"evidence_match_status": "no_evidence",
 						"supporting_evidence_references": [],
 						"confidence": 0.0,
-						"rationale": f"Validation failed for this cause: {cause_exc}",
+						"rationale": f"Validation failed after {max_retries} attempts: {last_exc}",
 					}
 				)
 
@@ -640,14 +609,6 @@ def validate_causes_node(state: AgentState) -> AgentState:
 		log_node_exit("validate_causes", {"validated_count": len(normalized_results), "next_step": "filter_validated"})
 		return updates
 
-	except json.JSONDecodeError as exc:
-		error_msg = f"Failed to parse LLM validation response: {exc}"
-		log_error("validate_causes", error_msg)
-		updates = {"error": error_msg, "next_step": "finalize"}
-		log_routing_decision("validate_causes", "finalize", "Invalid LLM JSON")
-		log_node_exit("validate_causes", updates)
-		return updates
-
 	except Exception as exc:
 		error_msg = f"Cause validation failed: {exc}"
 		log_error("validate_causes", error_msg)
@@ -661,6 +622,8 @@ def filter_validated_node(state: AgentState) -> AgentState:
 	"""Node: Keep only evidence-grounded causes and compute summary confidence."""
 	log_node_entry("filter_validated", state)
 
+	VALIDATED_CONFIDENCE_THRESHOLD = 0.90
+
 	try:
 		all_results = state.get("cause_validation_results", [])
 		validated = [
@@ -668,6 +631,7 @@ def filter_validated_node(state: AgentState) -> AgentState:
 			for result in all_results
 			if result.get("evidence_match_status") in {"matched", "partially_matched"}
 			and result.get("supporting_evidence_references")
+			and float(result.get("confidence", 0.0)) >= VALIDATED_CONFIDENCE_THRESHOLD
 		]
 
 		if validated:
@@ -677,10 +641,10 @@ def filter_validated_node(state: AgentState) -> AgentState:
 					sum(float(item.get("confidence", 0.0)) for item in validated) / len(validated),
 					3,
 				)
-			notes = "Returning causes with grounded supporting evidence."
+			notes = f"Returning causes with confidence \u2265 {VALIDATED_CONFIDENCE_THRESHOLD} and grounded supporting evidence."
 		else:
 			overall_confidence = 0.0
-			notes = state.get("notes") or "No generated causes were sufficiently grounded in supplied evidence."
+			notes = state.get("notes") or f"No causes met the confidence threshold of {VALIDATED_CONFIDENCE_THRESHOLD}."
 
 		updates = {
 			"validated_causes": validated,

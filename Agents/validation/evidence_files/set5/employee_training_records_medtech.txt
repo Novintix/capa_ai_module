@@ -1,0 +1,187 @@
+EMPLOYEE TRAINING AND QUALIFICATION RECORDS
+Document ID: HR-QMS-TRN-2026-ASM03
+Site: NOVINTIX MedTech Campus - Building 4
+Manufacturing Unit: Sterile Device Assembly - ASM-03
+Compiled By: QA Training Coordinator
+Review Date: 2026-03-10
+Scope: Personnel assigned to Batch IS-517 and related QA/Maintenance support functions
+
+SECTION 1 - TRAINING GOVERNANCE OVERVIEW
+1.1 Training framework
+- POL-HR-MD-014 Training and Qualification
+- POL-QA-MD-012 Good Documentation Practice
+- TRN-STD-MD-002 v2.4
+
+Training categories:
+A - GMP fundamentals
+B - Role-based SOP qualification
+C - Equipment and process operation
+D - Regulatory and data integrity
+E - Behavioral simulation (pressure and escalation)
+F - Specialist quality topics
+
+Training methods:
+- e-learning with pass threshold 80 percent
+- classroom
+- on-the-job qualification
+- scenario simulation
+
+1.2 Site indicators (2025 year-end)
+- On-time completion: 93.8 percent
+- Critical SOP completion: 96.9 percent
+- Average test score: 85.9 percent
+- Behavioral audit compliance: 87.6 percent
+Key gap:
+- Knowledge scores exceed behavioral execution by 8-12 points on critical stop-authority topics.
+
+SECTION 2 - EVENT TEAM QUALIFICATION SNAPSHOT
+Employee ID | Name      | Role                     | Qualification Status
+EMP-3102    | L. Martin | Operator Shift A         | Current
+EMP-3188    | N. Ali    | Operator Shift B         | Current
+EMP-3220    | R. Gomez  | Supervisor Shift A       | Current
+EMP-3294    | M. Dsouza | Supervisor Shift B       | Current
+EMP-3011    | V. Rao    | QA Floor Monitor         | Current
+EMP-2957    | C. Pereira| Maintenance Technician   | Current
+EMP-2877    | E. Chandra| QA Manager               | Current
+
+SECTION 3 - INDIVIDUAL RECORD HIGHLIGHTS
+3.1 L. Martin (Operator A)
+- SOP-ASM-061 v3.2: Completed 2026-01-26, score 90
+- GDP refresher: Completed 2025-11-08, score 88
+- Restart simulation module: OVERDUE (due 2026-02-01)
+- 90-day observation audit: 2/3 compliant for real-time closure (67 percent)
+Follow-up coaching: not scheduled by event date.
+
+3.2 N. Ali (Operator B)
+- SOP-ASM-061 v3.2: Completed 2026-01-29, score 86
+- Handover governance simulation: OVERDUE (due 2026-01-31)
+- Escalation decision simulation: OVERDUE (due 2026-02-01)
+Behavioral note:
+- Defers to prior-shift decisions unless explicit stop instruction provided.
+
+3.3 R. Gomez (Supervisor A)
+- Supervisor track complete for SOP-ASM-061.
+- Throughput-vs-compliance scenario: completed 2025-12-04.
+- Supervisor stop-authority reinforcement: OVERDUE (due 2026-02-10).
+Behavioral note:
+- Strong technical adherence; reluctant to call stop under dispatch pressure.
+
+3.4 M. Dsouza (Supervisor B)
+- SOP and escalation modules complete.
+- Refresher on critical-item handover acceptance: OVERDUE (due 2026-02-15).
+Behavioral note:
+- Tends to defer final compliance-stop authority to QA.
+
+3.5 C. Pereira (Maintenance)
+- Mechanical qualification current.
+- Module linking WO closure to FRM-ASM-109 initiation: OVERDUE (due 2026-02-05).
+Note:
+- Work-order workflow does not prompt QA-notification confirmation field.
+
+3.6 V. Rao (QA Floor Monitor)
+- All relevant modules current.
+- Event response aligned with SOP requirements.
+- Resource conflict delayed availability, but decision quality compliant.
+
+SECTION 4 - CRITICAL COMPETENCY MATRIX
+Competency                              | L.Martin | N.Ali | R.Gomez | M.Dsouza | C.Pereira | V.Rao
+SOP-ASM-061 Current                     | CURRENT  | CURRENT| CURRENT  | CURRENT   | N/A       | CURRENT
+GDP Real-Time Entry                     | CURRENT  | CURRENT| CURRENT  | CURRENT   | CURRENT   | CURRENT
+Restart Behavioral Simulation           | OVERDUE  | OVERDUE| OVERDUE  | CURRENT   | N/A       | CURRENT
+Handover Governance Simulation          | N/A      | OVERDUE| CURRENT  | OVERDUE   | N/A       | N/A
+WO-to-Release Link Awareness            | N/A      | N/A    | N/A      | N/A       | OVERDUE   | N/A
+
+SECTION 5 - TRAINING GAP INTERPRETATION
+- Three event-chain roles held overdue modules directly relevant to control failure.
+- Observation audit results below threshold did not trigger timely follow-up action.
+- Training program still over-weights knowledge checks versus behavior under pressure.
+
+SECTION 6 - CORRECTIVE TRAINING ACTIONS PLANNED
+- Mandatory completion of overdue critical modules within 30 days.
+- Monthly simulation drills for stop authority and handover integrity.
+- QA escalation when behavioral audit falls below 90 percent.
+- Mentor qualification update to include behavioral compliance screening.
+
+SECTION 7 - OBSERVATION AUDIT HISTORY (CRITICAL CONTROL BEHAVIORS)
+Audit Window: 2025-09 to 2026-02
+
+Observed behavior category: restart release completeness
+- Observations performed: 14
+- Fully compliant: 11
+- Partial compliance with delayed closure: 3
+- Critical non-compliant restart observed pre-event: 1 (IS-517)
+
+Observed behavior category: signed handover for open critical items
+- Observations performed: 12
+- Fully compliant: 9
+- Verbal-only transfer attempts intercepted: 2
+- Verbal-only transfer not intercepted before continuation: 1 (IS-517)
+
+Observed behavior category: immediate deviation initiation
+- Trigger events observed: 6
+- Deviation opened same shift: 4
+- Delayed initiation: 2
+
+Interpretation:
+- Compliance drift clusters in high-throughput windows.
+- Supervisory and operator simulation gaps correlate with delayed escalation behavior.
+
+SECTION 8 - LMS ALERTING SYSTEM LIMITATIONS
+Current LMS platform: TrackGMP v5.2
+Known limitations relevant to event:
+- No automatic QA-manager alert for overdue critical simulation modules.
+- No hard assignment block when critical training is overdue.
+- Observation audit scores below threshold do not trigger forced remediation workflow.
+
+Interim mitigation implemented post-event:
+- Weekly manual overdue critical-module digest to QA manager.
+- Shift assignment review includes critical-module status check.
+
+Planned platform improvements:
+- Rule-based alert for overdue critical modules and <90 percent observation results.
+- Assignment restriction for safety/compliance-critical roles pending overdue completion.
+
+SECTION 9 - MENTORING AND BEHAVIORAL TRANSFER RISK REVIEW
+Finding:
+- Mentor eligibility historically assessed on technical proficiency, not behavioral compliance consistency.
+- Newer operators may inherit informal practices inconsistent with current SOP requirements.
+
+Actions:
+- Add behavioral compliance threshold to mentor qualification criteria.
+- Quarterly mentor revalidation including observation-based scoring.
+- Retrain existing mentors on compliance-first decision norms.
+
+SECTION 10 - TRAINING EFFECTIVENESS METRICS FOR CAPA TRACKING
+Metric M1: Critical module completion on time
+Target: >= 98 percent
+
+Metric M2: Observation audit compliance for restart and handover controls
+Target: >= 95 percent
+
+Metric M3: Same-shift deviation initiation on defined triggers
+Target: >= 95 percent
+
+Metric M4: Overdue critical modules assigned to active line roles
+Target: 0
+
+Monthly review owners:
+- QA Training Coordinator
+- Manufacturing Manager
+- QA Manager
+
+Escalation trigger:
+- Any metric below target for two consecutive months triggers CAPA review item.
+
+SECTION 11 - POST-EVENT ASSIGNMENT CONTROL COMMITMENTS
+COMMIT-TRN-01: Freeze assignment to restart-critical roles if restart simulation module overdue.
+COMMIT-TRN-02: Require signed supervisor confirmation of team training currency before shift start.
+COMMIT-TRN-03: Add QA review checkpoint to weekly staffing plans.
+COMMIT-TRN-04: Close all IS-517-related overdue modules within 21 calendar days.
+
+SECTION 12 - APPROVALS
+Prepared by: QA Training Coordinator
+Reviewed by: QA Manager E. Chandra
+Reviewed by: Manufacturing Manager P. Costa
+Approval: Quality Director (pending)
+
+END OF TRAINING RECORD

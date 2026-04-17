@@ -4,24 +4,31 @@ In-memory chunk-and-embed approach for large evidence corpora.
 
 Strategy
 --------
-1. build_evidence_index(records)
+1. build_evidence_index(records, request_id)
    - Splits every evidence record's content into overlapping character chunks.
    - Embeds all chunks in a single batched call using all-MiniLM-L6-v2.
-   - Stores chunk texts + embeddings in module-level variables (no disk I/O).
+   - Stores chunk texts + embeddings keyed by request_id (e.g. complaint_id)
+     so concurrent requests never share or overwrite each other's index.
 
-2. retrieve_relevant_chunks(query, top_k)
+2. retrieve_relevant_chunks(query, request_id, top_k)
    - Embeds the query once.
-   - Computes cosine similarity against every chunk embedding.
+   - Computes cosine similarity against the request's own chunk embeddings.
    - Returns the top-k chunks sorted by relevance.
 
-Why in-memory?
---------------
-- Same pattern as Agents/cause_generation/tools/semantic_matcher.py
-- No external vector DB required
-- Embeddings are discarded when the next request rebuilds the index
-- The SentenceTransformer model is lazy-loaded and kept alive for reuse
+Why per-request keyed indexes?
+------------------------------
+- The original single global index was a concurrency bug: a second request
+  arriving while the first was still running validate_causes_node would reset
+  the index mid-flight, causing the first request to validate against the
+  wrong evidence.
+- Indexes are stored in a bounded OrderedDict (max 20 entries) so memory
+  remains controlled even under load.
+- The SentenceTransformer model is still lazy-loaded once and shared (read-only
+  after load, so sharing is safe).
 """
 
+import threading
+from collections import OrderedDict
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -30,19 +37,20 @@ import numpy as np
 # Tuneable constants
 # ---------------------------------------------------------------------------
 
-CHUNK_SIZE = 1000       # maximum characters per chunk
-CHUNK_OVERLAP = 150     # overlap between consecutive chunks
+CHUNK_SIZE = 1800       # maximum characters per chunk (larger = better context for structured docs)
+CHUNK_OVERLAP = 200     # overlap between consecutive chunks
 DEFAULT_TOP_K = 6       # number of chunks returned per query
-MIN_SIMILARITY = 0.15   # discard chunks below this cosine similarity
+MIN_SIMILARITY = 0.30   # discard chunks below this cosine similarity (raised from 0.15 to cut noise)
 
 # ---------------------------------------------------------------------------
-# Module-level in-memory index (rebuilt per request)
+# Per-request in-memory index store (bounded, thread-safe)
 # ---------------------------------------------------------------------------
 
 _model = None                          # lazy-loaded SentenceTransformer
 
-_chunk_meta: List[Dict[str, str]] = []   # [{reference_id, source, content}, ...]
-_chunk_embeddings: Optional[np.ndarray] = None   # shape (N, embedding_dim)
+_MAX_CACHED_INDEXES = 20               # keep at most this many request indexes in memory
+_indexes: OrderedDict = OrderedDict()  # request_id -> {"meta": [...], "embeddings": np.ndarray}
+_indexes_lock = threading.Lock()
 
 
 # ---------------------------------------------------------------------------
@@ -82,27 +90,25 @@ def _split_into_chunks(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = C
 # Public API
 # ---------------------------------------------------------------------------
 
-def build_evidence_index(evidence_records: List[Dict[str, Any]]) -> int:
+def build_evidence_index(evidence_records: List[Dict[str, Any]], request_id: str = "default") -> int:
     """
-    Chunk and embed all evidence records. Stores results in module-level vars.
+    Chunk and embed all evidence records. Stores results keyed by request_id.
 
     Parameters
     ----------
     evidence_records : list of dicts
         Each dict must have at least "content" (str), and ideally
         "reference_id" (str) and "source" (str).
+    request_id : str
+        Unique key for this request (e.g. complaint_id). Ensures concurrent
+        requests maintain independent indexes and never corrupt each other.
 
     Returns
     -------
     int
         Total number of chunks indexed (0 if nothing to index).
     """
-    global _chunk_meta, _chunk_embeddings
-
-    # Reset previous index
-    _chunk_meta = []
-    _chunk_embeddings = None
-
+    chunk_meta: List[Dict[str, str]] = []
     all_texts: List[str] = []
 
     for record in evidence_records:
@@ -113,8 +119,8 @@ def build_evidence_index(evidence_records: List[Dict[str, Any]]) -> int:
         ref_id = str(record.get("reference_id") or "unknown")
         source = str(record.get("source") or "unknown")
 
-        for chunk_idx, chunk_text in enumerate(_split_into_chunks(content)):
-            _chunk_meta.append({
+        for chunk_text in _split_into_chunks(content):
+            chunk_meta.append({
                 "reference_id": ref_id,
                 "source": source,
                 "content": chunk_text,
@@ -122,7 +128,9 @@ def build_evidence_index(evidence_records: List[Dict[str, Any]]) -> int:
             all_texts.append(chunk_text)
 
     if not all_texts:
-        _chunk_embeddings = np.zeros((0, 384), dtype=np.float32)
+        chunk_embeddings = np.zeros((0, 384), dtype=np.float32)
+        with _indexes_lock:
+            _store_index(request_id, chunk_meta, chunk_embeddings)
         return 0
 
     model = _get_model()
@@ -131,13 +139,27 @@ def build_evidence_index(evidence_records: List[Dict[str, Any]]) -> int:
     # Normalise rows so cosine similarity = dot product
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
     norms = np.where(norms == 0, 1.0, norms)
-    _chunk_embeddings = (embeddings / norms).astype(np.float32)
+    chunk_embeddings = (embeddings / norms).astype(np.float32)
 
-    return len(_chunk_meta)
+    with _indexes_lock:
+        _store_index(request_id, chunk_meta, chunk_embeddings)
+
+    return len(chunk_meta)
+
+
+def _store_index(request_id: str, chunk_meta: List[Dict[str, str]], chunk_embeddings: np.ndarray) -> None:
+    """Store index for request_id in the bounded OrderedDict (must hold _indexes_lock)."""
+    if request_id in _indexes:
+        _indexes.move_to_end(request_id)
+    _indexes[request_id] = {"meta": chunk_meta, "embeddings": chunk_embeddings}
+    # Evict oldest entries when over capacity
+    while len(_indexes) > _MAX_CACHED_INDEXES:
+        _indexes.popitem(last=False)
 
 
 def retrieve_relevant_chunks(
     query: str,
+    request_id: str = "default",
     top_k: int = DEFAULT_TOP_K,
     min_similarity: float = MIN_SIMILARITY,
 ) -> List[Dict[str, str]]:
@@ -148,6 +170,8 @@ def retrieve_relevant_chunks(
     ----------
     query : str
         Free-text query (e.g. cause_text + process_step + failure_mode).
+    request_id : str
+        Must match the request_id used in build_evidence_index for this request.
     top_k : int
         Maximum number of chunks to return.
     min_similarity : float
@@ -159,9 +183,16 @@ def retrieve_relevant_chunks(
         Each dict has keys: reference_id, source, content, similarity_score.
         Empty list if the index has not been built or query is blank.
     """
-    global _chunk_meta, _chunk_embeddings
+    with _indexes_lock:
+        index = _indexes.get(request_id)
 
-    if not _chunk_meta or _chunk_embeddings is None or len(_chunk_embeddings) == 0:
+    if not index:
+        return []
+
+    chunk_meta = index["meta"]
+    chunk_embeddings = index["embeddings"]
+
+    if not chunk_meta or chunk_embeddings is None or len(chunk_embeddings) == 0:
         return []
 
     query = query.strip()
@@ -177,7 +208,7 @@ def retrieve_relevant_chunks(
         query_vec = query_vec / q_norm
 
     # Cosine similarity (dot product of normalised vectors)
-    scores: np.ndarray = _chunk_embeddings.dot(query_vec)
+    scores: np.ndarray = chunk_embeddings.dot(query_vec)
 
     # Sort descending and take top candidates above threshold
     top_indices = np.argsort(scores)[::-1]
@@ -189,7 +220,7 @@ def retrieve_relevant_chunks(
         score = float(scores[idx])
         if score < min_similarity:
             break
-        chunk = _chunk_meta[int(idx)]
+        chunk = chunk_meta[int(idx)]
         results.append({
             "reference_id": chunk["reference_id"],
             "source": chunk["source"],
@@ -198,10 +229,3 @@ def retrieve_relevant_chunks(
         })
 
     return results
-
-
-def clear_evidence_index() -> None:
-    """Discard the current in-memory index (call after a request if desired)."""
-    global _chunk_meta, _chunk_embeddings
-    _chunk_meta = []
-    _chunk_embeddings = None

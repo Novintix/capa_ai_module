@@ -1,0 +1,150 @@
+QUALITY, FUNCTIONAL RELIABILITY, AND PARTICULATE ASSESSMENT REPORT
+Report Number: QFR-MDT-2026-012
+Product: Single-Use Infusion Pump Cartridge Set 10 mL (Sterile)
+Batch: IPC-117A
+Legacy Evidence Tag: MT-117
+Issued By: QC and Reliability Sciences Group
+Issue Date: 2026-03-01
+
+1. EXECUTIVE SUMMARY
+Batch IPC-117A showed elevated visual particulate rejects in sterile fluid pathway chambers. Functional flow and pressure performance remained within specification for non-defective samples. The strongest correlation is with process-governance failure around post-maintenance restart and delayed control closure.
+
+2. PURPOSE
+Consolidate quality, functional, and particulate evidence for investigation and CAPA decisions.
+
+3. SAMPLE PLAN AND METHODS
+3.1 Sampling Strategy
+- Final visual rejects and acceptances sampled across beginning, middle, and end of run.
+- Retained samples selected from three run segments.
+3.2 Visual and Microscopy Evaluation
+- Controlled booth visual inspection.
+- Stereomicroscopy and SEM-EDS for particle characterization.
+3.3 Functional Reliability Tests
+- Flow delivery accuracy at simulated use rates.
+- Back-pressure tolerance and leak integrity tests.
+- Connector fit and luer retention checks.
+3.4 Ancillary Evidence Review
+- Assembly timeline cross-check with logbook and MES event trail.
+
+4. RESULTS
+4.1 Visual Defect Findings
+- Rejected units: 186 out of 12,000 (1.55 percent).
+- Alert limit: 0.6 percent; action limit: 0.9 percent.
+- Defect trend was highest in final third of run.
+
+4.2 Functional Performance (non-defective sample subset)
+- Flow rate accuracy: Within specification.
+- Back-pressure tolerance: Within specification.
+- Leak integrity: Within specification.
+- Conclusion: Core mechanical performance intact where particulate absent.
+
+4.3 Trend Context
+- Prior four lots on line AS-04 remained at or below 0.42 percent rejects.
+- IPC-117A reject rate is statistically elevated and operationally distinct.
+
+5. PARTICULATE MORPHOLOGY SUMMARY
+- Predominant morphology: translucent filamentous fibers, 80 to 310 micrometers length.
+- Secondary morphology: short opaque fragments, 20 to 70 micrometers.
+- Interpretation: likely extrinsic polymer source, not formulation residue.
+
+6. CORRELATION WITH PROCESS EVIDENCE
+- Maintenance-triggered restart occurred before complete witness sign-off.
+- Open compliance item was transferred verbally at shift boundary.
+- Throughput acceleration occurred during period of incomplete control documentation.
+- No environmental monitoring excursions support ambient contamination source.
+
+7. RISK INTERPRETATION
+Quality Risk: Elevated
+Compliance Risk: Elevated
+Patient Use Risk: Medium-High pending full disposition
+Clinical Consequence Context: Potential for infusion pathway occlusion or inflammatory response if particulate enters administration circuit.
+
+8. RECOMMENDATIONS
+Immediate:
+1. Maintain quarantine for all IPC-117A units.
+2. Continue 100 percent visual and sub-visible particulate reinspection.
+3. Conduct replacement and verification of line AS-04 guide rail sleeve components.
+Near-Term:
+1. Implement MES lock for witness-dependent restart gating.
+2. Enforce signed written handover for unresolved critical items.
+3. Open systemic CAPA on governance and KPI alignment.
+
+9. LIMITATIONS
+- Final source attribution confidence is high but not absolute until full material exclusion panel completed.
+- Some timeline evidence is logbook narrative requiring audit-trail corroboration.
+
+10. CONCLUSION
+Event profile supports process-execution and governance failure around post-maintenance restart controls, with particulate source most consistent with polymer shed from worn guide rail sleeve near tubing feed path. Functional mechanics were not the primary failure mode.
+
+11. APPROVALS
+Analyst: R. Almeida
+Reviewer: S. Krishnan, QC Reliability Manager
+Approver: QA Head (pending)
+
+APPENDIX A - DEFECT TREND SNAPSHOT
+- Baseline reject mean over prior 12 lots: 0.34 percent.
+- IPC-117A reject rate: 1.55 percent.
+- Relative increase: 4.56 times baseline.
+
+APPENDIX B - CROSS-REFERENCE INDEX
+- ASSY-LOG-IPC117A-MT117 -> chronology and behavior evidence
+- SOP-MDT-058 -> restart and handover requirements
+- policy.txt -> site-level governance policies
+- INV-MDT-2026-0047 -> formal investigation record
+
+APPENDIX C - PARTICULATE CHARACTERIZATION DETAILS
+Method: SEM-EDS with FTIR confirmation panel.
+Sample Source: 8 rejected units and 3 retain controls.
+Analysis Date: 2026-02-24
+External Lab Ref: MEDLAB-PTC-260224
+
+Finding C-1
+- Morphology: elongated polymer fibers, slight flattening at one end.
+- EDS: carbon and oxygen dominant, trace silicon.
+- FTIR profile: consistent with thermoplastic polyurethane blend.
+
+Finding C-2
+- Comparison samples tested:
+  - Guide rail sleeve material (line AS-04): strong spectral overlap.
+  - Weld horn polymer guard: no meaningful overlap.
+  - Operator gown fibers: weak overlap, larger fiber diameter profile.
+  - Packaging tray nonwoven: partial overlap, lower confidence.
+
+Preliminary Source Attribution
+- Most probable: guide rail sleeve abrasion at tubing feed support point.
+- Confidence Level: Moderate-High.
+
+APPENDIX D - PRIOR LOT COMPARISON
+Lot IPC-113C (2026-01-14): 0.31 percent rejects, no maintenance restart event.
+Lot IPC-114A (2026-01-22): 0.29 percent rejects, complete readiness controls.
+Lot IPC-115B (2026-01-31): 0.42 percent rejects, minor alarm activity, no control breach.
+Lot IPC-116D (2026-02-05): 0.35 percent rejects, complete handover compliance.
+Lot IPC-117A (event lot): 1.55 percent rejects, restart and handover control failures.
+
+APPENDIX E - PATIENT RISK MODEL
+Category 1 (early run): moderate risk; lower defect density.
+Category 2 (mid run): moderate-high risk.
+Category 3 (late run): high risk; highest defect density.
+Overall lot risk: High.
+Recommended disposition path: full reinspection and QA disposition board review before release decision.
+
+APPENDIX F - ENVIRONMENTAL TREND REVIEW
+Six-week trend for line AS-04:
+- No viable EM action-limit excursions.
+- No non-viable particle action-limit excursions in clean assembly zone.
+Interpretation: ambient environment is unlikely primary source.
+
+APPENDIX G - FUNCTIONAL RELIABILITY DETAIL
+Tested non-defective sample count: 120 units.
+- Flow accuracy pass: 120/120.
+- Back-pressure pass: 120/120.
+- Leak integrity pass: 120/120.
+- Connector retention pass: 120/120.
+Interpretation: functional design remains robust; quality signal is contamination-related.
+
+12. REPORT RELEASE HISTORY
+Rev 1.0 - 2026-03-01: Initial issue.
+Rev 1.1 - 2026-03-06: Added detailed FTIR comparison and prior-lot statistical appendix.
+Rev 1.2 - Pending: final source attribution closure and lot disposition recommendation.
+
+END OF REPORT

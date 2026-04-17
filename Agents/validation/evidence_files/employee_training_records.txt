@@ -1,0 +1,482 @@
+EMPLOYEE TRAINING AND QUALIFICATION RECORDS
+Document ID: HR-QMS-TRN-2025-FL02
+Site: NOVINTIX Manufacturing Campus - Building 2
+Manufacturing Unit: Sterile Fill and Finish - Line FL-02
+Compiled By: QA Training Coordinator
+Review Date: 2025-12-31
+Scope: All personnel assigned to Line FL-02 and associated QA/Maintenance support functions
+
+=============================================================================
+SECTION 1 - SITE TRAINING GOVERNANCE OVERVIEW
+=============================================================================
+
+1.1 Training Governance Framework
+NOVINTIX operates a structured competency and qualification system governed by:
+- POL-HR-QMS-014 (Training and Qualification)
+- POL-QA-012 (Good Documentation Practice)
+- POL-QA-022 (CAPA Governance)
+- Site Training Standard: TRN-STD-001 v3.1 (effective 2024-01-01)
+
+Training categories:
+Cat A - GMP Fundamentals: All site personnel; annual refresher mandatory.
+Cat B - Role-Based SOP Qualification: Required before independent task execution; renewed when SOP is revised.
+Cat C - Equipment Operation: Practical qualification on specific equipment; includes simulator and live supervised sessions.
+Cat D - Regulatory and Compliance: Annual; covers GDP, data integrity, regulatory expectations.
+Cat E - Behavioral and Situational: Scenario-based training on pressure, deviation decision-making, escalation culture.
+Cat F - Specialist: Microbiology, sterility assurance, stability, particle science; role-specific.
+
+Training delivery modes:
+- e-Learning: Online modules with knowledge assessment (pass mark 80 percent).
+- Classroom: Instructor-led with attendance register and post-assessment.
+- On-the-Job (OJT): Supervised task execution; sign-off by qualified mentor.
+- Simulation: Scenario exercises; assessed by QA facilitator.
+- Micro-learning: Short reinforcement modules (10-15 min); no formal assessment.
+
+Training record system: LMS (Learning Management System) TrackGMP v5.2.
+All completions, scores, and sign-offs recorded electronically. Paper records retained as backup for OJT sign-offs.
+
+1.2 Training Performance Indicators (Site-Wide, 2025)
+- Overall training compliance rate (on-time completion): 94.2 percent.
+- Critical SOP refresher compliance rate: 97.1 percent.
+- Average knowledge assessment score (all roles, all modules): 86.4 percent.
+- Observation audit compliance rate (post-training behavioral check): 88.7 percent.
+- Number of deviations attributed to training gap (2025): 7 (vs. 11 in 2024; -36 percent improvement).
+- Outstanding overdue training items (as of 2025-12-31): 14 individuals, 22 modules.
+
+Key gap identified in 2025 annual training review:
+- Behavioral compliance (observational audit) consistently 8-10 percentage points below knowledge assessment scores across critical control categories.
+- Largest gap: Restart and escalation decision-making under schedule pressure (assessed: 89 percent; behavioral audit: 78 percent).
+- Root identified in CAPA-2025-0038: Training design was knowledge-focused; scenario-based content addressing real-world pressure scenarios was not included.
+
+=============================================================================
+SECTION 2 - LINE FL-02 TEAM ROSTER AND QUALIFICATION STATUS
+=============================================================================
+
+2.1 Roster Overview (as of 2025-11-10 batch date)
+
+Employee ID  | Name           | Role                    | Shift | Qualification Status
+EMP-0441     | J. Thomas      | Fill-Finish Operator    | A     | Fully Qualified
+EMP-0318     | R. Singh       | Fill-Finish Operator    | B     | Fully Qualified
+EMP-0501     | S. Patel       | Shift Supervisor        | A     | Fully Qualified
+EMP-0499     | M. Okafor      | Shift Supervisor        | B     | Fully Qualified
+EMP-0112     | M. Kapoor      | QA Floor Monitor        | B/C   | Fully Qualified
+EMP-0207     | H. Ramos       | Maintenance Technician  | A     | Fully Qualified
+EMP-0388     | D. Verma       | QA Manager              | Day   | Fully Qualified
+EMP-0221     | P. Nair        | QC Analyst              | Day   | Fully Qualified
+EMP-0455     | K. Nair        | Shift Supervisor        | C     | Fully Qualified
+EMP-0302     | A. Blum        | Production Director     | Day   | Fully Qualified (leadership GMP only)
+
+All FL-02 team members held current qualification status on the date of the batch event.
+Important note: "Fully Qualified" confirms task authorization under current SOP version only. It does not confirm behavioral compliance under pressure conditions. This distinction was identified as a systemic gap in CAPA-2025-0038.
+
+=============================================================================
+SECTION 3 - INDIVIDUAL TRAINING RECORDS
+=============================================================================
+
+---
+3.1 J. Thomas (EMP-0441) - Fill-Finish Operator, Shift A
+---
+Employment start: 2021-06-14
+GMP site induction: Completed 2021-06-14 to 2021-06-18. Pass.
+Initial qualification (Line FL-02, general operations): Completed 2021-07-30. Signed off by mentor EMP-0216.
+
+Training Record (most recent 24 months):
+
+Module                            | Category | Date       | Score | Method     | Status
+SOP-MFG-044 v4.1                 | B        | 2024-03-22 | 87%   | Classroom  | Complete
+GDP Fundamentals Refresher       | D        | 2024-04-10 | 91%   | e-Learning | Complete
+GMP Annual Refresher 2024        | A        | 2024-06-05 | 88%   | e-Learning | Complete
+Alarm Response Micro-learning    | E        | 2024-09-15 | N/A   | Micro      | Complete
+SOP-MFG-044 v4.2                 | B        | 2024-11-21 | 90%   | Classroom  | Complete
+Data Integrity Refresher         | D        | 2024-12-03 | 84%   | e-Learning | Complete
+SOP-MFG-044 v4.3                 | B        | 2025-04-02 | 91%   | Classroom  | Complete
+GDP Refresher (CAPA-2025-0038)   | D        | 2025-06-14 | 88%   | e-Learning | Complete
+GMP Annual Refresher 2025        | A        | 2025-08-20 | 85%   | e-Learning | Complete
+Restart Governance OJT Sign-off  | C        | 2025-09-12 | Pass  | OJT        | Complete
+Escalation & Deviation Decision  | E        | Not started| -     | Simulation | OVERDUE (due 2025-10-31)
+
+Observation Audit Results (post-training):
+- May 2024 audit: 3 restarts observed; 3 compliant. Pass.
+- August 2025 audit (post v4.3 training): 3 restarts observed; 2 compliant (1 delayed checklist entry). Borderline: 67 percent. Below 90 percent threshold. QA noted recommendation for follow-up coaching.
+- Follow-up coaching: Not scheduled as of batch date 2025-11-10. Administrative oversight by Training Coordinator.
+
+Behavioral notes from supervisory record:
+- Performance review 2024: "Reliable operator. Responds well to process demands. Occasionally defers documentation to end of process."
+- Performance review 2025 (mid-year): "Consistent throughput record. Documentation timeliness noted as area for development."
+- No formal corrective action in performance record; throughput outcomes positive.
+
+Disciplinary record: None.
+
+Key risk factor at time of event:
+- Overdue simulation module (Escalation & Deviation Decision) was specifically designed to address the pressure scenario that J. Thomas encountered on 2025-11-10.
+- Observation audit showing 67 percent behavioral compliance was not acted upon.
+- Both gaps were known to Training Coordinator but no escalation generated before batch event.
+
+---
+3.2 R. Singh (EMP-0318) - Fill-Finish Operator, Shift B
+---
+Employment start: 2022-03-07
+GMP site induction: Completed 2022-03-07 to 2022-03-11. Pass.
+Initial qualification (Line FL-02): Completed 2022-05-02. Signed off by mentor EMP-0441 (J. Thomas).
+
+Training Record (most recent 24 months):
+
+Module                            | Category | Date       | Score | Method     | Status
+SOP-MFG-044 v4.1                 | B        | 2024-04-01 | 83%   | Classroom  | Complete
+GMP Annual Refresher 2024        | A        | 2024-06-18 | 86%   | e-Learning | Complete
+GDP Fundamentals Refresher       | D        | 2024-08-14 | 82%   | e-Learning | Complete
+Alarm Response Micro-learning    | E        | 2024-09-22 | N/A   | Micro      | Complete
+SOP-MFG-044 v4.2                 | B        | 2024-12-02 | 85%   | Classroom  | Complete
+SOP-MFG-044 v4.3                 | B        | 2025-04-14 | 86%   | Classroom  | Complete
+GDP Refresher (CAPA-2025-0038)   | D        | 2025-07-02 | 80%   | e-Learning | Complete (borderline pass)
+GMP Annual Refresher 2025        | A        | 2025-08-28 | 83%   | e-Learning | Complete
+Restart Governance OJT Sign-off  | C        | 2025-09-25 | Pass  | OJT        | Complete
+Escalation & Deviation Decision  | E        | Not started| -     | Simulation | OVERDUE (due 2025-10-31)
+Handover Governance Practicum    | B        | Not started| -     | Simulation | OVERDUE (due 2025-09-30)
+
+Observation Audit Results:
+- July 2025 audit (post v4.3 training): 2 restarts observed; 2 compliant. Pass.
+- No additional audits before batch date.
+- Note: R. Singh's two overdue modules are directly relevant to the failures observed: handover governance and escalation decision-making.
+
+Behavioral notes from supervisory record:
+- Performance review 2024: "Good technical skills. Team-oriented. Can be deferential to Shift A decisions at handover."
+- Performance review 2025 (mid-year): "Throughput contribution strong. Improvement area: proactive compliance escalation."
+
+Key risk factor at time of event:
+- R. Singh had never completed the handover governance simulation practicum; his only training on written handover was classroom instruction (SOP v4.1, 2024).
+- The distinction between a compliant and non-compliant handover was not scenario-tested for R. Singh before the batch event.
+- R. Singh was mentored initially by J. Thomas; any behavioral patterns J. Thomas exhibited during mentorship may have been transmitted as normalized practice.
+
+---
+3.3 S. Patel (EMP-0501) - Shift Supervisor, Shift A
+---
+Employment start: 2019-11-04
+Total site tenure: 6 years.
+Supervisor qualification achieved: 2021-08-12.
+
+Training Record (most recent 24 months):
+
+Module                                  | Category | Date       | Score | Method     | Status
+SOP-MFG-044 v4.1 Supervisor Track      | B        | 2024-03-20 | 92%   | Classroom  | Complete
+Leadership GMP Refresher               | A/D      | 2024-05-09 | 90%   | Classroom  | Complete
+Escalation Scenario Workshop 2024      | E        | 2024-07-18 | Pass  | Simulation | Complete
+SOP-MFG-044 v4.2 Supervisor Track      | B        | 2024-11-19 | 94%   | Classroom  | Complete
+Data Integrity Leadership Module       | D        | 2024-12-10 | 88%   | e-Learning | Complete
+SOP-MFG-044 v4.3 Supervisor Track      | B        | 2025-03-28 | 91%   | Classroom  | Complete
+Throughput-vs-Compliance Scenario 2025 | E        | 2025-05-22 | Pass  | Simulation | Complete
+GMP Annual Refresher 2025              | A        | 2025-09-03 | 88%   | e-Learning | Complete
+Supervisor Accountability Workshop     | E        | Not started| -     | Simulation | OVERDUE (due 2025-10-15)
+
+Observation Audit Results (supervisory decisions):
+- September 2025: 4 restart events supervised; 4 compliant documentation outcomes. Pass.
+- Note: September audit did not simulate throughput pressure from external planning communications. Audit scenarios did not replicate the conditions of 2025-11-10.
+
+Behavioral notes:
+- 360-degree review 2025: "Strong technical knowledge. Team-oriented. Under schedule pressure, tends to seek consensus rather than exercise stop authority."
+- HSE observation 2025 Q2: "Supervisor responded appropriately to safety stop; engaged well with hold decision without schedule pressure context."
+- Planning communications log: S. Patel received at least 4 batch-urgency emails from production planning in Q4 2025, including the 2025-11-09 email from A. Blum regarding CF-882 dispatch urgency. No training module addressed how to respond to senior management urgency communications in a compliance context.
+
+---
+3.4 M. Okafor (EMP-0499) - Shift Supervisor, Shift B
+---
+Employment start: 2020-08-17
+
+Module                                  | Category | Date       | Score | Method     | Status
+SOP-MFG-044 v4.1                       | B        | 2024-03-25 | 88%   | Classroom  | Complete
+SOP-MFG-044 v4.2                       | B        | 2024-11-26 | 89%   | Classroom  | Complete
+SOP-MFG-044 v4.3                       | B        | 2025-04-07 | 87%   | Classroom  | Complete
+Escalation Scenario Workshop 2024      | E        | 2024-07-25 | Pass  | Simulation | Complete
+Throughput-vs-Compliance Scenario 2025 | E        | 2025-05-28 | Pass  | Simulation | Complete
+GMP Annual Refresher 2025              | A        | 2025-09-10 | 84%   | e-Learning | Complete
+Supervisor Accountability Workshop     | E        | Not started| -     | Simulation | OVERDUE (due 2025-10-15)
+
+Behavioral notes:
+- M. Okafor reviewed the batch packet and observed the incomplete checklist at 14:14, did not initiate a line hold.
+- Training record shows completion of "Throughput-vs-Compliance Scenario" (pass). However, post-event interview indicates M. Okafor was aware that continuation was non-compliant but did not feel this was clearly his authority to stop, deferring to QA to make the formal stop call.
+- This "deferring to QA" behavior is a cultural pattern not addressed by current training design. Supervisors are trained on what to do but not on why stopping is their individual obligation regardless of QA presence.
+
+---
+3.5 H. Ramos (EMP-0207) - Maintenance Technician
+---
+Employment start: 2018-05-23
+Maintenance qualification: Achieved 2019-02-14.
+
+Module                                       | Category | Date       | Score | Method     | Status
+GMP for Maintenance Personnel               | A        | 2024-04-30 | 83%   | e-Learning | Complete
+Product-Contact Equipment SOP WO-STD-007    | B        | 2024-06-12 | 87%   | Classroom  | Complete
+Work Order Closure Procedures               | B        | 2024-09-18 | 89%   | e-Learning | Complete
+GMP Annual Refresher 2025                   | A        | 2025-07-14 | 81%   | e-Learning | Complete
+Pump Replacement Qualification (P-17 class) | C        | 2025-01-09 | Pass  | OJT+Practical | Complete
+Restart Governance Awareness (Maintenance)  | B        | 2025-05-20 | 85%   | e-Learning | Complete
+Link between WO Closure and FRM-MFG-022    | B        | Not started| -     | e-Learning | OVERDUE (due 2025-09-30)
+
+Behavioral notes:
+- H. Ramos completed pump-head replacement correctly per mechanical procedure.
+- H. Ramos was not trained on the downstream obligation to ensure FRM-MFG-022 has been initiated before leaving the area. The "Link between WO Closure and FRM-MFG-022" module was overdue.
+- Post-event interview: "I closed my work order and informed the operator the pump was ready. I assumed the documentation was their responsibility from there."
+- System gap: Work order form WO-MNT-55391 contains no field prompting maintenance to notify QA or confirm FRM-MFG-022 has been started before departure.
+
+---
+3.6 M. Kapoor (EMP-0112) - QA Floor Monitor
+---
+Employment start: 2023-01-16
+QA Floor Monitor qualification: 2023-08-04.
+
+Module                                     | Category | Date       | Score | Method     | Status
+QA Floor Monitor Qualification Program    | B        | 2023-07-01 | 91%   | Classroom+OJT | Complete
+SOP-MFG-044 Witness Standards            | B        | 2024-03-28 | 93%   | Classroom  | Complete
+GDP and Data Integrity for QA            | D        | 2024-05-20 | 90%   | Classroom  | Complete
+Escalation Authority and Stop Rights     | E        | 2024-08-12 | Pass  | Simulation | Complete
+SOP-MFG-044 v4.3                        | B        | 2025-04-15 | 94%   | Classroom  | Complete
+QA Floor Authority Refresher            | E        | 2025-09-17 | Pass  | Simulation | Complete
+
+Notes:
+- M. Kapoor is the only FL-02 team member with all relevant modules current and no overdue items.
+- On batch date, M. Kapoor was assigned to another critical hold review (different batch), which is why witness availability was delayed until 16:20.
+- QA resource planning did not account for simultaneous high-demand events on 2025-11-10.
+- M. Kapoor's response when she arrived (declining to retroactively sign, requesting immediate deviation) was fully compliant. Her training was effective.
+- Gap: The system that allocates QA Floor Monitors to batches did not flag the conflict between her existing assignment and the CF-882 witness requirement.
+
+=============================================================================
+SECTION 4 - TRAINING MATRIX: CRITICAL COMPETENCIES FOR LINE FL-02
+=============================================================================
+
+Competency                              | J.Thomas | R.Singh | S.Patel | M.Okafor | H.Ramos | M.Kapoor
+SOP-MFG-044 v4.3 (current)            | CURRENT  | CURRENT | CURRENT | CURRENT  | N/A     | CURRENT
+GDP Real-Time Documentation            | CURRENT  | CURRENT | CURRENT | CURRENT  | CURRENT | CURRENT
+Alarm Response and Escalation          | CURRENT  | CURRENT | CURRENT | CURRENT  | CURRENT | CURRENT
+Restart Governance Post-Maintenance    | CURRENT  | CURRENT | CURRENT | CURRENT  | CURRENT | CURRENT
+Escalation/Deviation Decision (Sim)    | OVERDUE  | OVERDUE | CURRENT | OVERDUE  | N/A     | CURRENT
+Handover Governance Practicum          | N/A      | OVERDUE | CURRENT | CURRENT  | N/A     | N/A
+Supervisor Stop Authority              | N/A      | N/A     | OVERDUE | OVERDUE  | N/A     | CURRENT
+WO Closure / FRM-MFG-022 Link         | N/A      | N/A     | N/A     | N/A      | OVERDUE | N/A
+
+Summary: J. Thomas, R. Singh, and M. Okafor all had at least one directly-relevant OVERDUE module on the date of the event. S. Patel had one overdue item. H. Ramos had one overdue item. M. Kapoor: fully current.
+
+Training gap critical path for CF-882 event:
+- The simulation module "Escalation and Deviation Decision" was specifically designed to train operators in the exact scenario that occurred: continuing production under schedule pressure when a mandatory control (witness sign-off) is incomplete.
+- This module was scheduled for delivery in October 2025; it was not deployed until after the event because the scenario content authoring was still in progress (see CAPA-2025-0038 action status).
+- Three of five operators/supervisors in the event chain had this module outstanding.
+
+=============================================================================
+SECTION 5 - QUALIFICATION HISTORY: PUMP P-17 OPERATIONS
+=============================================================================
+
+P-17 Class Equipment Qualification (pump operations and post-maintenance restart):
+- Qualification standard: EQ-QUAL-P17-001 v2.0 (effective 2024-06-01).
+- Required for: Operators on lines where P-17 class pumps are installed.
+- Qualification method: L1 (theory) + L2 (supervised live operation, 3 events) + L3 (independent operation signed off by QA).
+- Requalification trigger: Equipment modification, SOP change, or 24-month interval.
+
+J. Thomas:
+- Initial qualification date: 2021-09-20. L1+L2+L3 completed.
+- 2023 requalification: 2023-09-15. Passed.
+- 2025 requalification: Due 2025-09-15. Completed 2025-09-12. Passed.
+- Status on batch date: Current.
+- Qualification covers operation, alarm response, and post-maintenance procedure.
+- Qualification does NOT include witness availability management or deviation initiation timing. These are covered by SOP qualification, not equipment qualification.
+
+R. Singh:
+- Initial qualification date: 2022-08-10. L1+L2+L3 completed.
+- 2024 requalification: 2024-08-06. Passed.
+- Status on batch date: Current.
+
+Note: Equipment qualification confirms the operator knows how to run the pump. It does not confirm behavioral compliance for shutdown and escalation decisions made under external pressure. This distinction represents a design gap in the qualification framework.
+
+=============================================================================
+SECTION 6 - ONBOARDING ADEQUACY REVIEW
+=============================================================================
+
+6.1 Onboarding Program Standard (TRN-STD-001 v3.1):
+Duration: 5 days formal induction + 90-day supervised period.
+Covers:
+- Site layout and emergency procedures.
+- GMP principles and GDP basics.
+- Role-specific SOP overview.
+- Equipment familiarity walk-through.
+- First 3 independent task executions under mentor supervision.
+- End-of-onboarding competency check by QA.
+
+6.2 J. Thomas Onboarding Review:
+- Onboarding completed 2021-07 within program standards.
+- Mentor: EMP-0216 (senior operator, retired 2023).
+- Onboarding assessment: Pass (score 84 percent).
+- Gap identified retrospectively: Onboarding in 2021 occurred under SOP-MFG-044 v3.0, which did not include the no-restart clause or the witness sign-off requirement. These were added in v4.0 (2023). J. Thomas was retrained on v4.0, v4.1, v4.2, and v4.3, but the behavioral anchor formed during onboarding may have normalized the pre-v4.0 practice.
+
+6.3 R. Singh Onboarding Review:
+- Onboarding completed 2022-05 within program standards.
+- Mentor: J. Thomas (EMP-0441).
+- Onboarding assessment: Pass (score 81 percent).
+- Significant: R. Singh was mentored by J. Thomas, who had an established pattern of deferring documentation under pressure. The onboarding relationship may have transmitted this normalization to R. Singh before it was formally identified as a gap.
+
+6.4 New Hire Onboarding Program Adequacy Assessment (2025 review):
+Findings:
+- Onboarding modules do not include situational/pressure-based compliance scenarios.
+- Mentors are not assessed for behavioral compliance before they are assigned mentoring duties.
+- Mentor behavior directly influences new hire behavioral patterns within the first 90 days.
+- Recommendation (from TRN-2025 annual review): Add behavioral compliance assessment as eligibility criterion for mentor designation.
+Status: Recommendation accepted; implementation planned in TRN-STD-001 v3.2 (target 2026-Q1).
+
+=============================================================================
+SECTION 7 - TRAINING EFFECTIVENESS ANALYSIS
+=============================================================================
+
+7.1 Method
+Training effectiveness was assessed through three measures:
+(a) Knowledge: Post-training assessment score.
+(b) Behavior: Observational audit compliance rate (real-time task performance check, 90 days post-training).
+(c) Outcome: Deviation and event correlation with training topics.
+
+7.2 Results Summary for FL-02 Team (2024-2025)
+
+Metric                | FY2024 | FY2025 | Target | Trend
+Knowledge avg score   | 88.1%  | 87.4%  | >85%  | At target
+Behavior audit rate   | 82.3%  | 84.6%  | >90%  | Below target, improving slowly
+Outcome (deviations)  | 11     | 7      | <5    | Reducing but above target
+
+7.3 Critical Findings
+Finding T-01: Knowledge-behavior gap is persistent.
+- Assessment scores are above target. Behavioral compliance is below target.
+- Gap is most pronounced for restart governance (knowledge 91 percent; behavior 78 percent).
+- Interpretation: Personnel know the rule but do not reliably apply it when under real conditions.
+
+Finding T-02: Schedule-pressure scenarios are absent from existing training design.
+- All current scenario-based modules use neutral (no-pressure) process environments.
+- No module recreates the experience of a planning urgency communication from a senior leader.
+- No module addresses the operator's authority and obligation to hold the line independently of QA presence.
+- This design gap was first identified in CAPA-2025-0038 (March 2025); scenario content was in authoring at time of batch event (November 2025).
+
+Finding T-03: Mentor-transmitted behavioral norms.
+- R. Singh was trained by J. Thomas. Both exhibit the same deferred-documentation behavioral pattern.
+- Mentor qualification does not currently include behavioral compliance assessment.
+- Minimum 2 other operator pairs on site share the same mentor-mentee deferred-documentation pattern (identified in 2025 observation audit program).
+
+Finding T-04: Overdue module tracking lacked escalation.
+- Three overdue high-criticality simulation modules on FL-02 team were visible in LMS for >4 weeks before batch event.
+- LMS generates automated reminder emails but does not alert QA Manager or Shift Supervisor.
+- LMS escalation rules: First reminder at 7 days overdue; second at 30 days. No QA alert at any stage.
+- Improvement required: LMS configured to alert QA Manager when high-criticality module is >14 days overdue.
+
+Finding T-05: Effectiveness assessment methodology gap.
+- Training effectiveness reports are generated at 90 days post-training for behavioral audit.
+- Reports go to Training Coordinator; not routed to QA Manager unless requested.
+- QA Manager has no automatic visibility into below-target behavioral audit results.
+- Improvement required: Below-threshold behavioral audit results route automatically to QA Manager and are reviewed at next management review.
+
+7.4 Proposed Training Program Changes (arising from event analysis)
+1. Develop and deploy "Compliance Under Pressure" simulation module for operators and supervisors; include: senior manager urgency email scenario, QA witness unavailability decision point, and verbal handover temptation scenario.
+2. Add behavioral compliance score as mandatory competency gate for mentor designation.
+3. Route LMS high-criticality overdue alerts to QA Manager at 14 days.
+4. Route below-threshold behavioral audit results (<90 percent) to QA Manager automatically.
+5. Include "compliance stop authority" as a standalone qualification element for supervisors.
+6. Add maintenance-operator interface training for maintenance technicians on FRM-MFG-022 initiation obligation.
+7. Annual training effectiveness review to use outcome-based (deviation rate correlated with training topic) metrics, not only completion and score metrics.
+
+=============================================================================
+SECTION 8 - COMPETENCY ASSESSMENT RECORDS: DEVIATION INITIATION
+=============================================================================
+
+Deviation initiation is classified as a critical competency for operators and supervisors on product-contact lines. The following records reflect practical competency checks using deviation scenario exercises conducted as part of the site's compliance assurance program.
+
+Assessment format: Written scenario + verbal debrief with QA assessor. Passing criteria: Correct identification of deviation trigger, correct timing of initiation, correct escalation path.
+
+J. Thomas - Deviation Initiation Assessment:
+- 2023-09-10: Pass. Scenario: Missing in-process check. Score: Adequate.
+- 2024-05-18: Pass. Scenario: Alarm without corrective action. Score: Adequate.
+- 2025-10-15 (scheduled; this was the overdue simulation): Not completed.
+- Assessment gap: The overdue module contained the scenario "Restart without witness sign-off under schedule pressure" - the exact scenario of the batch event.
+
+S. Patel - Deviation Initiation Assessment:
+- 2024-07-18: Pass. Escalation scenario workshop (all scenarios passed except minor scoring on timeline documentation).
+- 2025-05-22: Pass. Throughput-vs-compliance scenario.
+- 2025-10-15 "Supervisor Accountability Workshop" (overdue): Not completed.
+- This workshop specifically addressed supervisor obligation to initiate a hold independent of QA instruction when a documented restart control violation is observed.
+
+=============================================================================
+SECTION 9 - ANNUAL PERFORMANCE REVIEW CROSS-REFERENCE
+=============================================================================
+
+J. Thomas (EMP-0441) Annual Performance Review 2025:
+Rating: Exceeds expectations (throughput and quality targets met).
+Strengths cited: "Reliable, high throughput, process knowledge strong."
+Development area cited: "Documentation timeliness."
+KPI score breakdown:
+  - Throughput: 4.5 / 5.0
+  - Quality metrics: 4.0 / 5.0
+  - Compliance adherence: Not separately scored (absorbed into quality metrics).
+  - Documentation timeliness: No separate KPI; noted only as development area.
+Review outcome: Positive rating, merit increase recommended.
+Critical observation: J. Thomas received a positive annual review despite a documented documentation timeliness gap and a borderline behavioral audit. The performance management system did not create a penalty or formal action plan for the documented compliance gap. This is consistent with the systemic KPI misalignment identified in CAPA-2025-0189.
+
+S. Patel (EMP-0501) Annual Performance Review 2025:
+Rating: Meets expectations.
+Strengths: "Experienced supervisor, strong team management."
+Development: "Decision-making speed in complex situations."
+KPI score: Throughput 4.2/5.0; Team adherence 4.0/5.0; Compliance: not separately scored.
+No formal action for "decision-making speed" gap.
+
+H. Ramos (EMP-0207) Annual Performance Review 2025:
+Rating: Meets expectations.
+Training compliance noted: No mention of overdue module.
+No training-related action in performance review.
+
+=============================================================================
+SECTION 10 - TRAINING RECORDS FOR QA SYSTEM ROLES
+=============================================================================
+
+10.1 QA Manager D. Verma (EMP-0388)
+Module                                            | Date       | Score/Result
+CAPA Management Leadership                       | 2024-03-14 | Pass
+Management Review Facilitation                   | 2024-06-22 | Pass
+Regulatory Inspection Readiness                  | 2024-10-05 | Pass
+Risk-Based Decision Making (QRM)                 | 2025-02-17 | Pass
+CAPA Effectiveness Assessment Methods (advanced) | 2025-08-08 | Pass
+Management Review Governance (proposed new)     | Not started | Not started
+
+Note: D. Verma completed the CAPA Effectiveness Assessment Methods advanced module in August 2025 but the module content had not yet been updated to reflect the new POL-QA-022-EFF requirements (which are themselves proposed following the batch event). The module D. Verma completed in August 2025 uses the 2023 effectiveness criteria, which are the same criteria that produced the flawed CAPA-2024-0097-EFF outcome.
+
+10.2 IT Project Manager (ITPM-0048, external secondment)
+Module                                     | Date       | Score/Result
+Quality-Critical IT Project Awareness     | 2024-11-20 | Pass
+Note: This one-time awareness module was completed after Obs-2024-INS-08; however it did not cover the obligation to notify QA when project priority was being downgraded. The module covered "what quality-critical IT systems are" but not "governance obligations when those projects are delayed."
+
+=============================================================================
+SECTION 11 - TRAINING INFRASTRUCTURE AND LMS GAPS
+=============================================================================
+
+11.1 LMS Configuration Gaps identified in 2025 annual review:
+Gap LMS-01: High-criticality overdue modules do not generate QA Manager alert. First alert goes to employee at 7 days; no management alert.
+Gap LMS-02: LMS behavioral audit results are visible only in Training Coordinator dashboard; no automated route to QA review.
+Gap LMS-03: LMS does not link training records with active batch assignments. If an operator with overdue critical training is assigned to a batch, LMS does not generate a warning.
+Gap LMS-04: Mentor assignment records in LMS do not cross-reference mentee behavioral audit outcomes, so mentor influence is invisible.
+Gap LMS-05: LMS reports training compliance by completion date; does not measure knowledge decay over time. Personnel who completed a module 18 months ago may have reduced retention; no refresher trigger based on elapsed time since last pass.
+
+11.2 Proposed LMS Improvements:
+- Configure high-criticality overdue alert to QA Manager at 14 days overdue.
+- Route below-90-percent behavioral audit to QA Manager automatically.
+- Add batch-assignment pre-check: LMS flags operators with overdue critical modules before batch start.
+- Add mentor-mentee behavioral correlation report in annual training effectiveness review.
+- Implement knowledge-decay refresh trigger: modules older than 18 months in high-criticality category flagged for reassessment.
+
+=============================================================================
+SECTION 12 - SUMMARY OF TRAINING-RELATED ROOT CONTRIBUTING FACTORS (CF-882)
+=============================================================================
+
+Factor T-1 (MAN / OPERATOR): J. Thomas had an overdue simulation module covering the exact pressure-deviation scenario he encountered. Behavioral audit had flagged him at 67 percent compliance (below 90 percent target) 60 days before the event. No follow-up action was taken.
+
+Factor T-2 (MAN / SHIFT B OPERATOR): R. Singh had two overdue modules covering handover governance and escalation decision-making. R. Singh was mentored by J. Thomas and may have inherited deferred-documentation behavioral norms.
+
+Factor T-3 (MAN / SUPERVISOR): S. Patel had an overdue supervisor accountability module. His 360-degree review identified consensus-seeking under pressure as a development need; no behavioral simulation had addressed senior management urgency communication as a compliance test.
+
+Factor T-4 (MAN / SUPERVISOR B): M. Okafor had the same overdue supervisor accountability module. Behavioral interviews confirm cultural pattern of deferring stop decisions to QA rather than exercising supervisor stop authority.
+
+Factor T-5 (MAN / MAINTENANCE): H. Ramos had an overdue module covering the link between WO closure and FRM-MFG-022 initiation. He departed the area without confirming the form was started.
+
+Factor T-6 (MANAGEMENT SYSTEM): Performance reviews positively rewarded throughput performance while documentation timeliness gaps were noted as "development areas" with no formal consequence. This created a signal that throughput outweighs compliance in career outcome.
+
+Factor T-7 (TRAINING DESIGN): Three overdue modules on FL-02 were for a simulation ("Compliance Under Pressure") that had not yet been created at the time it was scheduled because the content authoring was delayed. The training gap was therefore structural, not just a completion failure.
+
+Factor T-8 (LMS SYSTEM): LMS did not alert QA Manager about overdue high-criticality modules, did not flag the operators' training gaps before batch assignment, and did not route the borderline behavioral audit result to QA for action.
+
+END OF EMPLOYEE TRAINING AND QUALIFICATION RECORDS

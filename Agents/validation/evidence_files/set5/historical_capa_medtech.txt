@@ -1,0 +1,149 @@
+HISTORICAL CAPA DOSSIER
+File: historical_capa_medtech.txt
+Compiled By: Quality Systems Analyst Team - MedTech
+Purpose: Provide prior related quality events for trend and recurrence analysis for sterile infusion-device assembly operations.
+
+CAPA RECORD 1
+CAPA ID: CAPA-2024-0129
+Date Opened: 2024-02-19
+Date Closed: 2024-06-04
+Area: Post-maintenance release control
+Event Summary:
+- Restart occurred after maintenance with incomplete form fields.
+- No confirmed product impact, but DHR compliance failure observed.
+Root Cause:
+- Restart checklist ownership ambiguity between operations and maintenance.
+Actions:
+- Updated role matrix and added supervisor release checkpoint.
+- Conducted targeted retraining for two shifts.
+Effectiveness:
+- Three months no recurrence; one delayed non-critical entry noted.
+
+CAPA RECORD 2
+CAPA ID: CAPA-2024-0288
+Date Opened: 2024-09-11
+Date Closed: 2025-01-08
+Area: Shift handover governance
+Event Summary:
+- Verbal-only transfer of open quality-critical item at shift boundary.
+Root Cause:
+- Weak enforcement of written handover requirement.
+Actions:
+- Revised handover SOP and signed transfer form requirements.
+- Added random handover audits.
+Effectiveness:
+- Improved compliance but residual risk remained medium at peak-volume periods.
+
+CAPA RECORD 3
+CAPA ID: CAPA-2025-0064
+Date Opened: 2025-03-06
+Date Closed: 2025-08-12
+Area: Documentation timeliness and data integrity
+Event Summary:
+- Delayed completion of critical DHR fields in multiple batches.
+Root Cause:
+- Throughput pressure and deferred documentation behavior.
+Actions:
+- Added MES prompts and supervisor midpoint DHR checks.
+- GDP refresher tied to performance objectives.
+Effectiveness:
+- Delayed entries reduced 57 percent overall; critical entries improved only partially.
+
+CAPA RECORD 4
+CAPA ID: CAPA-2025-0147
+Date Opened: 2025-06-22
+Date Closed: 2025-11-15
+Area: Alarm and warning response behavior
+Event Summary:
+- Operators acknowledged warnings without documented corrective action.
+Root Cause:
+- Misunderstanding that acknowledgment equals closure.
+Actions:
+- Added warning-response checklist and practical drills.
+- Added escalation matrix to line SOP.
+Effectiveness:
+- Documentation improved; repeated warning events still present in one line.
+
+CAPA RECORD 5
+CAPA ID: CAPA-2025-0221
+Date Opened: 2025-10-03
+Date Closed: 2026-01-22
+Area: Restart dual-gate control (witness + traceability)
+Event Summary:
+- Manual checks identified restart risk when lot reconciliation warning remained open.
+Root Cause:
+- No hard-system gate for combined witness and lot-reconciliation checks.
+Actions:
+- Opened CR-IT-2025-188 for MES dual lock.
+- Interim compensating controls in SOP-ASM-061.
+Effectiveness (declared at closure):
+- Activity completion declared effective.
+Critical gap:
+- Effectiveness review did not verify production deployment of CR-IT-2025-188.
+Residual Risk:
+- Medium-high until system lock live.
+
+CAPA RECORD 6
+CAPA ID: CAPA-2026-0031
+Date Opened: 2026-02-20
+Date Closed: Open
+Area: KPI governance misalignment
+Background:
+- Throughput-only scorecards identified as risk factor in repeated restart-control behavior.
+Findings:
+- Compliance hold decisions reduce performance score with no positive credit.
+Planned Actions:
+- Introduce compliance adherence weighting of 30 percent.
+- Add positive score treatment for correct compliance holds.
+- Require annual QA review of KPI behavior impact.
+Status:
+- In governance approval workflow.
+
+CAPA RECORD 7
+CAPA ID: CAPA-2025-0221-EFF
+Date Opened: 2026-01-23
+Date Closed: 2026-02-12
+Area: Effectiveness review of CAPA-2025-0221
+Findings:
+- 9 audited restarts: 8 compliant, 1 delayed closure.
+- No verification evidence that CR-IT-2025-188 was deployed.
+- Residual risk noted but no formal risk acceptance generated.
+Lesson:
+- Activity-based closure can generate false assurance when technical controls remain pending.
+
+MANAGEMENT REVIEW EXTRACTS
+Meeting Date: 2025-11-21
+- CR-IT-2025-188 listed as in progress, no risk-tier escalation recorded.
+
+Meeting Date: 2026-01-19
+- CAPA-2025-0221 closed as effective with residual risk noted.
+- No explicit trigger action assigned for delayed lock deployment.
+
+Meeting Date: 2026-03-06
+- IS-517 event reviewed; investigation INV-2026-0073 opened.
+- Decision made to revise management review template with risk-tier criteria.
+
+REGULATORY OBSERVATION HISTORY
+Observation ID: OBS-MD-2025-04
+Inspection date: 2025-05-14
+Observation summary:
+- Technical quality controls dependent on project delivery lacked explicit interim risk-acceptance governance.
+Site response:
+- Commit to formal QA sign-off for delays to quality-critical digital controls.
+Status at IS-517 event:
+- Commitment partially implemented; no complete enforcement mechanism.
+
+SYSTEMIC TREND SUMMARY
+Trend A: Restart control failures cluster near maintenance plus schedule pressure windows.
+Trend B: Verbal handover recurrence despite policy reminders.
+Trend C: Effectiveness reviews over-rely on activity completion.
+Trend D: Technical-control deployment delays not consistently risk-accepted.
+Trend E: KPI design can discourage compliance-first stop decisions.
+
+LESSONS FOR CURRENT INVESTIGATION
+1. Manual compensating controls are fragile when schedule pressure is high.
+2. Handover controls require system-backed enforcement, not policy alone.
+3. Technical controls must be verified as deployed before CAPA effectiveness closure.
+4. Management review must be risk-tiered, not status-only.
+
+END OF DOSSIER

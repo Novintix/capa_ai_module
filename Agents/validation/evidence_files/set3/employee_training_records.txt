@@ -1,0 +1,185 @@
+﻿EMPLOYEE TRAINING AND QUALIFICATION RECORDS
+Document ID: HR-QMS-TRN-2026-MDA02
+Site: NOVINTIX Medical Devices Campus - Building 4
+Manufacturing Unit: Implantable Device Assembly - Line MDA-02
+Compiled By: QA Training Coordinator
+Review Date: 2026-03-05
+Scope: Personnel assigned to MDA-02 and linked QA/Maintenance support roles
+
+SECTION 1 - GOVERNANCE OVERVIEW
+Training framework governed by:
+- POL-HR-QMS-014
+- POL-QA-012
+- POL-QA-022
+- Training Standard TRN-MDT-002 v2.4
+
+Training categories:
+Cat A - GMP and implantable device fundamentals.
+Cat B - Role-specific SOP qualification.
+Cat C - Equipment and station practical qualification.
+Cat D - Regulatory and documentation integrity.
+Cat E - Behavioral scenario training under schedule pressure.
+
+Delivery modes:
+- e-Learning, classroom, OJT, simulation workshops.
+
+Site metrics (2026 Q1):
+- On-time completion: 95.1 percent.
+- Critical SOP refresher completion: 97.8 percent.
+- Mean assessment score: 87.2 percent.
+- Behavioral audit compliance: 86.0 percent.
+- Overdue critical modules: 11 people, 17 modules.
+
+Key gap:
+- Behavioral execution under pressure trails knowledge scores by 9 to 12 points.
+
+SECTION 2 - TEAM ROSTER
+Employee ID | Name       | Role                         | Shift | Qualification Status
+EMP-1102    | L. Moreno  | Device Assembly Operator     | A     | Fully Qualified
+EMP-1044    | T. Huang   | Device Assembly Operator     | B     | Fully Qualified
+EMP-1008    | R. Ahmed   | Shift Supervisor             | A     | Fully Qualified
+EMP-0994    | M. Okafor  | Shift Supervisor             | B     | Fully Qualified
+EMP-0832    | N. Patel   | QA Floor Engineer            | B/C   | Fully Qualified
+EMP-0766    | E. Cole    | Maintenance Technician       | A     | Fully Qualified
+EMP-0701    | S. Iqbal   | Senior Quality Engineer      | Day   | Fully Qualified
+EMP-0685    | V. Menon   | Reliability Engineer         | Day   | Fully Qualified
+
+SECTION 3 - INDIVIDUAL RECORDS
+
+3.1 L. Moreno - Operator Shift A
+- SOP-MDT-041 v3.1 training complete (2025-05-12, 89 percent)
+- SOP-MDT-041 v3.2 training complete (2026-01-22, 92 percent)
+- GDP refresher complete (2026-02-01, 88 percent)
+- Restart governance OJT complete (2025-11-09)
+- Escalation simulation module: OVERDUE (due 2026-02-10)
+Observation audit:
+- 2026-01-28: 2/3 compliant restart behavior (67 percent), coaching recommended.
+Gap relevance:
+- Overdue simulation directly tied to event decision behavior.
+
+3.2 T. Huang - Operator Shift B
+- SOP-MDT-041 v3.2 complete (2026-01-24, 86 percent)
+- Handover governance practical: OVERDUE (due 2026-02-05)
+- GDP refresher complete (2026-02-02, 82 percent)
+Observation audit:
+- 2026-02-06: pass on normal scenario, no pressure scenario tested.
+Gap relevance:
+- Did not complete signed-handover simulation before event.
+
+3.3 R. Ahmed - Supervisor Shift A
+- Supervisor restart governance module complete (2026-01-20, 93 percent)
+- Throughput-vs-compliance scenario complete (2025-11-18, pass)
+- Supervisor accountability refresh: OVERDUE (due 2026-02-01)
+Behavioral note:
+- Tends to defer hard stop decisions when dispatch pressure is high.
+
+3.4 M. Okafor - Supervisor Shift B
+- SOP-MDT-041 supervisor track complete (2026-01-21, 90 percent)
+- Escalation authority simulation complete (2025-12-03, pass)
+- Advanced handover workshop: OVERDUE (due 2026-02-08)
+Behavioral note:
+- Aware of requirements but deferred stop authority to QA.
+
+3.5 E. Cole - Maintenance Technician
+- Critical maintenance closure module complete (2025-12-10, 87 percent)
+- WO-to-clearance linkage module: OVERDUE (due 2026-01-30)
+Gap relevance:
+- Work-order closure executed without confirming witness-linked clearance completion.
+
+3.6 N. Patel - QA Floor Engineer
+- All required modules current.
+- Witness standards and stop-right simulation complete.
+- Event response fully compliant upon arrival.
+
+SECTION 4 - TRAINING SYSTEM FINDINGS
+- Multiple event-involved personnel had overdue behavioral modules.
+- Observation audit follow-up actions were not consistently escalated.
+- Completion dashboards emphasized attendance and test scores more than pressure-condition behavior outcomes.
+
+SECTION 5 - RECOMMENDED TRAINING ACTIONS
+1. Mandatory closure of overdue escalation and handover simulations within 10 business days.
+2. Add pressure-context scenarios to all operator and supervisor recertification.
+3. Tie supervisor training effectiveness to observed stop-decision quality, not only completion metrics.
+4. Add automated alerts for overdue critical modules to QA manager and line manager.
+
+SECTION 6 - TRAINING TIMELINE RECONSTRUCTION FOR LOT MD-317
+2025-11-18 - First rollout of throughput-vs-compliance simulation to supervisors.
+2025-12-03 - Shift B supervisor completed escalation authority simulation.
+2026-01-20 to 2026-01-24 - SOP-MDT-041 v3.2 retraining cycle completed for core line staff.
+2026-01-28 - Observation audit identified 67 percent compliance in restart behavior for Operator L. Moreno; follow-up coaching was recommended but not scheduled.
+2026-02-01 to 2026-02-02 - GDP refresher completed for Operators L. Moreno and T. Huang.
+2026-02-05 - Handover governance practical due for T. Huang; not completed.
+2026-02-08 - Advanced handover workshop due for M. Okafor; not completed.
+2026-02-10 - Escalation simulation due for L. Moreno; not completed.
+2026-02-18 - Lot MD-317 event date. Multiple overdue behavioral modules remained open.
+2026-03-04 - Investigation opened with training effectiveness as systemic workstream.
+
+SECTION 7 - OBSERVATION AUDIT DETAIL
+Audit Program: QA-OBS-MDA02-2026-Q1
+Audit Method:
+- Randomized in-line observations with trigger checklist for restart, handover, and escalation behaviors.
+- Scoring dimensions: requirement knowledge, decision timeliness, escalation correctness, documentation timeliness.
+
+7.1 Operator Cohort Findings
+- Knowledge scores generally above 85 percent.
+- Decision timeliness under pressure scenarios averaged 72 percent.
+- Most common behavior gap: waiting for supervisor or QA confirmation despite clear trigger conditions.
+
+7.2 Supervisor Cohort Findings
+- Requirements awareness high.
+- Stop authority execution under dispatch pressure scored 74 percent.
+- Common pattern: attempt to maintain run while expecting delayed documentation closure.
+
+7.3 Maintenance Cohort Findings
+- Mechanical closure compliance strong.
+- Governance linkage awareness weaker where work orders did not enforce FRM-MDT-041 completion cross-check.
+
+7.4 QA Cohort Findings
+- Strong compliance with witness and stop-right behaviors.
+- Main limitation: resource constraints during concurrent high-priority events.
+
+SECTION 8 - ROOT CAUSE THEMES FROM TRAINING PERSPECTIVE
+Theme 1: Completion bias
+- Training program weighted completion and test scores more heavily than real-world behavior under pressure.
+
+Theme 2: Scenario mismatch
+- Existing simulations did not sufficiently reproduce real dispatch urgency and authority-gradient dynamics.
+
+Theme 3: Follow-up execution gap
+- Observation audit findings did not always trigger timely coaching or risk escalation.
+
+Theme 4: Cross-functional handoff blind spots
+- Maintenance training lacked explicit accountability for closure linkage with quality clearance completion.
+
+SECTION 9 - CORRECTIVE TRAINING PLAN (POST-INVESTIGATION)
+Action TRN-01
+- Build mandatory simulation module: "Critical Restart Decision Under Dispatch Pressure."
+- Audience: operators and supervisors.
+- Due: 2026-04-15.
+
+Action TRN-02
+- Add hard escalation rule in LMS: overdue Category E module for critical lines auto-notifies QA manager and line manager.
+- Due: 2026-03-28.
+
+Action TRN-03
+- Require 90-day behavioral verification audit after every high-criticality SOP revision.
+- Due: 2026-04-01.
+
+Action TRN-04
+- Add maintenance closure linkage module with practical assessment using simulated work-order scenarios.
+- Due: 2026-04-05.
+
+Action TRN-05
+- Introduce supervisor coaching dashboard with "compliance stop quality" metric tracked monthly.
+- Due: 2026-04-30.
+
+SECTION 10 - EFFECTIVENESS METRICS FOR TRAINING REMEDIATION
+- Metric A: Overdue critical behavioral modules reduced to zero for MDA-02 roster within 30 days.
+- Metric B: Observation audit stop-decision compliance above 95 percent for three consecutive months.
+- Metric C: Zero verbal-only transfer of open critical items for three consecutive months.
+- Metric D: Deviation initiation latency under trigger conditions reduced below 30 minutes median.
+
+SECTION 11 - MANAGEMENT REVIEW NOTE
+At monthly Device Quality Review, training effectiveness status must be discussed jointly with CAPA and KPI governance updates to avoid isolated closure decisions that ignore behavioral and incentive interactions.
+
+END OF TRAINING RECORD
