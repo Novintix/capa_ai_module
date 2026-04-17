@@ -700,7 +700,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
             "session_id": state.get("session_id"),
             "status": "awaiting_human_review",
             "mode": state.get("mode", "NO_FMEA_SINGLE_SHOT"),
-            "analysis_depth": current_loop,
+            "analysis_depth": actual_current_iteration,
             "ai_flagged": False,
             "manual_investigation_required": False,
             "stopping_reason": None,

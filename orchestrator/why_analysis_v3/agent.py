@@ -67,6 +67,8 @@ class WhyAnalysisV3Orchestrator:
                 "complaint_id": input_data.complaint_id,
                 "session_id": input_data.session_id,
                 "status": "error",
+                "mode": "NO_FMEA_SINGLE_SHOT",  # Required field
+                "analysis_depth": 0,  # Required field
                 "error": f"Orchestrator error: {exc}",
                 "stopping_reason": "orchestrator_exception",
                 "ai_flagged": False,
@@ -124,6 +126,8 @@ class WhyAnalysisV3Orchestrator:
                     "status": "error",
                     "error": f"No valid checkpoint found for session {session_id}: {e}",
                     "stopping_reason": "no_checkpoint",
+                    "mode": "NO_FMEA_SINGLE_SHOT",  # Required field
+                    "analysis_depth": 0,  # Required field
                 }
             
             # CRITICAL FIX: The issue is that invoke(None) doesn't work at END interrupt
@@ -199,6 +203,8 @@ class WhyAnalysisV3Orchestrator:
             return {
                 "session_id": session_id,
                 "status": "error",
+                "mode": "NO_FMEA_SINGLE_SHOT",  # Required field
+                "analysis_depth": 0,  # Required field
                 "error": f"Resume error: {exc}",
                 "stopping_reason": "resume_exception",
                 "ai_flagged": False,
