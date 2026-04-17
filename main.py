@@ -30,7 +30,7 @@ register_routes(app)
 
 # Mount static files LAST (so API routes take precedence)
 # This serves UI files at root, but API routes are checked first
-app.mount("/", StaticFiles(directory="UI", html=True), name="ui")
+# app.mount("/", StaticFiles(directory="UI", html=True), name="ui")
 
 
 if __name__ == "__main__":
