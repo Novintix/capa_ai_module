@@ -1,0 +1,227 @@
+﻿PERFORMANCE AND QUALITY ASSESSMENT REPORT
+Report Number: PQR-2026-0173
+Product: NeuroPulse Implantable Infusion Controller (Model NP-410)
+Lot: MD-317
+Legacy Evidence Tag: D-317
+Issued By: Quality Control and Reliability Lab
+Issue Date: 2026-03-02
+
+1. EXECUTIVE SUMMARY
+Lot MD-317 showed elevated low-dose flow-rate failures and increased micro-particulate indications in optical inspection. Core electronic performance remained within specification. Combined evidence indicates strongest linkage to process governance failure during post-maintenance restart, with humidity drift as an amplifying environmental factor.
+
+2. PURPOSE
+Consolidate acceptance test outcomes, particulate characterization, process correlation, and risk interpretation for formal investigation and CAPA decisions.
+
+3. SAMPLE PLAN AND METHODS
+3.1 Device sampling
+- Outgoing acceptance testing performed per NP410-QC-ATP-09.
+- Additional retain sample testing selected from early, middle, and late assembly windows.
+
+3.2 Flow performance testing
+- Low-dose profile at 0.8 mL/hr, 2-hour controlled bench run.
+- Mid-dose and high-dose profiles used for comparative stability checks.
+
+3.3 Particulate screening
+- Optical path inspection at inline camera and post-assembly microscopy.
+- Selected suspect samples analyzed by SEM-EDS.
+
+3.4 Ancillary review
+- Chronology and control-state correlation from assembly log and process CSV.
+
+4. RESULTS
+4.1 Flow-rate verification
+- Failed units at low-dose profile: 19/1,200 (1.58 percent).
+- Site action limit: 0.80 percent.
+- Alert limit: 0.50 percent.
+- Mid-dose and high-dose profiles: within expected control limits.
+
+4.2 Particulate findings
+- Inline optical suspect events rose during 09:00-16:00 window.
+- Final microscopy-confirmed suspect units: 14.
+- Predominant morphology: thin polymer-like filaments.
+
+4.3 Electronics and firmware checks
+- Pump motor current, encoder response, and firmware checksum all in-spec.
+- No systemic electronic fault pattern found.
+
+4.4 Comparative lot trend
+- Prior three lots on MDA-02 did not exceed low-dose failure alert limit.
+- MD-317 exceeds historical mean by 4.2x.
+
+5. CORRELATION WITH PROCESS EVIDENCE
+- Restart occurred before sterile-path witness completion.
+- Open critical item transferred verbally at shift boundary.
+- Deviation raised only after extended delay.
+- Relative humidity was elevated during the same period as particulate and low-dose instability rise.
+
+6. PARTICULATE CHARACTERIZATION SUMMARY
+Method: SEM-EDS with supplemental FTIR
+Sample source: 6 retained devices with confirmed suspect material
+Analysis date: 2026-03-01
+External lab reference: EXT-MDT-260301
+
+Finding 1:
+- Morphology: filament fragments, 90-260 micrometers length.
+- EDS: carbon/oxygen dominant with trace silicon.
+- FTIR match: polyurethane-like profile, likely from tubing sheath or polymer handling surface.
+
+Finding 2:
+- Secondary fragments: short opaque particles 20-60 micrometers.
+- Composition: mixed polymer-cellulosic signature.
+- Interpretation: likely ancillary handling lint, not primary source.
+
+Material comparison:
+- Transfer tubing abrasion sample showed strong profile overlap with primary particles.
+- Weld horn residue sample did not match.
+- Gowning fibers were broader diameter than detected fragments.
+
+Preliminary source attribution:
+- Most likely source: polymer shedding at transfer tubing clip abrasion point during post-maintenance handling.
+- Confidence: moderate-high.
+
+7. RISK INTERPRETATION
+Quality Risk: High
+Compliance Risk: High
+Patient Risk: Medium-High pending final disposition due implantable use context and low-dose delivery impact potential.
+
+8. RECOMMENDATIONS
+Immediate
+1. Maintain lot quarantine and perform 100 percent low-dose retest.
+2. Execute enhanced particulate inspection on all quarantined units.
+3. Enforce witness-first restart rule with no exceptions.
+
+Near-term
+1. Deploy MES lock for restart gate.
+2. Replace and reroute tubing clip geometry to eliminate abrasion mechanism.
+3. Revise KPI model to remove throughput penalty for compliance holds.
+4. Introduce scenario-based supervisor escalation drills.
+
+9. LIMITATIONS
+- Final attribution confidence depends on full teardown review of all suspect units.
+- Some chronology evidence relies on manual log entries and requires full audit-trail reconciliation.
+
+10. CONCLUSION
+The lot MD-317 event is most consistent with a process-control and governance failure at post-maintenance restart, amplified by environmental and material-handling factors. Electronic subsystem integrity was not identified as a primary failure driver.
+
+11. APPROVALS
+Analyst: K. Roy, Senior Reliability Analyst
+Reviewer: N. Das, QC Lab Manager
+Approver: Head of Quality Engineering (pending)
+
+APPENDIX A - LOT COMPARISON SNAPSHOT
+Lot MD-314 (2026-01-08): low-dose fails 4/1,200 (0.33 percent), no critical maintenance restart.
+Lot MD-315 (2026-01-22): low-dose fails 5/1,200 (0.42 percent), compliant restart.
+Lot MD-316 (2026-02-04): low-dose fails 3/1,200 (0.25 percent), compliant restart.
+Lot MD-317 (2026-02-18): low-dose fails 19/1,200 (1.58 percent), noncompliant restart.
+
+APPENDIX B - CROSS-REFERENCE INDEX
+- assembly_process_log_D-317.txt
+- investigation_record_D-317.txt
+- medtech_assembly_sop.txt
+- policy.txt
+- historical_capa_medtech.txt
+
+APPENDIX C - RISK MODEL FOR QUARANTINED UNITS
+Segment 1 (early run): Moderate risk.
+Segment 2 (mid run): Medium-High risk.
+Segment 3 (late run): High risk due highest signal density.
+Overall recommendation: maintain release block until all CAPA containment checks close.
+
+APPENDIX D - STATISTICAL SIGNAL REVIEW
+Method Summary:
+- Baseline established from previous 12 lots on line MDA-02.
+- Compared MD-317 low-dose flow failure rate and particulate event frequency against rolling baseline.
+
+Key Results:
+- Baseline low-dose failure mean: 0.37 percent.
+- MD-317 low-dose failure: 1.58 percent.
+- Relative increase: 4.27x baseline.
+- Proportion test indicates statistically significant shift (p < 0.001).
+- Particulate optical alert frequency increased 2.9x versus baseline during 09:00-16:00 window.
+
+Interpretation:
+- MD-317 behavior is not random variation; data supports special-cause disturbance.
+- Temporal clustering aligns with noncompliant restart window and elevated humidity trend.
+
+APPENDIX E - PROCESS WINDOW CORRELATION
+Window 1 (07:00-09:00)
+- Restart active without witness sign-off.
+- Humidity trending from 44 to 46 percent.
+- Defect indicators low but emerging.
+
+Window 2 (09:00-12:00)
+- Throughput ramp and continued open critical clearance.
+- Humidity 47 to 49 percent.
+- Optical suspect signal accumulation increases.
+
+Window 3 (12:00-16:31)
+- Continued operation with unresolved compliance state.
+- Flow checks begin showing marginal behavior at low-dose profile.
+- Particulate signal rate highest pre-hold.
+
+Window 4 (16:31-17:14)
+- Deviation opened; line HOLD; no output produced.
+
+Window 5 (17:14-18:10)
+- Restart under corrected witness control and enhanced checks.
+- Signal frequency decreases but does not fully normalize within same lot.
+
+APPENDIX F - DEVICE-LEVEL FAILURE CLASSIFICATION
+Failure Class A: Low-dose flow drift above upper tolerance.
+- Count: 11 devices.
+- Primary association: unstable fluid-path micro-resistance profile.
+
+Failure Class B: Low-dose under-delivery below lower tolerance.
+- Count: 8 devices.
+- Primary association: transient restriction and particulate interference possibility.
+
+Failure Class C: Optical particulate suspect with pass flow.
+- Count: 14 devices (subset overlaps Classes A/B in 6 cases).
+
+Failure Class D: Electronic anomaly.
+- Count: 0 devices linked to event trend.
+
+APPENDIX G - PATIENT IMPACT SCENARIO REVIEW
+Scenario 1: Mild under-delivery in chronic dosing profile.
+- Potential impact: reduced therapeutic efficacy over time.
+- Risk rating: Medium.
+
+Scenario 2: Intermittent flow instability in sensitive dosing phase.
+- Potential impact: clinical variability and treatment uncertainty.
+- Risk rating: Medium-High.
+
+Scenario 3: Particulate-related pathway concern.
+- Potential impact: localized irritation or system performance degradation if not detected pre-implant.
+- Risk rating: Medium-High.
+
+Current control status:
+- No units released.
+- Quarantine and enhanced screening materially reduce immediate patient exposure risk.
+
+APPENDIX H - DISPOSITION DECISION FRAMEWORK
+Release eligibility criteria for MD-317:
+1. 100 percent low-dose retest completion with no unresolved fails.
+2. 100 percent enhanced particulate screening completion.
+3. CAPA containment actions verified active.
+4. Formal QA and medical safety sign-off.
+
+If any criterion fails:
+- Lot remains blocked.
+- Escalate to Site Quality Council for disposition decision.
+
+APPENDIX I - FOLLOW-UP TESTING PLAN
+Planned tests:
+- Extended 8-hour low-dose endurance run on 30 sampled units.
+- Replicated assembly trial with corrected restart gate and controlled humidity band.
+- Comparative tubing abrasion stress test with revised clip geometry.
+
+Success thresholds:
+- No flow-rate trend drift beyond alert criteria.
+- No particulate profile match to MD-317 primary finding.
+- Stable process capability index above internal target.
+
+APPENDIX J - REPORT REVISION HISTORY
+Rev 1.0 - 2026-03-02: Initial issue.
+Rev 1.1 - Pending: Include completion results for 100 percent retest and tubing redesign verification.
+
+END OF REPORT

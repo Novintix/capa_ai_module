@@ -71,7 +71,7 @@ ORIGINAL WHY QUESTION:
 COMPLAINT DESCRIPTION:
 {complaint_description}
 
-GENERATED CAUSES TO VALIDATE:
+GENERATED CAUSE TO VALIDATE (array with one element):
 {generated_causes_json}
 
 RETRIEVED EVIDENCE (semantically matched to this cause — most relevant passages only):
@@ -84,10 +84,11 @@ Each evidence item has:
   "similarity_score" — relevance to this cause (higher = more relevant)
 
 TASK:
-Validate the generated cause ONLY against the evidence passages above.
+Validate the single cause in the array above ONLY against the evidence passages provided.
 Do not invent evidence not present in the passages.
 
-Return cause_validation_results with one of:
+Return a JSON object with "cause_validation_results" as an array containing exactly one
+validation result for that cause, using one of:
 - matched
 - partially_matched
 - no_evidence

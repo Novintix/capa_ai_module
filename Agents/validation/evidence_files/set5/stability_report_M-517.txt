@@ -1,0 +1,163 @@
+STABILITY AND QUALITY ASSESSMENT REPORT
+Report Number: SR-2026-0112
+Product: Smart Infusion Set with Anti-Free-Flow Clamp (Model IFX-20)
+Batch: IS-517
+Legacy Evidence Tag: M-517
+Issued By: QC Device Quality Group
+Issue Date: 2026-03-02
+
+1. EXECUTIVE SUMMARY
+Batch IS-517 showed elevated reject count for translucent micro-fragments inside the fluid path and intermittent flow restriction. Functional dimensions and sealing integrity remained within specification for non-defective samples. Strongest correlation is with process-governance and restart-control failure after maintenance.
+
+2. PURPOSE
+Consolidate visual, flow-performance, microscopy, and trend data to support formal investigation and CAPA decisions.
+
+3. SAMPLE PLAN AND METHODS
+3.1 Sample selection
+- Final inspection rejects and retains sampled across beginning, middle, and end of run.
+3.2 Visual and borescope analysis
+- Controlled station visual plus borescope inspection for inner channel defects.
+3.3 Functional tests
+- Flow-rate verification and anti-free-flow clamp response testing.
+3.4 Material characterization
+- FTIR and microscopy for particle composition and morphology.
+
+4. RESULTS
+4.1 Defect findings
+- Rejected units: 96 / 8,000 (1.20 percent).
+- Primary defect: translucent polymer-like micro-fragments in fluid path.
+- Secondary defect: intermittent flow restriction under standard test pressure.
+
+4.2 Functional indicators
+- Non-defective sample flow rates: within target.
+- Seal integrity: acceptable in non-defective units.
+
+4.3 Trend context
+- Previous four lots had reject rates between 0.22 and 0.39 percent.
+- IS-517 exceeded action threshold 0.70 percent.
+
+5. MORPHOLOGY SUMMARY
+- Predominant fragment shape: thin translucent slivers, 80-280 micrometers.
+- Secondary observation: small polymer flecks near lane-B guide region.
+- Preliminary source type: process-contact polymer abrasion rather than ambient contamination.
+
+6. CORRELATION WITH PROCESS EVIDENCE
+- Restart occurred before witness sign-off completion.
+- Lot-reconciliation warning unresolved at initial restart.
+- Open critical item verbally transferred at shift boundary.
+- Throughput recovery pressure documented in assembly log.
+
+7. RISK INTERPRETATION
+Quality Risk: High
+Compliance Risk: High
+Patient Risk: Medium-High (IV use-case; risk managed via quarantine)
+
+8. RECOMMENDATIONS
+Immediate:
+1. Maintain quarantine and execute 100 percent reinspection of IS-517.
+2. Continue source confirmation with guide insert and tubing contact-point analysis.
+3. Enforce witness and lot-reconciliation dual gate before all restarts.
+
+Near-term:
+1. Deploy MES dual-lock for witness and lot reconciliation.
+2. Implement mandatory signed handover for open quality-critical items.
+3. Open CAPA for governance and effectiveness-review methodology gaps.
+
+9. LIMITATIONS
+- Some source attribution confidence depends on completion of remaining comparative samples.
+- Human-factor evidence based on records/interviews requires management-system corroboration.
+
+10. CONCLUSION
+The event is most consistent with restart-governance failure and traceability-control bypass in a post-maintenance context, not broad process drift or environmental contamination.
+
+APPENDIX A - BATCH COMPARISON
+IS-513: 0.24 percent rejects
+IS-514: 0.39 percent rejects
+IS-515: 0.31 percent rejects
+IS-516: 0.22 percent rejects
+IS-517: 1.20 percent rejects (event batch)
+
+APPENDIX B - MATERIAL CHARACTERIZATION
+- FTIR profile of recovered particles aligns with polymer used in lane-B guide insert material family.
+- No profile match with sterile pouch film, clamp resin, or tubing bulk lot.
+- Confidence: moderate-high for localized abrasion source hypothesis.
+
+APPENDIX C - FUNCTIONAL TEST SUMMARY
+- Flow test exceedances clustered in units from pre-hold production interval.
+- Post-controlled restart interval showed lower defect concentration.
+
+APPENDIX D - ENVIRONMENTAL TREND REVIEW
+- ISO 7 and ISO 8 adjacent zones remained within defined limits.
+- No viable/non-viable excursions corresponding to defect window.
+- Environmental contamination not supported as primary contributor.
+
+APPENDIX E - DISPOSITION MODEL
+- Pre-hold production window risk: High.
+- Post-controlled restart window risk: Medium.
+- Recommended release pathway: none until full reinspection and CAPA containment verification complete.
+
+APPENDIX F - STATISTICAL SIGNAL ANALYSIS
+Baseline reject rate (prior 4 lots): mean 0.29 percent.
+Event lot reject rate (IS-517): 1.20 percent.
+Relative increase: 4.1x baseline.
+Chi-square comparison against pooled baseline: statistically significant at p < 0.001.
+Interpretation:
+- The event lot behavior is not random variation around historical process performance.
+- Statistical signal supports assignment to special-cause conditions.
+
+APPENDIX G - SUB-VISIBLE DEBRIS TREND PROFILE
+Method:
+- Borescope-assisted internal channel inspection on retained samples from each run segment.
+Findings:
+- Early-run retained units show sparse but present translucent slivers.
+- Mid-run retained units show highest occurrence density near lane-B guide segment.
+- Post-controlled restart units show lower but non-zero defect frequency.
+Interpretation:
+- Defect source likely active before controlled hold and partially persisted until deeper line clean and guide correction.
+
+APPENDIX H - FLOW PERFORMANCE RISK SEGMENTATION
+Segment 1 (07:06-16:26 interval):
+- Higher flow intermittency outliers.
+- Elevated defect and rework burden.
+
+Segment 2 (17:15-18:15 interval):
+- Reduced intermittency after controlled restart.
+- Residual low-level defects suggest source was reduced, not fully eliminated immediately.
+
+Clinical interpretation:
+- Intermittent flow restriction can affect infusion consistency.
+- Even when complete blockage is absent, partial restrictions can compromise intended therapy delivery profiles.
+
+APPENDIX I - ROOT-CAUSE HYPOTHESIS WEIGHTING
+Hypothesis H1: Ambient contamination source.
+Evidence score: Low.
+Rationale: No correlated EM excursions.
+
+Hypothesis H2: Supplier material defect.
+Evidence score: Low-Medium.
+Rationale: Incoming checks and lot-level indicators normal; no broad pattern across lots.
+
+Hypothesis H3: Localized process-contact abrasion after maintenance/restart-control failure.
+Evidence score: High.
+Rationale: Microscopy and trend localization align with lane-B guide contact region and governance breach window.
+
+Overall weighted conclusion:
+- H3 is the principal explanatory hypothesis with highest evidence coherence.
+
+APPENDIX J - RELEASE GATING RECOMMENDATION PACKAGE
+Before any disposition decision for IS-517:
+1. Complete 100 percent borescope reinspection and flow verification.
+2. Confirm closure of deviation DEV-2026-0073 with approved CAPA containment implementation.
+3. Verify temporary dual-check controls are in operation and audited for at least three successive restarts.
+4. Obtain QA Director and Regulatory Affairs joint sign-off.
+
+Disposition status at report issue date:
+- Quarantine maintained.
+- Release not recommended.
+
+11. APPROVALS
+Analyst: T. Menon
+Reviewer: V. Das (QC Manager)
+Approver: QA Head (pending)
+
+END OF REPORT

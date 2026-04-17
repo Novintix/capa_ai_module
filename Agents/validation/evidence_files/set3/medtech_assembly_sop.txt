@@ -1,0 +1,159 @@
+﻿STANDARD OPERATING PROCEDURE
+Title: Controlled Sterile-Path Clearance and Restart After Critical Maintenance
+SOP Number: SOP-MDT-041
+Version: 3.2
+Effective Date: 2026-01-15
+Supersedes: SOP-MDT-041 v3.1
+Department: Implantable Device Manufacturing Operations
+
+1. PURPOSE
+Define mandatory controls to ensure sterile-path readiness and documentation integrity after maintenance that affects implantable device fluid pathways.
+
+2. SCOPE
+Applies to all implantable infusion controller lines where maintenance intervention disturbs fluid-path, weld, or sterile-contact boundaries.
+
+3. REFERENCES
+- POL-QA-005 Deviation Management
+- POL-QA-012 Good Documentation Practice
+- POL-MDT-031 Shift Handover Governance
+- FRM-MDT-041 Sterile-Path Clearance Form
+- FRM-MDT-051 Shift Handover Record
+- FRM-QA-DEV-02 Device Deviation Form
+
+4. DEFINITIONS
+- Sterile-Path Clearance: Formal verification that post-maintenance pathway is clean, intact, and documented.
+- Witness: Authorized QA or qualified delegate verifying clearance completion.
+- Hold State: Mandatory run-stop status pending control closure.
+
+5. ROLE RESPONSIBILITIES
+5.1 Operator
+- Execute checklist in real time.
+- Document all outcomes contemporaneously.
+- Do not restart line without completed witness sign-off.
+
+5.2 Maintenance Technician
+- Complete mechanical intervention and document closure.
+- Confirm no tools, temporary parts, or residues remain.
+- Verify linkage to FRM-MDT-041 before work order closeout.
+
+5.3 QA Witness
+- Verify checklist evidence and physical condition.
+- Sign witness field before release.
+
+5.4 Shift Supervisor
+- Ensure no open critical item at restart or handover.
+- Enforce hold when critical documentation is incomplete.
+
+6. TRIGGER EVENTS REQUIRING FULL CLEARANCE
+- Ultrasonic weld horn replacement
+- Fluid-path tubing replacement or rerouting
+- Valve block replacement in dosing pathway
+- Sterile manifold disassembly
+- Any maintenance opening controlled sterile boundary
+
+7. PRE-RESTART CONTROL FLOW
+Step 1: Set line to HOLD.
+Step 2: Confirm maintenance closure details complete.
+Step 3: Complete FRM-MDT-041 physical checks.
+Step 4: Record timestamps and operator initials.
+Step 5: Obtain QA witness signature.
+Step 6: Supervisor confirms checklist attached in active lot packet.
+Step 7: Release HOLD and resume.
+
+8. CHECKLIST EXECUTION DETAIL
+8.1 Cleanliness and debris control
+- Confirm no lint, fibers, polymer dust, or residues in critical zones.
+
+8.2 Fluid-path integrity
+- Confirm seals, fittings, and clip points are secure and undamaged.
+
+8.3 Documentation completeness
+- Confirm current revision form and mandatory fields complete.
+
+8.4 Alarm and environment checks
+- Confirm no unresolved critical alarms.
+- Confirm humidity and temperature in approved range before restart.
+
+9. DOCUMENTATION RULES
+- Entries must be contemporaneous.
+- Blank mandatory fields are not acceptable.
+- Corrections must follow GDP-compliant strike-through method.
+- Delayed entry requires reason, supervisor approval, and QA review.
+
+10. SHIFT HANDOVER REQUIREMENT
+If clearance remains open at handover:
+- Line remains HOLD unless documented QA exception.
+- Open item transferred on signed FRM-MDT-051.
+- Incoming shift signs explicit ownership.
+
+11. DEVIATION TRIGGERS
+Immediate deviation required when:
+- Restart occurs before witness sign-off.
+- Open critical item is transferred verbally only.
+- Mandatory form fields are reconstructed after the fact.
+- Environmental warning band is exceeded and operation continues without documented risk decision.
+
+12. CONTAINMENT GUIDANCE
+- Quarantine affected lot units from noncompliant window.
+- Increase flow and particulate inspection scope.
+- Stop comparable interventions until team briefing if trend recurrence exists.
+
+13. TRAINING REQUIREMENTS
+- Initial qualification before independent execution.
+- Annual refresher for all high-criticality modules.
+- Scenario-based escalation training for operators and supervisors.
+- Post-deviation retraining within 10 business days for involved personnel.
+
+14. EFFECTIVENESS METRICS
+- 100 percent compliant post-maintenance restarts with witness before RUN.
+- Zero verbal-only transfer of open critical items for 3 consecutive months.
+- 90 percent reduction in delayed deviation initiation over two quarters.
+- Rolling lot trend: low-dose failure rate below alert limit.
+
+15. MES SYSTEM LOCK REQUIREMENT
+15.1 Required behavior
+- MES must block HOLD to RUN transition when FRM-MDT-041 witness field is blank.
+- Applies to all lots linked to critical maintenance work order types.
+
+15.2 Override control
+- Override requires dual QA director approval and automatic deviation ticket creation.
+
+15.3 Implementation status
+- CR-IT-2025-118 is quality-critical; deployment tracked monthly.
+- Until live, compensating controls remain mandatory and high-risk.
+
+16. ESCALATION MATRIX
+Scenario A: Witness unavailable at planned restart.
+- Action: Delay restart and escalate after 30 minutes to QA manager.
+
+Scenario B: Restart before witness discovered post-hoc.
+- Action: Immediate HOLD, deviation within 30 minutes, QA manager notified within 1 hour.
+
+Scenario C: Open item at handover.
+- Action: signed transfer required; no verbal-only carry-forward.
+
+Scenario D: Repeated noncompliance pattern.
+- Action: CAPA review initiated within 5 business days.
+
+17. TRAINING EFFECTIVENESS RULES
+- Completion data alone is insufficient.
+- 90-day behavioral observation audit required after refresher.
+- Compliance under pressure scenarios must be explicitly tested.
+- Any observed score below 90 percent requires coaching and reassessment.
+
+18. MANAGEMENT REVIEW INTEGRATION
+- Restart compliance appears as standing agenda item in monthly quality review.
+- Two failures in 30 days trigger site leadership briefing.
+- CAPA effectiveness must verify technical control deployment, not only training completion.
+
+19. KPI ALIGNMENT REQUIREMENT
+- Throughput metrics shall not penalize justified compliance holds.
+- Compliance actions are tracked as positive quality performance.
+- Annual KPI governance review by Site Quality Council required.
+
+20. REVISION HISTORY
+v3.0 (2024-06-01): Initial consolidated restart governance procedure.
+v3.1 (2025-04-01): Added handover and escalation triggers.
+v3.2 (2026-01-15): Added environmental decision requirements, technical-lock verification language, and stronger effectiveness criteria.
+
+END OF SOP

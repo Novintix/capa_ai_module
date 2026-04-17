@@ -1,61 +1,190 @@
-STABILITY STUDY REPORT
-Product   : Metformin HCl 500mg Film-Coated Tablets
-Batch     : B-202
-Protocol  : STAB-MET-007
-Condition : 40 C / 75% RH (Accelerated)
-Timepoint : 3 Months
-Report No : SR-2026-0041
-Date      : 2026-02-15
+﻿STABILITY AND QUALITY ASSESSMENT REPORT
+Report Number: SR-2026-0041
+Product: Ceftriaxone for Injection 1g (Vial)
+Batch: CF-882
+Legacy Evidence Tag: B-202
+Issued By: QC Stability Group
+Issue Date: 2026-02-15
 
------------------------------------------------------------
-1. OBJECTIVE
-To evaluate physical and chemical stability of Batch B-202 at the 3-month accelerated
-stability timepoint per ICH Q1A guidelines.
+1. EXECUTIVE SUMMARY
+Batch CF-882 exhibited an elevated final visual reject count for white lint-like particulate findings. Chemical quality indicators remained within specification. Evidence suggests the strongest linkage is process-governance and documentation-control weakness around post-maintenance restart and handover controls.
 
------------------------------------------------------------
-2. OBSERVATIONS
+2. PURPOSE
+This report consolidates quality signals from visual inspection, trend analysis, retained sample assessments, and record review for use in formal investigation and CAPA decisions.
 
-2.1 Visual / Appearance
-  Initial (T0)   : Smooth, white film coat. No defects observed.
-  3 Month (T3)   : Peeling and flaking of film coat observed on approximately 22% of tablets.
-                   Cracks noted on coat surface, primarily at tablet edges.
-                   Coat adhesion appears weakened.
+3. SAMPLE PLAN AND METHODS
+3.1 Batch and retain sample selection
+- Finished units sampled according to AQL-based final visual plan.
+- Retains selected from beginning, middle, and end of run.
+3.2 Visual inspection
+- Controlled booth inspection by certified inspectors.
+- Defect categorization by morphology.
+3.3 Chemical quality checks
+- Assay and related substances review from release and retain data.
+3.4 Ancillary review
+- Process chronology and documentation status cross-check from manufacturing records.
 
-2.2 Dissolution (USP Apparatus II, 900 mL, 0.1N HCl, 50 RPM, 45 min)
-  Spec           : NLT 75% at 45 min
-  T0 result      : 91% (average of 6 units)
-  T3 result      : 63% (average of 6 units) -- FAIL
+4. RESULTS
+4.1 Visual Defect Findings
+- Rejected units: 142 / 10,000.
+- Primary observed defect: white lint-like particulate appearance.
+- Defect pattern distribution:
+  - First third of run: lower frequency.
+  - Middle third: moderate frequency.
+  - Final third: highest concentration.
+4.2 Chemical and potency indicators
+- Assay: within approved specification.
+- Related substances: within approved specification.
+- pH and reconstitution checks: within specification.
+4.3 Trend context
+- Prior three campaign lots did not show equivalent particulate spike.
+- This event exceeds historical mean and action trend threshold.
 
-2.3 Assay (HPLC)
-  Spec           : 95.0 - 105.0%
-  T0 result      : 100.2%
-  T3 result      : 99.6% -- PASS
+5. DEFECT MORPHOLOGY SUMMARY
+- Predominant morphology: thin filamentous white fibers.
+- Secondary morphology: occasional short fragmented opaque particles.
+- Preliminary interpretation: likely extrinsic source contribution; final material characterization pending.
 
-2.4 Related Substances
-  Spec           : Total impurities NMT 0.5%
-  T3 result      : 0.18% -- PASS
+6. CORRELATION WITH PROCESS AND DOCUMENTATION EVIDENCE
+- Maintenance-triggered restart event documented.
+- Clear-Clean-Check record indicates delayed completion and missing witness sign-off at runtime.
+- Open compliance item transferred verbally at shift boundary.
+- Throughput recovery pressure documented in operations log.
+- No strong evidence of formulation instability as primary driver.
 
-2.5 Hardness (at T3)
-  Spec           : 8 - 14 kP
-  T3 result      : 9.2 kP (average) -- PASS
+7. RISK INTERPRETATION
+Quality Risk: Elevated
+Compliance Risk: Elevated
+Patient Risk: Pending final particulate composition, currently assessed as Medium with precautionary controls.
 
------------------------------------------------------------
-3. ANALYST COMMENTS
+8. RECOMMENDATIONS
+Immediate:
+1. Maintain quarantine and expanded visual reinspection.
+2. Complete particulate characterization with external microscopy if needed.
+3. Enforce pre-restart witness requirement for post-maintenance interventions.
+Near-term:
+1. Implement system control preventing restart when witness field blank.
+2. Reinforce written handover discipline for open quality items.
+3. Open CAPA focused on governance behavior and control effectiveness.
 
-The peeling and cracking of the film coat is the primary finding of concern. Coat failure
-is likely contributing to the dissolution failure by exposing uneven tablet surface area
-to dissolution media. Chemical stability appears unaffected. Coating process parameters
-should be reviewed as the most probable cause of coat integrity failure.
+9. LIMITATIONS
+- Final particulate source attribution requires laboratory characterization completion.
+- Some operational evidence is based on logbook narrative and requires corroboration with system audit trails.
 
------------------------------------------------------------
-4. CONCLUSION
+10. CONCLUSION
+Batch CF-882 quality event is most consistent with process execution and documentation-governance failure around maintenance restart controls rather than chemical instability. Investigation should prioritize accountability, restart gating, and handover controls.
 
-Batch B-202 FAILS the 3-month accelerated stability criteria.
-Failure attributed to film coat defect (peeling/cracking).
-Formal investigation and CAPA required per SOP-QA-021.
+11. APPROVALS
+Analyst: P. Nair
+Reviewer: S. Mehta, QC Manager
+Approver: QA Head (pending)
 
-Analyst      : P. Nair
-Reviewed by  : Dr. S. Mehta (QC Manager)
-Date         : 2026-02-15
------------------------------------------------------------
+APPENDIX A - DEFECT TREND SNAPSHOT
+- Week -4 to Week -1 baseline reject trend: low and stable.
+- Event week: sharp increase crossing alert and action thresholds.
+
+APPENDIX B - CROSS-REFERENCE INDEX
+- MFG-LOG-CF882-B202 -> Timeline and behavior evidence
+- SOP-MFG-044 -> Required controls
+- policy.txt -> Policy obligations and enforcement
+- INV-2026-0019 -> Consolidated investigation
+
+APPENDIX C - PARTICULATE CHARACTERIZATION FINDINGS
+Method: Scanning electron microscopy with energy dispersive X-ray spectroscopy (SEM-EDS).
+Sample source: 5 retained vials with confirmed particulate from rejection pool.
+Analysis date: 2026-02-20.
+Analyst: External Contract Laboratory (Lab Ref: EXT-LAB-20260220).
+
+Finding C-1:
+- Particle morphology: Thin filamentous fiber, approximate dimensions 120-350 micrometers length, 5-12 micrometers diameter.
+- Elemental composition (EDS): Carbon and oxygen dominant; trace silicon; no metals detected.
+- Classification: Consistent with synthetic polymer fiber (likely polyester or polyamide based on elemental profile).
+- Not consistent with glass, stainless steel, rubber, or product crystalline material.
+
+Finding C-2:
+- Secondary particle type observed in 2 vials: Short fragmented opaque particles, 20-80 micrometers.
+- Elemental composition: Carbon, oxygen, nitrogen; consistent with processed cellulosic or synthetic nonwoven material.
+- Classification: Consistent with nonwoven fabric fragment; rule-out: lint from operator garment, filter material, cleaning cloth.
+
+Comparison with process materials:
+- Transfer hose exterior sample (retained 2025-11-10 20:10): Fiber shedding test conducted. Hose exterior abrasion clip contact point yielded fibers with overlapping SEM profile to Finding C-1 particles.
+- Pump seal kit material (SK-P17-003 lot sample): Tested; no fiber shedding observed. Seal material does not match particulate profile.
+- Operator garments (Grade B coverall material): Fiber sample submitted. Garment fiber width significantly larger than observed particles; considered unlikely primary source but not ruled out.
+- Conveyor guard gasket (worn, retained): Gasket material SEM profile does not match.
+
+Preliminary source attribution:
+- Most probable source: Transfer hose exterior abrasion at routing clip contact point, generating polymer fiber particles that entered the product-contact pathway during pump-head replacement or post-replacement handling.
+- Confidence level: Moderate-high (SEM-EDS overlap with hose sample; no alternative candidate with equivalent profile match).
+- Residual uncertainty: Complete exclusion of all other sources requires additional routing and handling review.
+
+APPENDIX D - PRIOR CAMPAIGN LOT COMPARISON
+Comparative data from preceding three batches on line FL-02:
+
+Batch CF-878 (2025-09-15):
+- Final visual reject count: 31 / 10,000 (0.31 percent).
+- No maintenance events on P-17 preceding this batch.
+- No particulate defect type matches; primarily cosmetic rejects.
+- Reject rate: within historical baseline.
+
+Batch CF-879 (2025-10-02):
+- Final visual reject count: 28 / 10,000 (0.28 percent).
+- Routine PM on P-17 (WO-MNT-54950) completed 14 days prior; no product-contact intervention.
+- Clear-Clean-Check completed within 40 minutes with witness; no documentation gap.
+- Reject rate: within historical baseline.
+
+Batch CF-880 (2025-10-20):
+- Final visual reject count: 35 / 10,000 (0.35 percent).
+- No maintenance events involving P-17.
+- Reject rate: within historical baseline; slight upward trend noted in QC review but within action limits.
+
+Batch CF-882 (2025-11-10) [event batch]:
+- Final visual reject count: 142 / 10,000 (1.42 percent).
+- Action limit: 0.8 percent. Alert limit: 0.5 percent. Both exceeded.
+- Pump-head replacement (P-17) immediately preceding batch.
+- Clear-Clean-Check incomplete at restart.
+- Statistical significance: Chi-square test on defect rate vs. prior 3-batch baseline gives p <0.001.
+- Conclusion: The elevated reject rate is statistically distinct from prior campaign performance; the change correlates temporally with the maintenance event and restart control failure.
+
+Historical mean reject rate (prior 12 batches on FL-02): 0.31 percent.
+CF-882 reject rate: 1.42 percent. This is 4.6 times the historical mean.
+
+APPENDIX E - RISK MODEL FOR RELEASED AND UNRELEASED UNITS
+Batch disposition status at investigation close:
+- All 10,000 filled vials remain in quarantine.
+- No units released to distribution.
+
+Risk model:
+Category 1 - First-third of run (approximately vials 1-3,333): Defect frequency lower. Represents period immediately after restart; pump and system stabilization period. Risk: Moderate.
+Category 2 - Middle-third of run (approximately vials 3,334-6,666): Moderate defect frequency. Risk: Moderate-High.
+Category 3 - Final-third of run (approximately vials 6,667-10,000): Highest defect concentration. Risk: High.
+Overall batch risk: High. Recommendation: 100 percent manual visual reinspection of all quarantine units before any release decision. Final release depends on reinspection results and completion of particulate characterization.
+
+Patient risk assessment:
+- Intravenous product with potential for particulate-induced phlebitis, vascular inflammation, or embolic risk if particulate enters patient.
+- Current risk: Precautionary High pending final particle identification.
+- No adverse events reported from any distributed product (batch not yet distributed).
+- Precautionary patient risk: Managed by quarantine. Current assessment: No immediate patient safety action required as units are contained.
+
+APPENDIX F - ENVIRONMENTAL MONITORING TREND REVIEW
+Six-month EM trend review for FL-02 (May-November 2025):
+- Grade A settle plate exceedance events: 0 out of 214 sampling periods.
+- Grade B settle plate exceedance events: 0 out of 214 sampling periods.
+- Active air sampling exceedances: 0 out of 106 periods.
+- Particle count (0.5 micron Grade A): 0 out of 312 readings exceeded action limit.
+Interpretation: Environmental monitoring data does not support environmental contamination as a contributing source for the batch particulate event. This strengthens the conclusion that the source is a process-contact material origin rather than ambient contamination.
+
+APPENDIX G - STABILITY AND POTENCY REVIEW FOR RISK SCOPE
+Retained samples tested (5 retention vials, one from each third of run):
+- Assay (HPLC): 98.2, 98.4, 97.9, 98.1, 98.5 percent (specification: 90.0-110.0 percent). All pass.
+- Related substances: Total impurities 0.45, 0.47, 0.43, 0.44, 0.48 percent (specification: NMT 2.0 percent). All pass.
+- pH: 6.1, 6.2, 6.1, 6.1, 6.2 (specification: 5.5-7.0). All pass.
+- Reconstitution time: All within specification.
+- Particulate (USP <788> sub-visible): 4 of 5 samples show elevated particle counts relative to baseline; 3 of 5 exceed action levels for particles ≥10 micrometers.
+Interpretation: Chemical quality unaffected. Sub-visible particulate is the primary quality signal; consistent with process-contact foreign matter introduction.
+
+12. REPORT RELEASE HISTORY
+Rev 1.0 - 2026-02-15: Initial issue.
+Rev 1.1 - 2026-02-22: Updated with SEM-EDS results (Appendix C) and prior batch comparison (Appendix D).
+Rev 1.2 - Pending: Final particulate source attribution and batch disposition recommendation.
+
 END OF REPORT

@@ -1,0 +1,203 @@
+INVESTIGATION RECORD
+Investigation Number: INV-2026-0073
+Product: Smart Infusion Set with Anti-Free-Flow Clamp (Model IFX-20)
+Batch Number: IS-517
+Legacy Reference: M-517
+Investigation Type: Medical device quality event with process-governance and traceability concerns
+Initiation Date: 2026-03-04
+Investigation Owner: QA Investigation Cell - MedTech Unit
+
+1. INCIDENT DESCRIPTION
+During 100 percent final visual and flow verification, 96 units out of 8,000 were rejected for translucent micro-fragment particles inside the fluid path and intermittent flow restriction. Reject ratio exceeded internal action limit and triggered formal investigation.
+
+2. INVESTIGATION OBJECTIVES
+- Determine direct and contributing causes for particulate and flow restriction defects.
+- Assess potential patient impact for IV infusion use-case.
+- Verify whether post-maintenance restart controls and DHR traceability controls were followed.
+- Define containment and long-term CAPA recommendations.
+
+3. SCOPE
+- Device history records (DHR) for Batch IS-517 manufactured on 2026-02-18.
+- UV cure station maintenance and restart controls for subassembly line ASM-03.
+- Shift handover records and barcode lot reconciliation logs.
+- Process trend data, sterility support data, and prior CAPA history.
+
+4. DOCUMENTS REVIEWED
+- ASM-LOG-IS517-M517 (assembly and process logbook)
+- SOP-ASM-061 (post-maintenance line release for sterile fluid-path assembly)
+- policy_medtech.txt compendium (site policy obligations)
+- line_speed_temp_M-517-process_data.csv (time-series process dataset)
+- stability_report_M-517.txt (quality and trend report)
+- historical_capa_medtech.txt (prior events and effectiveness records)
+- employee_training_records_medtech.txt (qualification and behavioral compliance records)
+
+5. EVIDENCE MATRIX
+E1: Restart occurred at 07:06 with incomplete witness sign-off on FRM-ASM-109 line release form.
+E2: Barcode lot reconciliation warning acknowledged but not resolved before RUN state.
+E3: Open compliance item transferred verbally at shift handover without signed DHR transfer note.
+E4: Throughput recovery pressure documented in supervisor timeline notes and planning email.
+E5: Historical CAPA trend shows recurrence around restart gating, handover, and delayed deviation initiation.
+
+6. TIMELINE OF RELEVANT EVENTS
+2026-02-18 06:41 - Maintenance completes UV-curing nozzle manifold replacement on ASM-03.
+2026-02-18 07:06 - Line resumed while FRM-ASM-109 witness field remained blank.
+2026-02-18 07:12 - MES traceability warning: unconfirmed tubing lot scan mapping for Lane B.
+2026-02-18 12:18 - QA walkthrough notes incomplete release form; closure requested.
+2026-02-18 13:49 - Verbal handover of unresolved quality item from Shift A to Shift B.
+2026-02-18 16:26 - QA floor monitor opens deviation and places line on HOLD.
+2026-03-02 - QC trend report confirms reject spike beyond action threshold.
+2026-03-04 - Formal investigation opened.
+
+7. INTERVIEW SUMMARIES
+7.1 Operator Shift A (L. Martin)
+- Reported intention to complete witness and barcode reconciliation at first process hold.
+- Confirmed schedule pressure due distributor dispatch commitment.
+- Acknowledged delayed documentation and non-escalation.
+
+7.2 Operator Shift B (N. Ali)
+- Received verbal handover that release form and lot reconciliation were pending closure.
+- Continued operation expecting end-of-run closure and QA review.
+- Confirmed no signed transfer of open critical item.
+
+7.3 Shift Supervisor (R. Gomez)
+- Confirmed awareness of missing witness sign-off by 06:55.
+- Stated QA witness was temporarily unavailable due concurrent line hold review.
+- Did not enforce stop, citing schedule recovery pressure.
+
+7.4 QA Floor Monitor (V. Rao)
+- Confirmed incomplete FRM-ASM-109 observed midday and again at 16:20.
+- Refused retroactive witness signature.
+- Directed immediate deviation initiation and line HOLD.
+
+8. CAUSAL ANALYSIS
+8.1 Primary Cause
+- Failure to enforce mandatory post-maintenance release control before restart on a sterile fluid-path assembly line.
+
+8.2 Contributing Cause 1
+- Traceability control bypass: unresolved lot reconciliation warning acknowledged without correction.
+
+8.3 Contributing Cause 2
+- Inadequate handover governance for unresolved quality-critical item.
+
+8.4 Contributing Cause 3
+- Throughput-biased operational pressure and delayed deviation initiation.
+
+8.5 Contributing Cause 4
+- CAPA effectiveness method relied on activity completion rather than confirming technical gate deployment.
+
+9. RISK ASSESSMENT
+Severity: High (device fluid path used for intravenous delivery)
+Occurrence: Medium (similar process-control failures seen in prior records)
+Detectability: Medium (defects detected at final inspection, not prevented at source)
+Initial Risk Level: High
+
+10. CONTAINMENT ACTIONS
+- Quarantine all 8,000 units from Batch IS-517.
+- Expanded 100 percent borescope visual and flow-rate verification on affected lot.
+- Temporary rule: QA pre-assigned witness for all post-maintenance restarts on ASM lines.
+- Mandatory signed DHR handover for any open quality-critical item.
+
+11. PROPOSED CAPA PLAN
+CAPA-1: MES lock to prevent RUN status if FRM-ASM-109 witness field is blank.
+CAPA-2: Auto-block release when barcode lot reconciliation warning remains unresolved.
+CAPA-3: Supervisor KPI update to include compliance hold quality metric (minimum 30 percent weighting).
+CAPA-4: Scenario-based retraining focused on stop authority under dispatch pressure.
+CAPA-5: Monthly recurrence review with QA, Manufacturing, Engineering, and Regulatory Affairs.
+
+12. EFFECTIVENESS CRITERIA
+- 100 percent post-maintenance restarts with witness sign-off prior to RUN.
+- Zero unresolved barcode lot reconciliation warnings at restart for 3 consecutive months.
+- Zero verbal-only transfer of open critical items for 3 consecutive months.
+- At least 90 percent reduction in delayed critical entries within two quarters.
+
+13. EXTENDED INTERVIEW SUMMARIES
+13.1 QA Manager (E. Chandra)
+- Confirmed prior CAPA CAPA-2025-0221 was closed as effective based on audits and retraining completion.
+- Acknowledged effectiveness review did not verify deployment of the MES dual-gate lock CR-IT-2025-188.
+- Confirmed monthly review minutes listed the lock as in-progress without formal risk acceptance after schedule slip.
+
+13.2 Production Director (M. Howard)
+- Confirmed dispatch urgency communication sent 2026-02-17.
+- Stated intent was planning alignment, not tolerance of control bypass.
+- Acknowledged current scorecards favor throughput and do not positively score compliance holds.
+
+13.3 IT Project Lead (S. Kato)
+- Confirmed MES dual-gate lock was reprioritized behind ERP integration defects in Q4 2025.
+- No documented QA risk acceptance was generated during delay extension.
+- Go-live moved from 2025-Q4 to 2026-Q2.
+
+13.4 Maintenance Technician (C. Pereira)
+- Completed manifold replacement per work order WO-MNT-78112.
+- Confirmed work order form lacks mandatory step linking closure to FRM-ASM-109 completion.
+- Was not required by form workflow to notify QA before leaving line.
+
+14. SEVEN-WHY SYSTEMIC CHAIN
+WHY-1: Why were micro-fragments and intermittent flow restrictions found?
+Because debris entered or remained in fluid-path channels after restart and controls were not fully completed.
+
+WHY-2: Why was fluid path not fully verified before restart?
+Because line restart occurred prior to completion of post-maintenance verification and witness sign-off.
+
+WHY-3: Why did restart occur with incomplete verification?
+Because system allowed HOLD to RUN transition without validating FRM-ASM-109 witness completion and unresolved lot-mapping warning.
+
+WHY-4: Why did supervisors allow continuation despite known gaps?
+Because no hard system lock existed and schedule pressure incentivized continuation with intent to close records later.
+
+WHY-5: Why was hard lock not in place despite prior CAPA commitments?
+Because IT reprioritization delayed CR-IT-2025-188 and delay was not accompanied by formal risk acceptance.
+
+WHY-6: Why did management review not escalate prolonged delay?
+Because review template tracked status labels but lacked risk-tier trigger criteria for overdue quality-critical controls.
+
+WHY-7: Why did governance framework fail to protect compliance controls during project reprioritization?
+Because cross-functional prioritization lacked mandatory QA approval and formal risk documentation for quality-critical deferrals.
+
+15. ISHIKAWA (6M + MANAGEMENT) SUMMARY
+15.1 Man
+- Operators and supervisor deferred mandatory controls under time pressure.
+- Overdue simulation training modules in stop authority and deviation timing.
+
+15.2 Machine
+- MES allowed RUN transition without witness or unresolved traceability warning block.
+- Work-order workflow missing QA-notification gate.
+
+15.3 Method
+- SOP contained requirement but compensating controls were human-dependent.
+- Handover method allowed practical drift to verbal transfer.
+
+15.4 Measurement
+- Standard in-process checks lacked heightened post-maintenance particulate checks.
+- DHR completeness review occurred too late to prevent exposure.
+
+15.5 Material
+- Microscopy matched polymer profile consistent with micro-abrasion from tubing guide insert in lane B.
+- Supplier material quality remained within incoming specs.
+
+15.6 Environment
+- Cleanroom and EM data remained within limits; ambient contamination unlikely as primary source.
+
+15.7 Management
+- Effectiveness reviews measured activity closure over technical control deployment.
+- KPI and governance structures insufficiently protected compliance-first decisions.
+
+16. IMMEDIATE COMMITMENTS
+COMMIT-01: Escalate CR-IT-2025-188 to Site Director if not live by 2026-05-15.
+COMMIT-02: Issue interim risk acceptance for lock delay period with monitored compensating controls.
+COMMIT-03: Revise management review template to include risk-tier escalation rules.
+COMMIT-04: Add mandatory QA approval to quality-critical IT reprioritization workflow.
+COMMIT-05: Complete KPI redesign with compliance weighting by 2026-Q3.
+COMMIT-06: Deploy scenario-based behavioral compliance module by 2026-Q2.
+COMMIT-07: Update WO closure template to require FRM-ASM-109 initiation and QA notification fields.
+COMMIT-08: Update CAPA effectiveness template to require technical-control verification evidence.
+
+17. INVESTIGATION STATUS
+Current state: Open - pending CAPA board approval and final source confirmation closure package.
+Planned closure target: 2026-04-30.
+
+18. SIGN-OFFS
+Lead Investigator: QA Investigation Cell - MedTech Unit
+Review: QA Manager E. Chandra
+Approval: Quality Director (pending)
+
+END OF INVESTIGATION RECORD

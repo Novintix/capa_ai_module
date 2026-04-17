@@ -1,0 +1,125 @@
+﻿HISTORICAL CAPA DOSSIER
+File: historical_capa_medtech.txt
+Compiled By: Device Quality Systems Analytics Team
+Purpose: Prior related quality events and corrective history for recurrence analysis.
+
+CAPA RECORD 1
+CAPA ID: CAPA-MDT-2024-0048
+Date Opened: 2024-02-12
+Date Closed: 2024-05-30
+Area: Post-maintenance restart governance
+Event Summary:
+- Assembly resumed after fixture replacement with incomplete restart checklist.
+- No released product impact confirmed.
+Root Cause:
+- Ownership ambiguity between maintenance and operations for clearance completion.
+Actions:
+- Updated restart SOP role matrix.
+- Added supervisor verification step.
+Effectiveness:
+- Short-term compliance improved, but delayed entries persisted.
+
+CAPA RECORD 2
+CAPA ID: CAPA-MDT-2024-0139
+Date Opened: 2024-09-03
+Date Closed: 2025-01-14
+Area: Shift handover quality controls
+Event Summary:
+- Open quality item transferred verbally across shifts.
+Root Cause:
+- Weak written handover enforcement and low escalation confidence.
+Actions:
+- Revised handover form and mandatory sign fields.
+- Conducted supervisor workshops.
+Effectiveness:
+- 9/10 handovers compliant in first quarter post-close.
+Residual Risk:
+- One delayed handover record in high-throughput week.
+
+CAPA RECORD 3
+CAPA ID: CAPA-MDT-2025-0062
+Date Opened: 2025-04-15
+Date Closed: 2025-08-27
+Area: Delayed deviation initiation
+Event Summary:
+- Trigger conditions met but deviation was opened at end of shift.
+Root Cause:
+- Cultural preference for local resolution before escalation.
+Actions:
+- Added LMS module on immediate trigger-based deviation rules.
+- Introduced supervisor spot checks.
+Effectiveness:
+- Deviation latency improved by 49 percent.
+
+CAPA RECORD 4
+CAPA ID: CAPA-MDT-2025-0118
+Date Opened: 2025-07-10
+Date Closed: 2025-11-21
+Area: Environmental control drift response
+Event Summary:
+- Humidity trend exceeded internal warning band without operational response.
+Root Cause:
+- Environmental alerts treated as informational, not decision inputs.
+Actions:
+- Added RH warning thresholds to line dashboard.
+- Required trend acknowledgment in shift log.
+Effectiveness:
+- Alert acknowledgment rate improved; hold decisions remained inconsistent.
+
+CAPA RECORD 5
+CAPA ID: CAPA-MDT-2025-0144
+Date Opened: 2025-10-02
+Date Closed: Open
+Area: IT restart lock deployment for witness gate (CR-IT-2025-118)
+Background:
+- Technical lock identified to prevent RUN transition with blank witness field.
+- Planned go-live 2025-Q4 slipped into 2026 due ERP migration conflict.
+Findings:
+- QA was informed of schedule change but no formal risk acceptance signed.
+- Compensating controls remained human-dependent.
+Status at MD-317 event date:
+- Lock not deployed; project in UAT.
+
+CAPA RECORD 6
+CAPA ID: CAPA-MDT-2026-0007
+Date Opened: 2026-01-09
+Date Closed: Open
+Area: KPI governance misalignment
+Background:
+- Internal audit observed throughput-only shift scorecards discouraged compliance holds.
+Findings:
+- Correct compliance holds reduced shift throughput score with no positive offset.
+Actions in progress:
+- Redesign scorecard with 30 percent compliance weighting.
+- Add explicit positive credit for justified holds.
+Connection to MD-317:
+- Throughput pressure cited directly in supervisor and operator interviews.
+
+TREND ANALYSIS SUMMARY (2024-2026)
+Trend 1: Restart and witness gate failures recur in maintenance boundary conditions.
+Trend 2: Verbal carry-forward remains present in stress windows.
+Trend 3: Deviation latency appears when planning pressure rises.
+Trend 4: Technical controls are planned but deployed slowly.
+Trend 5: Training completion metrics overstate true behavioral compliance.
+
+LESSONS LEARNED RELEVANT TO CURRENT INVESTIGATION
+1. Written handover is the strongest barrier against open-item loss.
+2. Human-only controls fail under dispatch pressure without hard system gates.
+3. Effectiveness checks must verify control deployment, not just activity completion.
+4. KPI design materially influences compliance behavior.
+
+RECOMMENDED PREVENTIVE CONTROLS
+- Mandatory QA witness scheduling window for every post-maintenance restart.
+- MES lock preventing RUN transition without complete witness field.
+- Weekly management risk review for delayed quality-critical IT controls.
+- Shift scorecard rebalance with compliance-weighted metrics.
+
+MANAGEMENT REVIEW EXTRACT (RELEVANT)
+Meeting: Monthly Device Quality Review
+Date: 2026-01-18
+Agenda Item: CAPA-MDT-2025-0144
+- Status noted as in progress.
+- No formal risk acceptance recorded despite overdue quality-critical control.
+- Action carried to next month without escalation.
+
+END OF DOSSIER

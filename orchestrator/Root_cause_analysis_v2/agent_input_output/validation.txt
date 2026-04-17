@@ -56,25 +56,25 @@ input:
   ],
 
   "logs": [
-    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\coating_process_log_B-202.txt"
+    "Agents\\validation\\evidence_files\\coating_process_log_B-202.txt"
   ],
   "reports": [
-    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\stability_report_B-202.txt"
+    "Agents\\validation\\evidence_files\\stability_report_B-202.txt"
   ],
   "process_data": [
-    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\pan_speed_temp_B-202-process_data.csv"
+    "Agents\\validation\\evidence_files\\pan_speed_temp_B-202-process_data.csv"
   ],
   "historical_capa": [
-    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\historical_capa_coating.txt"
+    "Agents\\validation\\evidence_files\\historical_capa_coating.txt"
   ],
   "policies": [
-    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\deviation_management_policy.txt"
+    "Agents\\validation\\evidence_files\\policy.txt"
   ],
   "sop": [
-    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\film_coating_sop.txt"
+    "Agents\\validation\\evidence_files\\film_coating_sop.txt"
   ],
   "investigation_records": [
-    "C:\\Users\\krish\\OneDrive\\Desktop\\ALL\\work\\CAPA\\capa_ai_module\\Agents\\validation\\evidence_files\\investigation_record_B-202.txt"
+    "Agents\\validation\\evidence_files\\investigation_record_B-202.txt"
   ],
 
   "supporting_system_information": {
@@ -91,25 +91,22 @@ output:
     "total_validated_causes": 1,
     "validated_causes": [
         {
-            "cause_id": "C004",
-            "cause_text": "Responsibility for line clearance was not clearly assigned; no designated person was accountable for confirming the Clear‑Clean‑Check.",
-            "process_step": "Accountability assignment",
-            "failure_mode": "No owner to verify completion",
-            "potential_effects": "Task falls through the cracks, increasing risk of contamination and non‑compliance with GMP.",
-            "severity": 8,
-            "occurrence": 4,
-            "detection": 3,
-            "current_controls": "RACI matrix, shift handover logs, supervisor verification.",
+            "cause_id": "C002",
+            "cause_text": "Production schedule pressure caused the maintenance crew to skip the line clearance to meet fill targets.",
+            "process_step": "Maintenance turnaround",
+            "failure_mode": "Step omitted due to time constraints",
+            "potential_effects": "Incomplete cleaning, increased risk of cross‑contamination and equipment damage.",
+            "severity": 7,
+            "occurrence": 5,
+            "detection": 2,
+            "current_controls": "Shift planning, production KPI monitoring, supervisor sign‑off requirement.",
             "source": "Generated",
             "evidence_match_status": "partially_matched",
             "supporting_evidence_references": [
-                "investigation_record_B-202.txt",
-                "film_coating_sop.txt",
-                "deviation_management_policy.txt",
-                "coating_process_log_B-202.txt"
+                "question.original"
             ],
-            "confidence": 0.6,
-            "rationale": "Investigation record and operator log document missing written handover and unrecorded deviations, indicating gaps in accountability. SOP and policy require documented handover and deviation reporting, supporting a general accountability issue, but no direct evidence of line clearance or Clear‑Clean‑Check assignment."
+            "confidence": 0.45,
+            "rationale": "Evidence confirms the line clearance was not performed (question), but does not provide any indication that production schedule pressure forced the crew to skip the step."
         }
     ],
     "cause_validation_results": [
@@ -126,8 +123,8 @@ output:
             "source": "Generated",
             "evidence_match_status": "no_evidence",
             "supporting_evidence_references": [],
-            "confidence": 0.1,
-            "rationale": "Provided evidence pertains to coating process deviations, temperature alarms, pan speed changes, and prior CAPA on spray rate training. No records address training on line clearance or Clear‑Clean‑Check after pump head replacement."
+            "confidence": 0.0,
+            "rationale": "Provided evidence includes the original why question and unrelated log entries, none of which demonstrate inadequate operator training."
         },
         {
             "cause_id": "C002",
@@ -140,10 +137,12 @@ output:
             "detection": 2,
             "current_controls": "Shift planning, production KPI monitoring, supervisor sign‑off requirement.",
             "source": "Generated",
-            "evidence_match_status": "no_evidence",
-            "supporting_evidence_references": [],
-            "confidence": 0.1,
-            "rationale": "No provided logs, investigation records, SOPs, or other evidence mention production schedule pressure, maintenance crew actions, or omission of line clearance after pump head replacement."
+            "evidence_match_status": "partially_matched",
+            "supporting_evidence_references": [
+                "question.original"
+            ],
+            "confidence": 0.45,
+            "rationale": "Evidence confirms the line clearance was not performed (question), but does not provide any indication that production schedule pressure forced the crew to skip the step."
         },
         {
             "cause_id": "C003",
@@ -158,8 +157,8 @@ output:
             "source": "Generated",
             "evidence_match_status": "no_evidence",
             "supporting_evidence_references": [],
-            "confidence": 0.1,
-            "rationale": "None of the provided evidence (logs, reports, process data, SOPs, policies, investigation records) mentions a Clear‑Clean‑Check checklist, pump‑head replacement, or line clearance requirements."
+            "confidence": 0.0,
+            "rationale": "Provided evidence includes the original why question, an unrelated equipment alarm log, and the complaint description; none confirm that the checklist was outdated or omitted the pump‑head replacement trigger."
         },
         {
             "cause_id": "C004",
@@ -172,17 +171,12 @@ output:
             "detection": 3,
             "current_controls": "RACI matrix, shift handover logs, supervisor verification.",
             "source": "Generated",
-            "evidence_match_status": "partially_matched",
-            "supporting_evidence_references": [
-                "investigation_record_B-202.txt",
-                "film_coating_sop.txt",
-                "deviation_management_policy.txt",
-                "coating_process_log_B-202.txt"
-            ],
-            "confidence": 0.6,
-            "rationale": "Investigation record and operator log document missing written handover and unrecorded deviations, indicating gaps in accountability. SOP and policy require documented handover and deviation reporting, supporting a general accountability issue, but no direct evidence of line clearance or Clear‑Clean‑Check assignment."
+            "evidence_match_status": "no_evidence",
+            "supporting_evidence_references": [],
+            "confidence": 0.0,
+            "rationale": "The provided evidence only contains the original why question and unrelated alarm log entries; none address assignment of responsibility for line clearance."
         }
     ],
-    "overall_confidence": 0.6,
+    "overall_confidence": 0.45,
     "notes": "Returning causes with grounded supporting evidence."
 }

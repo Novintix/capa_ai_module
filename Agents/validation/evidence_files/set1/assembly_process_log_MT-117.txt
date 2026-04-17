@@ -1,0 +1,174 @@
+ASSEMBLY LOGBOOK AND SHIFT RECORD
+Document ID: ASSY-LOG-IPC117A-MT117
+Site: NOVINTIX Medical Device Campus - Building 4
+Manufacturing Unit: Sterile Device Assembly - Line AS-04
+Product: Single-Use Infusion Pump Cartridge Set 10 mL
+Batch Number: IPC-117A
+Legacy Cross Reference: MT-117
+Date of Manufacture: 2026-02-12
+Prepared By: Production Operations
+Reviewed By: Manufacturing Supervisor
+
+SECTION 1 - BATCH CONTEXT
+- Planned batch size: 12,000 cartridge sets
+- Line: AS-04
+- Critical station: Tubing feed and ultrasonic weld module UWM-3
+- Maintenance work order linked: WO-MDT-77192
+- Triggering maintenance event: Ultrasonic weld horn replacement and feed path alignment check
+- Required restart control: FRM-MDT-041 Line Readiness completed with QA witness sign-off before RUN
+
+SECTION 2 - PRE-SHIFT DETAILS
+06:00 - Shift A briefing completed.
+06:06 - PPE and gowning verification complete.
+06:11 - Cleanroom status board reviewed; no critical alerts.
+06:14 - Utilities and compressed dry air checks within range.
+06:18 - Maintenance confirms UWM-3 horn replacement complete.
+06:22 - Operator L. Chen retrieves FRM-MDT-041 from controlled document station.
+06:27 - Readiness packet assembled; witness field still pending.
+06:31 - Planning call requests schedule recovery due prior sterilization queue delay.
+06:36 - Supervisor R. Iqbal instructs team to prepare startup while waiting for QA witness.
+06:42 - First visual check completed by operator only.
+06:49 - Operator note entered: witness pending at startup window.
+
+SECTION 3 - EVENT TIMELINE
+06:56 - Line status changed HOLD to RUN.
+07:01 - Assembly resumed at 132 units/min.
+07:05 - FRM-MDT-041 attached with witness field blank.
+07:10 - QA contact attempt initiated; QA monitor occupied with separate hold review.
+07:16 - Throughput increased to 136 units/min.
+07:22 - In-process visual check recorded acceptable.
+07:31 - No deviation opened.
+07:38 - Supervisor reminder: close readiness documentation at next hold window.
+07:45 - Throughput 140 units/min.
+07:54 - Operator note: no abnormal vibration at UWM-3.
+08:03 - Secondary visual check acceptable.
+08:12 - Checklist witness field still blank.
+08:21 - Planning update asks recovery to target dispatch window.
+08:29 - Throughput increased to 145 units/min.
+08:36 - No hold initiated.
+08:44 - QA patrol request queued.
+08:53 - In-process sample acceptable.
+09:02 - Throughput 148 units/min.
+09:11 - Batch packet still incomplete for readiness witness.
+09:20 - Supervisor requested witness escalation from QA desk.
+09:29 - QA desk response: witness available after ongoing release review.
+09:38 - No deviation ticket opened.
+09:47 - Throughput 151 units/min.
+09:56 - Feed path cleaned externally; no internal intervention.
+10:05 - In-process check acceptable.
+10:14 - Throughput 154 units/min.
+10:23 - Checklist remains open.
+10:32 - Operator note references schedule pressure and intent to close later.
+10:41 - No stop initiated.
+10:50 - Throughput 157 units/min.
+10:59 - In-process check acceptable.
+11:08 - QA patrol logs incomplete readiness form.
+11:15 - QA advises immediate closure before shift handover.
+11:24 - Operations acknowledges but continues run.
+11:33 - Throughput 160 units/min.
+11:42 - No deviation initiated.
+11:51 - Packet review still shows blank witness field.
+12:00 - Throughput 162 units/min.
+12:09 - In-process sample acceptable.
+12:18 - Supervisor calls QA desk for escalation.
+12:27 - QA desk: witness unavailable until post-release checkpoint.
+12:36 - Throughput 165 units/min.
+12:45 - No hold initiated.
+12:54 - Operator note: open checklist to be transferred at handover if pending.
+13:03 - Throughput 167 units/min.
+13:12 - Packet prepared for handover.
+13:21 - Checklist still unresolved.
+13:30 - No written transfer document prepared.
+13:39 - Handover briefing initiated.
+13:49 - Verbal transfer to Shift B operator M. Ortiz.
+13:53 - Shift A closeout: no signed written transfer for open critical item.
+
+SECTION 4 - SHIFT B CONTINUATION
+14:01 - Shift B briefing includes verbal note: witness sign-off pending.
+14:07 - M. Ortiz confirms awareness and intent to close before run end.
+14:14 - Supervisor C. Nguyen reviews packet, sees blank witness field; no hold initiated.
+14:20 - Throughput maintained at 167 units/min.
+14:29 - In-process check acceptable.
+14:38 - Throughput increased to 170 units/min.
+14:47 - QA contact attempt made, no immediate response.
+14:56 - No deviation opened.
+15:05 - Throughput 172 units/min.
+15:14 - In-process check acceptable.
+15:23 - Operator reports brief translucent speck in one chamber, unit segregated.
+15:31 - Supervisor instructs continued run and capture in notes.
+15:40 - Throughput 174 units/min.
+15:49 - Second QA contact attempt placed.
+15:58 - QA response: witness available around 16:20.
+16:07 - In-process visual check acceptable.
+16:16 - Throughput stable.
+16:21 - QA witness N. Rao arrives at line.
+16:23 - N. Rao reviews FRM-MDT-041 and confirms witness field blank since restart.
+16:25 - QA directs immediate hold and deviation initiation.
+16:27 - DEV-MDT-2026-0073 opened.
+16:28 - Line status changed RUN to HOLD.
+16:34 - Filled count at hold: 9,112 units.
+16:39 - QA Manager notified.
+16:45 - Risk assessment initiated for all units produced since 06:56 restart.
+16:52 - Decision made to resume only after fresh readiness verification.
+16:58 - New form FRM-MDT-041-B opened.
+17:04 - QA witness performs physical verification.
+17:08 - Witness signature completed.
+17:11 - Line changed HOLD to RUN.
+17:15 - Throughput restarted at 158 units/min.
+17:24 - Enhanced in-process sampling initiated (every 30 minutes, 60-unit sample).
+17:33 - Enhanced sample 1: 2 units with suspected fiber; segregated.
+17:42 - Enhanced sample 2: 1 unit suspect; segregated.
+17:51 - Enhanced sample 3: no suspect particles.
+18:00 - Throughput 160 units/min.
+18:09 - End-of-run reconciliation initiated.
+18:17 - Total assembled: 12,000 units.
+18:23 - Batch packet completed except open deviation reference.
+18:31 - QA final line review completed.
+18:37 - Written handover to Shift C completed correctly.
+
+SECTION 5 - POST-RUN CHECKS
+18:49 - Retain samples delivered to QC.
+18:56 - UWM-3 and tubing feed path inspected.
+19:03 - Guide rail sleeve near feed support shows localized abrasion.
+19:10 - Sleeve sample clipped for material comparison.
+19:18 - Maintenance updates WO-MDT-77192 with post-run observations.
+19:26 - Environmental station trend reviewed; no excursion.
+19:34 - Deviation narrative expanded with sample findings.
+
+SECTION 6 - MAINTENANCE BACKGROUND
+Equipment: UWM-3 (ultrasonic weld module)
+Work Order: WO-MDT-77192
+- Opened: 2026-02-10
+- Activity: Weld horn replacement and feed alignment check
+- Completed: 2026-02-12 06:18
+- Technician: E. Walters
+- Post-maintenance functional test: Pass
+- Known gap: Work order template does not require FRM-MDT-041 initiation confirmation before handoff
+
+SECTION 7 - ENVIRONMENTAL MONITORING SUMMARY
+- Viable and non-viable monitoring remained within limits throughout run.
+- Differential pressure stable in sterile assembly zone.
+- Temperature and humidity within validated range.
+- No EM signal correlated to particulate reject trend.
+
+SECTION 8 - PRODUCTION PRESSURE CONTEXT
+- Original dispatch target: same-day hospital network shipment.
+- Upstream delay: sterilization queue +95 minutes.
+- Planning communication prioritized schedule recovery before shift end.
+- Throughput increased progressively from 132 to 174 units/min during unresolved control period.
+
+SECTION 9 - MES AUDIT TRAIL EXTRACT
+06:56:12 - HOLD to RUN initiated by L.Chen.
+06:56:14 - Transition accepted; no witness-field validation by MES.
+13:49:27 - Handover note entered: open checklist pending.
+16:28:03 - RUN to HOLD initiated by M.Ortiz.
+16:28:05 - Reason: QA-directed hold pending deviation.
+17:11:09 - HOLD to RUN initiated after FRM-MDT-041-B witness sign-off.
+
+SECTION 10 - KEY OBSERVATIONS
+- Primary control failure occurred at 06:56 restart without completed witness sign-off.
+- Handover governance failure occurred at 13:49 with verbal-only transfer.
+- Deviation trigger condition existed from 06:56 but was opened at 16:27.
+- Process and environmental data indicate event is governance-linked, not ambient contamination-driven.
+
+END OF LOGBOOK

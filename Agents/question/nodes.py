@@ -174,10 +174,13 @@ def generate_why_question_node(state: AgentState) -> AgentState:
     try:
         llm = get_llm()
 
+        evidence = state.get("evidence") or "Not provided"
+        sop = state.get("sop") or "Not provided"
+
         user_prompt = WHY_QUESTION_USER_PROMPT_TEMPLATE.format(
             complaint=state["complaint"],
-            evidence=state["evidence"],
-            sop=state["sop"],
+            evidence=evidence,
+            sop=sop,
             previous_chain=_format_previous_chain(
                 state.get("previous_why"),
                 state.get("previous_answers")
