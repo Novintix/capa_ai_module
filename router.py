@@ -80,6 +80,7 @@ def register_routes(app: FastAPI):
             "status": "online",
             "service": "Centralized Agent Repository",
             "version": "1.0.0",
+            "message": "Use /fishbone_v3_test.html to access the UI",
             "agents": {
                 "detection": "Policy-Driven Detection Score Agent",
                 "regulatory": "Regulatory Compliance Agent",
