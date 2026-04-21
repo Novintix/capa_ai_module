@@ -145,10 +145,10 @@ def zero_evidence_payload(state: Dict[str, Any]) -> Dict[str, Any]:
             "process_step": c.get("process_step", "Unknown process step"),
             "failure_mode": c.get("failure_mode", "Unspecified failure mode"),
             "potential_effects": c.get("potential_effects"),
-            "severity": int(c.get("severity", 5)),
-            "occurrence": int(c.get("occurrence", 5)),
-            "detection": int(c.get("detection", 5)),
-            "current_controls": c.get("current_controls", "Not provided"),
+            "severity": c.get("severity"),  # Can be None
+            "occurrence": c.get("occurrence"),  # Can be None (not used by zero evidence agent)
+            "detection": c.get("detection"),  # Can be None (not used by zero evidence agent)
+            "current_controls": c.get("current_controls"),
             "source": c.get("source", "unknown"),
         })
     
