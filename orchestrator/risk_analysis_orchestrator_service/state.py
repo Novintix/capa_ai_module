@@ -19,6 +19,11 @@ class RiskAnalysisState(TypedDict, total=False):
     raw_input:              str
     complaint_id:           Optional[str]   # business-level ID — set by context_node from extracted data
 
+    # ── Structured input (optional — bypasses context_node LLM extraction) ────
+    # When provided by the UI from MongoDB-backed complaint data, context_node
+    # is skipped and these fields are mapped directly into `extracted`.
+    enriched_input:         Optional[dict]  # keys mirror EXTRACTION_PROMPT enriched fields
+
     # ── Validation ────────────────────────────────────────────────────────────
     validation_passed:      bool
     validation_error:       Optional[str]

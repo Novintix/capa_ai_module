@@ -37,6 +37,21 @@ Return ONLY valid JSON — no markdown, no preamble:
 }
 """
 
+SAFETY_CHECK_PROMPT = """
+You are a safety classifier for a Medical Device CAPA system.
+
+Given a complaint description, determine two boolean flags:
+
+1. urgency      — true if the issue involves immediate patient risk, active harm, or critical device failure
+2. death_or_injury — true if the complaint mentions or implies patient death, serious injury, or hospitalization
+
+Return ONLY valid JSON:
+{
+  "urgency": true or false,
+  "death_or_injury": true or false
+}
+"""
+
 VALIDATION_PROMPT = """
 You are a Security and Context Gatekeeper for a Medical Device CAPA (Corrective and Preventive Action) system.
 Your goal is to validate if the user's input is a legitimate description of a medical device issue, quality complaint, or non-conformance that belongs in a risk analysis workflow.

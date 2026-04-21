@@ -29,6 +29,8 @@ from orchestrator.why_analysis_v3.router import router as why_analysis_v3_router
 from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
 from orchestrator.fishbone_v2.router import router as fishbone_v2_router  # NEW: Single-depth fishbone with 6M categorization
 from orchestrator.fishbone_v3.router import router as fishbone_v3_router  # NEW: HITL Fishbone
+from orchestrator.Root_cause_analysis.router import router as root_cause_analysis_router
+from orchestrator.Root_cause_analysis_v2.router_v2 import router as root_cause_analysis_v2_router
 from orchestrator.capa_director.router import router as director_router
 from orchestrator.dynamic_builder.router import router as dynamic_builder_router
 
@@ -61,6 +63,8 @@ def register_routes(app: FastAPI):
     app.include_router(rca_v2_router)
     app.include_router(fishbone_v2_router)  # NEW: Fishbone v2
     app.include_router(fishbone_v3_router)  # NEW: Fishbone v3 (HITL)
+    app.include_router(root_cause_analysis_router)
+    app.include_router(root_cause_analysis_v2_router)
     app.include_router(similar_cases_router)
     app.include_router(ranking_router)
     app.include_router(pattern_router)
@@ -80,6 +84,7 @@ def register_routes(app: FastAPI):
             "status": "online",
             "service": "Centralized Agent Repository",
             "version": "1.0.0",
+            "message": "Use /fishbone_v3_test.html to access the UI",
             "agents": {
                 "detection": "Policy-Driven Detection Score Agent",
                 "regulatory": "Regulatory Compliance Agent",
@@ -97,6 +102,7 @@ def register_routes(app: FastAPI):
                 "rca_v2": "RCA v2 Orchestrator (State Machine Implementation with Controlled Memory)",
                 "fishbone_v2": "Fishbone v2 Orchestrator (Single-Depth Analysis with 6M Categorization)",
                 "fishbone_v3": "Fishbone v3 Orchestrator (Human-in-the-Loop Analysis with Decisions)",
+                "root_cause_analysis": "Root Cause Analysis Coordinator (Top-level flow for Fishbone/Why and user checkpoints)",
                 "similar_cases": "Similar Cases Search Agent (Vector Search)",
                 "ranking": "Root Cause Ranking Agent (RCPS Methodology)",
                 "pattern": "Pattern Analysis and Trend Recognition Agent",
@@ -138,6 +144,11 @@ def register_routes(app: FastAPI):
                 "GET /rca-v2/health": "RCA v2 Orchestrator health check",
                 "POST /fishbone-v3/analyze": "Phase 1: Run Fishbone analysis and pause for human review",
                 "POST /fishbone-v3/decide": "Phase 2: Submit human decisions (RCA, PROCEED) for causes",
+                "POST /root-cause-analysis/start/why": "RCA checkpoint 1: start Why Analysis path",
+                "POST /root-cause-analysis/start/fishbone": "RCA checkpoint 1: start Fishbone path",
+                "POST /root-cause-analysis/select-category": "RCA checkpoint 3: choose Fishbone category and proceed to Why Analysis",
+                "POST /root-cause-analysis/proceed-action-plan": "RCA checkpoint 2: confirm proceed to Action Plan and finish RCA flow",
+                "GET /root-cause-analysis/status/{complaint_id}": "Get RCA coordinator session status",
                 "POST /similar-cases/": "Find similar complaint cases using vector search",
                 "GET /similar-cases/health": "Similar cases agent health check",
                 "POST /ranking/": "Rank candidate root causes using RCPS methodology",

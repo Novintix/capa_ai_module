@@ -1,0 +1,55 @@
+HISTORICAL CAPA RECORD
+CAPA No   : CAPA-2024-0033
+Product   : Metformin HCl 500mg Film-Coated Tablets
+Batch     : B-178
+Issue     : Film coat orange-peel texture; batch failed appearance spec at T0.
+Opened    : 2024-04-10
+Closed    : 2024-06-18
+
+-----------------------------------------------------------
+1. INVESTIGATION SUMMARY
+
+Root cause identified: Spray rate set above specification (32 g/min vs. spec max 25 g/min)
+for the first 90 minutes of coating. Excess spray rate caused wet coat pooling,
+leading to surface texture defects upon drying.
+
+Contributing factor: Operator misread batch record spray rate column (mixed up two gun
+configuration vs. single gun configuration). Training record showed operator had not
+completed updated batch record training introduced in 2024.
+
+-----------------------------------------------------------
+2. CORRECTIVE ACTIONS
+
+CA-01 : Batch B-178 rejected. Disposition: destruction.
+CA-02 : Spray rate alarm limits programmed into CP-03 and CP-04 control systems
+        (upper limit 26 g/min; hard stop at 30 g/min).
+CA-03 : Batch record revised to clearly distinguish single-gun and dual-gun spray rate
+        columns with color coding and header notes.
+
+-----------------------------------------------------------
+3. PREVENTIVE ACTIONS
+
+PA-01 : All coating operators retrained on revised batch record (SOP-MFG-018 v3.0).
+        Training completed by 2024-05-30. Training records filed.
+PA-02 : Coaching session conducted with Shift A and Shift B coating teams on alarm
+        response expectations per POL-QA-005. Session dated 2024-05-15.
+PA-03 : Quarterly coating process parameter review added to site quality calendar.
+
+-----------------------------------------------------------
+4. EFFECTIVENESS CHECK
+
+Verification performed 2024-09-01. Review of 4 subsequent coating batches (B-181, B-185,
+B-190, B-195): zero spray rate deviations recorded. Appearance results all passing at T0.
+CAPA declared effective.
+
+Closed by  : M. Krishnan (QA)
+Approved   : Dr. S. Mehta (QC Manager)
+Date       : 2024-06-18
+
+-----------------------------------------------------------
+NOTE FOR CURRENT INVESTIGATION (INV-2026-0019):
+Alarm response training was conducted in 2024 (PA-02 above) yet Batch B-202 operator
+acknowledged a temperature alarm without corrective action in November 2025. This suggests
+training effectiveness has degraded or new operators were not included in retraining.
+-----------------------------------------------------------
+END OF HISTORICAL CAPA

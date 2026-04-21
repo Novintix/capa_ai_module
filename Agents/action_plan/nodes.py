@@ -27,7 +27,21 @@ def generate_actions_node(state: ActionPlanState) -> ActionPlanState:
 
     try:
         llm = get_llm()
-        capa_input = state.get("capa_input", {})
+
+        # Build capa_input dict from explicit state fields
+        capa_input = {
+            "investigation_summary":        state.get("investigation_summary", ""),
+            "containment_actions":          state.get("containment_actions", ""),
+            "five_why_analysis":            state.get("five_why_analysis", ""),
+            "primary_root_cause":           state.get("primary_root_cause", ""),
+            "contributing_root_causes":     state.get("contributing_root_causes", []),
+            "systemic_root_causes":         state.get("systemic_root_causes", []),
+            "evidence_collected":           state.get("evidence_collected", ""),
+            "root_cause_verification_status": state.get("root_cause_verification_status", "Pending"),
+            "severity_level":               state.get("severity_level", "Major"),
+            "timeline_constraint":          state.get("timeline_constraint", "90 days"),
+            "available_resources":          state.get("available_resources", "Standard"),
+        }
 
         prompt = build_capa_action_plan_prompt(capa_input)
         response = llm.invoke(prompt)

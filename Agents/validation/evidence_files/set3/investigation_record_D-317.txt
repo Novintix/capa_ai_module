@@ -1,0 +1,187 @@
+﻿INVESTIGATION RECORD
+Investigation Number: INV-2026-0173
+Product: NeuroPulse Implantable Infusion Controller (Model NP-410)
+Lot Number: MD-317
+Legacy Reference: D-317
+Investigation Type: Device quality event with process control and documentation concerns
+Initiation Date: 2026-03-04
+Investigation Owner: Quality Engineering Investigation Cell
+
+1. INCIDENT DESCRIPTION
+During final outgoing acceptance testing, 19 devices out of 1,200 failed precision flow-rate verification at the low-dose profile. Units also showed intermittent micro-particulate findings in downstream optical inspection of the fluid path. The combined defect rate exceeded site action limits and triggered formal investigation.
+
+2. INVESTIGATION OBJECTIVES
+- Determine direct and contributing causes for flow variance and particulate signals.
+- Assess patient safety risk for implanted-use profile.
+- Verify whether assembly, cleaning, and verification controls were executed as required.
+- Define containment, CAPA, and effectiveness criteria.
+
+3. SCOPE
+- Device assembly records for lot MD-317 on line MDA-02.
+- Ultrasonic weld horn replacement and restart governance controls.
+- Shift handover quality communication and escalation behavior.
+- Environmental and process telemetry (torque, humidity, cure temperature, line speed).
+- Prior CAPA trend records and policy compliance.
+
+4. DOCUMENTS REVIEWED
+- assembly_process_log_D-317.txt
+- medtech_assembly_sop.txt
+- policy.txt
+- performance_report_D-317.txt
+- torque_temp_humidity_D-317-process_data.csv
+- historical_capa_medtech.txt
+- employee_training_records.txt
+
+5. EVIDENCE MATRIX
+E1: Assembly restarted before completion of sterile-path witness verification after weld horn change.
+E2: Open compliance item transferred verbally at shift handover without signed written transfer.
+E3: No immediate deviation raised when restart control gap was known.
+E4: Throughput recovery messaging documented in production timeline.
+E5: Process telemetry shows humidity drift during the same window as unstable flow-rate outcomes.
+E6: Historical CAPA records show repeated recurrence in restart governance and handover discipline.
+E7: Training completion rates were high, but scenario-based behavioral modules were overdue for key roles.
+
+6. TIMELINE OF RELEVANT EVENTS
+2026-02-18 06:11 - Weld horn WH-22 replacement completed by maintenance.
+2026-02-18 06:29 - Cleaning and sterile-path clearance form initiated but witness field remained unsigned.
+2026-02-18 06:42 - Line moved from HOLD to READY under schedule recovery pressure.
+2026-02-18 07:00 - Assembly resumed with incomplete witness verification.
+2026-02-18 12:24 - QA monitor observed pending witness field and requested immediate closure.
+2026-02-18 13:56 - Open compliance item communicated verbally to Shift B.
+2026-02-18 16:31 - Deviation DEV-2026-0173 opened; line placed on HOLD.
+2026-03-02 - Final acceptance testing detected elevated flow failures and particulate hits.
+2026-03-04 - Formal investigation opened.
+
+7. INTERVIEW SUMMARIES
+7.1 Operator Shift A (L. Moreno)
+- Confirmed intent to complete witness documentation at the next micro-stop.
+- Stated dispatch pressure was emphasized during morning planning call.
+- Acknowledged restart happened with known open documentation.
+
+7.2 Operator Shift B (T. Huang)
+- Confirmed verbal handover included unresolved clearance item.
+- Continued operation expecting QA closure before end of run.
+- Did not open deviation due assumption that Shift A had already escalated.
+
+7.3 Shift Supervisor A (R. Ahmed)
+- Confirmed awareness that sterile-path witness was incomplete at restart.
+- Reported concern that prolonged hold would miss implant shipment commitment.
+- Did not enforce stop because expected rapid QA availability.
+
+7.4 QA Floor Engineer (N. Patel)
+- Observed incomplete witness field at midday review.
+- Requested immediate correction and escalation.
+- Returned at 16:20 and formally stopped line when no correction was made.
+
+7.5 Maintenance Technician (E. Cole)
+- Completed weld horn replacement per mechanical work instruction.
+- Confirmed work order had no hard linkage field to sterile-path witness completion.
+- Left area after mechanical sign-off assuming operations would complete clearance workflow.
+
+8. CAUSAL ANALYSIS
+8.1 Primary Cause
+- Failure to enforce post-maintenance sterile-path restart gate before releasing line to RUN.
+
+8.2 Contributing Cause 1
+- Handover governance weakness: critical open item transferred verbally without signed ownership.
+
+8.3 Contributing Cause 2
+- Throughput-first performance pressure affected supervisory decisions.
+
+8.4 Contributing Cause 3
+- Deviation initiation delayed despite trigger conditions already met.
+
+8.5 Contributing Cause 4
+- Environmental humidity drift increased polymer particulate shedding susceptibility during assembly.
+
+9. RISK ASSESSMENT
+Severity: High (implantable delivery precision and particulate exposure risk)
+Occurrence: Medium (pattern present in historical CAPA portfolio)
+Detectability: Medium (detected in final acceptance, not fully prevented in process)
+Initial Risk Level: High
+
+10. CONTAINMENT ACTIONS
+- All lot MD-317 units quarantined and blocked from release.
+- Expanded flow-rate retest to 100 percent of finished units.
+- Additional optical particulate screening added to all quarantined units.
+- Temporary rule: QA witness pre-booking mandatory for all post-maintenance restarts.
+- Shift briefing issued requiring signed transfer for all open critical items.
+
+11. PROPOSED CAPA PLAN
+CAPA-1: MES lock to prevent HOLD to RUN transition when sterile-path witness field is blank.
+CAPA-2: Auto-trigger deviation prompt when restart occurs before clearance closure.
+CAPA-3: Supervisor KPI revision to include compliance-first hold decisions.
+CAPA-4: Scenario-based retraining for restart and escalation decisions under schedule pressure.
+CAPA-5: Weekly recurrence review with QA, Manufacturing, Reliability, and IT.
+CAPA-6: Work order update requiring explicit linkage to sterile-path clearance completion before maintenance closeout.
+
+12. EFFECTIVENESS CRITERIA
+- 100 percent post-maintenance restarts with witness sign-off before RUN.
+- Zero verbal-only transfers of open critical items for 90 days.
+- At least 85 percent reduction in delayed deviation initiation for trigger events within two quarters.
+- No repeated low-dose flow-rate failure signal above alert limit across three consecutive lots.
+
+13. SYSTEMIC WHY ANALYSIS (SEVEN LEVELS)
+WHY LEVEL 1
+Observation: 19/1,200 devices failed low-dose flow verification and particulate flags rose.
+Why?
+Because assembled fluid-path integrity and process control were not reliably maintained during post-maintenance restart.
+
+WHY LEVEL 2
+Why was fluid-path integrity not reliably maintained?
+Because assembly resumed while sterile-path clearance remained incomplete and witness verification was absent.
+
+WHY LEVEL 3
+Why did assembly resume with incomplete clearance?
+Because no hard system gate blocked RUN transition and supervisory decision favored schedule recovery.
+
+WHY LEVEL 4
+Why was there no hard gate and why was schedule favored?
+Because IT control CR-IT-2025-118 (restart lock) was delayed in UAT, and shift scorecards remained throughput dominant without compliance weighting.
+
+WHY LEVEL 5
+Why was IT control delayed and scorecard unchanged?
+Because change-priority decisions during ERP migration deprioritized quality-critical controls without formal QA risk acceptance, and KPI redesign action from prior audit was not escalated.
+
+WHY LEVEL 6
+Why did management systems allow this?
+Because effectiveness reviews closed actions based on activity completion (training, SOP updates) rather than technical-control deployment verification, and management review templates lacked overdue risk-tier triggers.
+
+WHY LEVEL 7
+Why was governance design insufficient?
+Because quality-critical IT prioritization and performance metric governance did not include mandatory QA approval checkpoints for compliance-sensitive deferrals, creating a structural path for high-risk delays.
+
+14. ORGANIZATIONAL AND CULTURAL FACTORS
+14.1 Throughput normalization
+Interview evidence indicates line teams interpreted schedule urgency as acceptable rationale to defer compliance stop decisions.
+
+14.2 Authority gradient
+Operators and supervisors waited for QA to force a stop, despite known trigger conditions.
+
+14.3 Documentation safety-net misconception
+Teams treated retrospective completion as acceptable for critical restart controls.
+
+14.4 CAPA closure confidence gap
+Prior effectiveness checks did not confirm technical control deployment, generating false assurance.
+
+15. MANAGEMENT OVERSIGHT FINDINGS
+- CAPA dashboard tracked restart lock project as "in progress" for multiple months without formal risk acceptance.
+- No documented decision rationale when quality-critical control was deprioritized.
+- KPI redesign action remained open without interim mitigation plan.
+
+16. INVESTIGATION CONCLUSION
+Lot MD-317 event is attributed to restart governance failure combined with handover control breakdown and reinforcing organizational incentives that favored throughput over immediate compliance action. Humidity drift likely amplified particulate manifestation but did not replace governance failure as primary cause.
+
+17. APPROVALS
+Investigation Lead: S. Iqbal, Senior Quality Engineer
+Technical Reviewer: V. Menon, Principal Reliability Engineer
+QA Approver: Director of Quality Systems (pending)
+
+18. APPENDIX - CROSS-REFERENCE INDEX
+- assembly_process_log_D-317.txt -> Event chronology, decisions, handover evidence.
+- performance_report_D-317.txt -> Device-level failure trends and analytical findings.
+- medtech_assembly_sop.txt -> Required controls and restart flow.
+- historical_capa_medtech.txt -> Recurrence trend evidence.
+- policy.txt -> Governance and escalation requirements.
+- employee_training_records.txt -> Qualification and behavioral gap evidence.
+- torque_temp_humidity_D-317-process_data.csv -> Process telemetry and control-state evidence.

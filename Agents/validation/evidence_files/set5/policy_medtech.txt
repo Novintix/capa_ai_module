@@ -1,0 +1,170 @@
+POLICY COMPENDIUM
+Document Title: MedTech Site Quality and Manufacturing Governance Policies
+Document File Name: policy_medtech.txt
+Master Reference: QMS-POL-MD-COMPENDIUM-2026
+Effective Date: 2026-01-01
+Next Review Date: 2027-12-31
+Owned By: Quality Systems Office - MedTech
+Approved By: Site Quality Council and Site Leadership Team
+
+INTRODUCTION
+This compendium consolidates policies applicable to sterile device assembly quality governance, including deviation management, documentation standards, traceability controls, handover governance, CAPA, training, and project governance for quality-critical digital controls.
+
+POLICY 1 - DEVIATION MANAGEMENT
+Policy ID: POL-QA-MD-005
+Requirements:
+1. Any departure from approved procedure is a deviation.
+2. Critical deviations require same-shift initiation.
+3. Restart without complete release controls requires immediate HOLD and QA notification.
+4. Repeat deviations trigger CAPA review.
+
+POLICY 2 - GOOD DOCUMENTATION PRACTICE
+Policy ID: POL-QA-MD-012
+Requirements:
+1. Entries are contemporaneous and attributable.
+2. Backdating is prohibited.
+3. Blank mandatory fields are non-compliant.
+4. Verbal claims without records are not evidence.
+
+POLICY 3 - TRACEABILITY GOVERNANCE
+Policy ID: POL-QA-MD-017
+Requirements:
+1. Component lots must be reconciled before RUN.
+2. Unresolved lot-mapping warnings block release authorization.
+3. Any warning acknowledgment requires documented corrective action.
+4. Traceability audit trail must remain enabled.
+
+POLICY 4 - POST-MAINTENANCE RESTART CONTROL
+Policy ID: POL-OPS-MD-044
+Requirements:
+1. No restart before FRM-ASM-109 completion and witness sign-off.
+2. No restart with unresolved traceability warnings.
+3. Missing witness signature invalidates release record.
+4. Non-compliant restart triggers deviation and risk assessment.
+
+POLICY 5 - WARNING/ALARM MANAGEMENT
+Policy ID: POL-ENG-MD-031
+Requirements:
+1. Acknowledgment is not closure.
+2. Repeated warnings require escalation.
+3. Product-risk warnings require documented action and supervisor review.
+
+POLICY 6 - SHIFT HANDOVER GOVERNANCE
+Policy ID: POL-OPS-MD-031
+Requirements:
+1. Open critical items must be transferred in signed written form.
+2. Verbal-only transfer is prohibited.
+3. Incoming shift explicitly accepts ownership in writing.
+
+POLICY 7 - INVESTIGATION STANDARDS
+Policy ID: POL-QA-MD-021
+Requirements:
+1. Investigation includes timeline, evidence matrix, and cause analysis.
+2. Conclusions require corroborative evidence where feasible.
+3. Interim conclusions are labeled and updated upon final data.
+
+POLICY 8 - CAPA GOVERNANCE
+Policy ID: POL-QA-MD-022
+Requirements:
+1. CAPA includes owner, due date, measurable effectiveness criteria.
+2. Effectiveness cannot rely only on activity completion.
+3. Delayed CAPA requires formal risk acceptance.
+4. Recurrence within 12 months triggers CAPA redesign review.
+
+POLICY 9 - TRAINING AND QUALIFICATION
+Policy ID: POL-HR-MD-014
+Requirements:
+1. Qualification required before independent execution.
+2. Annual refresher for critical SOPs.
+3. Behavioral effectiveness monitored via observation audits.
+4. Sub-threshold audits require mandatory follow-up action.
+
+POLICY 10 - CHANGE CONTROL
+Policy ID: POL-QA-MD-028
+Requirements:
+1. Changes affecting fluid-path geometry/risk require formal change control.
+2. Related SOP/forms/training updates synchronized before go-live.
+3. Temporary changes require expiry and rollback plan.
+
+POLICY 11 - DHR REVIEW AND RELEASE SUPPORT
+Policy ID: POL-QA-MD-034
+Requirements:
+1. Mandatory completeness check for signatures, warnings, interventions, deviations.
+2. Missing critical records prevent release recommendation.
+3. Late critical entries reviewed for integrity risk.
+
+POLICY 12 - RISK MANAGEMENT
+Policy ID: POL-QA-MD-040
+Requirements:
+1. Risk scoring considers severity, occurrence, detectability.
+2. Interim controls tracked to closure.
+3. Potential patient impact escalated immediately.
+
+POLICY 13 - MANAGEMENT REVIEW GOVERNANCE
+Policy ID: POL-QA-MD-050
+Requirements:
+1. Monthly review must include CAPA delays and residual risk tiering.
+2. High-risk overdue items require formal escalation and risk acceptance.
+3. Status labels alone are not acceptable for aging high-risk controls.
+
+POLICY 14 - QUALITY-CRITICAL IT PROJECT GOVERNANCE
+Policy ID: POL-IT-MD-015
+Requirements:
+1. Quality-critical digital controls must be listed in a governed register.
+2. Priority changes require QA approval and documented impact.
+3. Delay beyond committed date requires risk acceptance within 15 business days.
+4. Compensating controls monitored monthly.
+
+POLICY 15 - KPI GOVERNANCE ALIGNMENT
+Policy ID: POL-OPS-MD-022
+Requirements:
+1. Shift scorecards include compliance weighting at minimum 25 percent.
+2. Correct compliance holds are scored as positive quality behavior.
+3. KPI changes require compliance impact assessment.
+
+POLICY 16 - CAPA EFFECTIVENESS STANDARD
+Policy ID: POL-QA-MD-022-EFF
+Requirements:
+1. Technical-control CAPAs require deployment verification evidence.
+2. Residual risk requires tier assignment and approval when medium/high.
+3. Recurrence triggers retrospective effectiveness-method review.
+
+POLICY 17 - QA WITNESS PRE-BOOKING
+Policy ID: POL-QA-MD-WIT-001
+Requirements:
+1. QA witness pre-assigned 2 hours before planned post-maintenance restart.
+2. If witness unavailable >30 minutes, restart delayed and escalated.
+3. Planning log must show witness assignment status.
+
+POLICY 18 - IN-PROCESS ELEVATED-RISK MONITORING
+Policy ID: POL-QC-MD-IPC-020
+Requirements:
+1. Elevated-risk restart events require enhanced visual and flow checks.
+2. Triggered in-process checks documented in DHR.
+3. Action-limit exceedance requires immediate HOLD.
+
+POLICY 19 - EQUIPMENT QUALIFICATION
+Policy ID: POL-ENG-MD-QUA-021
+Requirements:
+1. Post-maintenance verification required before release.
+2. Guide/routing geometry changes require risk assessment.
+3. Qualification plans include particulate-shed risk.
+
+POLICY 20 - HUMAN FACTORS GOVERNANCE
+Policy ID: POL-HR-MD-HF-022
+Requirements:
+1. Critical decision points must be designed for low ambiguity.
+2. Urgency communications should include compliance-first language.
+3. Mentor eligibility requires behavioral compliance screening.
+
+APPENDIX A - POLICY CROSSWALK
+- SOP-ASM-061 mapped to POL-OPS-MD-044, POL-QA-MD-012, POL-QA-MD-017.
+- FRM-ASM-109 mapped to POL-OPS-MD-044 and POL-QA-MD-034.
+- FRM-OPS-041 mapped to POL-OPS-MD-031.
+
+APPENDIX B - ENFORCEMENT PRINCIPLES
+- Repeat findings are systemic indicators.
+- Exceptions require formal approval with time-bound closure plan.
+- Patient-risk relevant deviations receive highest escalation priority.
+
+END OF POLICY COMPENDIUM

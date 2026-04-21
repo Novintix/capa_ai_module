@@ -1,36 +1,509 @@
-COATING PROCESS OPERATOR LOG
-Product   : Metformin HCl 500mg Film-Coated Tablets
-Batch     : B-202
-Equipment : Coating Pan CP-04
-Date      : 2025-11-10
-Shift     : A (06:00 - 14:00) / B (14:00 - 22:00)
+﻿MANUFACTURING LOGBOOK AND SHIFT RECORD
+Document ID: MFG-LOG-CF882-B202
+Site: NOVINTIX Manufacturing Campus - Building 2
+Manufacturing Unit: Sterile Fill and Finish
+Product: Ceftriaxone for Injection 1g (Vial)
+Batch Number: CF-882
+Legacy Cross Reference: B-202
+Date of Manufacture: 2025-11-10
+Prepared By: Production Operations
+Reviewed By: Manufacturing Supervisor
 
------------------------------------------------------------
-TIME     OPERATOR   EVENT
------------------------------------------------------------
-06:15    J. Thomas   Pan startup. Pre-heat initiated. Target inlet temp: 55-60 C.
-06:45    J. Thomas   Coating solution prepared. Viscosity checked: 280 cP (spec 250-300 cP). OK.
-07:00    J. Thomas   Tablet bed loaded: 80 kg. Pan speed set to 8 RPM (spec 7-10 RPM).
-07:10    J. Thomas   Coating spray initiated. Inlet temp: 58 C. Exhaust temp: 38 C.
-08:30    J. Thomas   Inlet temp alarm triggered: 72 C. Alarm acknowledged. No corrective action taken. Spray continued.
-08:45    J. Thomas   Inlet temp: 74 C. Operator noted "temp fluctuating" in logbook. No supervisor notified.
-09:00    J. Thomas   Inlet temp returned to 61 C after HVAC auto-correction.
-10:15    J. Thomas   Pan speed reduced to 6 RPM (below spec). Reason logged: "excessive tablet noise."
-10:15    J. Thomas   Pan speed deviation not escalated to QA.
-11:00    J. Thomas   Visual inspection: coat appearance acceptable.
-13:50    J. Thomas   Handover to Shift B. Verbal handover only. No written entry of temp alarm or pan speed deviation.
+SECTION 1 - BATCH CONTEXT
+- Planned batch size: 10,000 vials
+- Line: FL-02
+- Product contact transfer pump: P-17
+- Maintenance work order linked: WO-MNT-55391
+- Triggering maintenance event: Pump-head replacement due to seal wear
+- Planned restart requirement: Clear-Clean-Check and line clearance with witness sign-off before process continuation
 
-14:00    R. Singh    Shift B start. Pan speed noted at 6 RPM. No correction made.
-14:30    R. Singh    Coating spray continued. Inlet temp stable at 57 C.
-16:00    R. Singh    Pan speed increased to 8 RPM after routine check against batch record.
-18:30    R. Singh    Coating complete. Spray stopped. Drying phase initiated.
-19:00    R. Singh    Tablets discharged. Visual: uniform appearance, no obvious defects.
-19:30    R. Singh    Batch transferred to QC hold area.
+SECTION 2 - PRE-SHIFT AND STARTUP DETAILS
+06:00 - Shift A team assembled for line briefing.
+06:05 - PPE compliance check completed by Shift Lead S. Patel.
+06:08 - Environmental status board reviewed: no open critical alerts.
+06:10 - Utilities check initiated for compressed air, clean steam, and nitrogen support.
+06:14 - Differential pressure in corridor C-2 reading within approved limits.
+06:18 - Maintenance confirmed completion of pump-head replacement on P-17.
+06:21 - Maintenance advised line is mechanically available; documentation packet still being finalized.
+06:24 - Operator J. Thomas requested Clear-Clean-Check form from document station.
+06:29 - Batch packet assembled at line desk; line clearance section noted as incomplete.
+06:34 - Production planning call requested schedule recovery due earlier delay in upstream staging.
+06:38 - Shift supervisor instructed team to prepare for startup while waiting for witness.
+06:42 - First pass visual inspection of transfer path performed by operator only.
+06:45 - Witness signature not yet obtained; no QA representative at line.
+06:49 - Operator note entered: clearance checklist pending witness at startup.
 
------------------------------------------------------------
-SUMMARY OF DEVIATIONS NOTED IN LOG:
-1. Inlet air temperature exceeded upper limit (74 C vs. spec 60 C max) at 08:30-09:00.
-2. Pan speed below specification (6 RPM vs. spec 7-10 RPM) from 10:15 to 16:00.
-3. Deviations not formally escalated or documented on deviation form during shift.
------------------------------------------------------------
-END OF LOG
+SECTION 3 - DETAILED EVENT TIMELINE
+06:55 - Line status set to READY by operator terminal.
+07:00 - Filling preparation resumed.
+07:03 - Product transfer verification done verbally between maintenance and operations.
+07:07 - Clear-Clean-Check form FRM-MFG-022-882 attached but witness field blank.
+07:12 - Shift lead asked QA floor monitor for immediate witness availability.
+07:15 - QA floor monitor assigned to another critical hold review.
+07:19 - Startup continued with instruction to close documentation by first process hold window.
+07:24 - In-process sample point confirmed no immediate visible particulate.
+07:30 - Throughput increased from 145 to 148 vials/min.
+07:35 - Material transfer hose clamp rechecked. No leak identified.
+07:41 - Alarm event count incremented for short transfer pressure dip; auto-recovered.
+07:46 - Operator note: no abnormal vibration on pump P-17.
+07:52 - Packaging side temporary lint observation outside product-contact zone; cleaned by housekeeping.
+07:58 - Shift lead requested checklist closure update.
+08:04 - Operator reported witness still pending.
+08:10 - Throughput increased to 151 vials/min to recover schedule.
+08:16 - Visual check at line camera station acceptable.
+08:21 - No deviation form opened at this point.
+08:27 - Team discussed entering delayed record at next hold.
+08:33 - QA patrol noted incomplete checklist and requested closure before shift end.
+08:38 - Operations acknowledged request.
+08:44 - No process stop initiated.
+08:50 - Documentation pending status unchanged.
+08:57 - Operator entry references pressure alarm acknowledgment and continued operation.
+09:03 - Throughput raised to 156 vials/min.
+09:08 - Environmental settle plate run started by microbiology team.
+09:15 - No direct product-contact intervention.
+09:22 - Batch packet check indicates missing witness signature persists.
+09:29 - Supervisor reminded team to avoid post-facto reconstruction.
+09:36 - Shift planner again requested recovery against dispatch commitment.
+09:43 - Throughput 157 vials/min.
+09:51 - Routine line cleaning around conveyor guards completed.
+10:00 - Throughput 160 vials/min.
+10:08 - Operator entry: line stable, no visible fibers in in-process check.
+10:17 - Batch documentation still open for line clearance witness.
+10:26 - Supervisor phoned QA desk for witness escalation.
+10:33 - QA desk advised witness can be provided after current lot release review.
+10:41 - Operator note: hold event not triggered due schedule pressure.
+10:49 - Throughput 162 vials/min.
+10:57 - Alarm count unchanged.
+11:05 - In-process visual check: acceptable.
+11:14 - Operator note: checklist to be completed before handover.
+11:23 - Shift lead reviewed packet; marked action item for closeout.
+11:31 - Throughput 165 vials/min.
+11:40 - No deviation ticket opened.
+11:48 - Verbal reminder issued by supervisor: no verbal-only carry forward.
+11:56 - Line remained in run state.
+12:05 - QA corridor walk-through requested packet for review.
+12:11 - Packet shown with checklist incomplete.
+12:18 - QA advised immediate escalation if witness unavailable.
+12:27 - Team deferred action to shift-end window.
+12:36 - Throughput 168 vials/min.
+12:44 - No new alarms.
+12:53 - Operator note: planning pressure cited for continuation.
+13:01 - Throughput 169 vials/min.
+13:09 - Batch packet prepared for handover.
+13:17 - Incomplete checklist remained unresolved.
+13:24 - No deviation form attached.
+13:31 - Handover briefing draft started.
+13:39 - Outgoing operator documented pending quality item.
+13:47 - Handover initiated.
+13:54 - Verbal transfer to Shift B operator R. Singh.
+13:58 - No signed written transfer for open item at handover close.
+
+SECTION 4 - SHIFT B CONTINUATION (13:58 ONWARD - Operator R. Singh, Supervisor M. Okafor)
+14:05 - Shift B briefed by S. Patel on verbal carry-forward: checklist still pending witnesses.
+14:09 - R. Singh noted awareness of open item, stated plan to close before end of run.
+14:14 - M. Okafor reviewed batch packet; observed missing witness signature. No line stop initiated.
+14:18 - Throughput at 169 vials/min from Shift A handover value.
+14:22 - Process running stable; no new alarms.
+14:28 - Housekeeping completes secondary clean outside product zone.
+14:33 - R. Singh attempts contact with QA Floor Monitor via radio; no response.
+14:38 - Throughput increased to 171 vials/min per schedule recovery target.
+14:44 - M. Okafor notes verbal instruction from shift planning: dispatch window closes at 17:00.
+14:51 - Environmental settle plate retrieval completed by microbiology; result pending.
+14:58 - R. Singh makes second attempt to contact QA witness; receives message QA team in product release review.
+15:04 - No hold initiated.
+15:10 - Throughput increased to 173 vials/min.
+15:17 - In-process visual check performed at line QC station; acceptable result recorded.
+15:24 - Operator note: lint-type debris observed momentarily at outer conveyor guard; cleaned immediately outside product-contact path.
+15:31 - R. Singh queries shift supervisor M. Okafor about whether to open deviation.
+15:35 - M. Okafor advises to document and hold deviation decision pending supervisor review of timeline.
+15:41 - Throughput increased to 175 vials/min.
+15:47 - Batch packet now approximately 60 percent complete; clearance record still has blank witness.
+15:53 - R. Singh contacts QA Duty Manager directly via telephone.
+15:58 - QA Duty Manager advises QA Floor Monitor will be available at 16:20.
+16:04 - Throughput at 175 vials/min; stable.
+16:12 - Another in-process visual check: no abnormal findings recorded.
+16:20 - QA Floor Monitor M. Kapoor arrives at line.
+16:23 - M. Kapoor reviews FRM-MFG-022-882: observes witness field unsigned and process has been running since 07:00.
+16:26 - M. Kapoor declines to retroactively sign witness field; states this would be post-facto documentation.
+16:29 - M. Kapoor advises immediate deviation record open for restart without witness sign-off.
+16:33 - Deviation ticket DEV-2026-0019 opened; line status changed to HOLD.
+16:35 - Throughput at zero; filling paused.
+16:40 - M. Okafor notified; QA Manager D. Verma called.
+16:45 - D. Verma acknowledges; directs risk assessment of all vials produced from 07:00 restart.
+16:48 - Batch packet assembled with current completed units count: 8,724 vials filled.
+16:50 - All filled units marked as quarantine pending risk assessment outcome.
+16:55 - D. Verma discusses whether to resume filling for balance of 10,000 lot or stop.
+17:00 - Decision: Resume with enforced QA witness for pre-restart sign-off on fresh FRM-MFG-022 companion record.
+17:05 - New FRM-MFG-022-882-B opened; M. Kapoor performs physical verification of line.
+17:09 - Line physical check: no loose materials, seals confirmed, transfer path clear.
+17:12 - M. Kapoor signs witness field of FRM-MFG-022-882-B.
+17:15 - Line status changed to RUN; filling resumed.
+17:18 - Throughput ramped to 160 vials/min.
+17:24 - D. Verma instructs enhanced in-process visual sampling for remainder of batch.
+17:31 - In-process sample (enhanced): 50 vials inspected manually; 2 vials show white fiber-type particle.
+17:37 - D. Verma directs further sample hold; throughput maintained but 50-vial sample frequency doubled.
+17:43 - Second in-process sample (50 vials): 1 vial with suspicious particle retained.
+17:50 - Environmental EM settle plate for Period 17:00-17:45 shows normal result; no correlation with environmental contamination.
+17:56 - Third in-process sample (50 vials): no visible defects.
+18:02 - Throughput at 163 vials/min.
+18:08 - Filling approaching completion; end-of-batch reconciliation initiated.
+18:14 - Total vials capped: 10,000 per plan.
+18:19 - End-of-batch in-process visual: 3 additional vials with white fiber particle identified in last 200-vial segment.
+18:24 - All retained defective samples consolidated into single retention envelope, labeled with batch and time.
+18:29 - Filling complete. Equipment purge and post-use cleaning initiated.
+18:33 - Batch packet completed with exception of open deviation DEV-2026-0019.
+18:40 - M. Kapoor reviews complete batch packet; signs QA batch review section.
+18:47 - Shift B handover to Shift C initiated; all items transferred in written format via FRM-MFG-031-882.
+18:52 - Open items formally assigned to Shift C support: particulate retention samples, DEV-2026-0019 support.
+18:55 - Shift C supervisor K. Nair acknowledges receipt in writing.
+
+SECTION 5 - POST-FILLING QUALITY ACTIVITIES
+19:05 - Retention samples delivered to QC cold room.
+19:10 - DEV-2026-0019 extended to include in-process findings from 17:31 sampling.
+19:16 - End-of-run batch packet review: witness signature still missing from original FRM-MFG-022-882 (confirmed as known deviation).
+19:22 - P-17 pump assembly disassembled for post-use inspection.
+19:28 - Pump internals inspection: no damage, no material retention observed; seals intact.
+19:35 - Maintenance report WO-MNT-55391 updated with close-out findings.
+19:41 - Packaging materials area searched for possible fiber source; no loose materials identified.
+19:48 - HVAC filter inspection in FL-02 corridor: filters within change schedule, no visible damage.
+19:55 - Conveyor guard gasket inspected: slight wear on exterior-side gasket noted; gasket is outside product-contact path, flagged for scheduled replacement.
+20:03 - Transfer hose identified as potential source candidate: hose exterior shows minor abrasion from routing clip.
+20:10 - Sample clipping from transfer hose exterior retained for comparison with particle morphology.
+20:17 - Shift B/C documentation reconciliation completed.
+
+SECTION 6 - PUMP-HEAD REPLACEMENT AND MAINTENANCE BACKGROUND
+Equipment ID: P-17 (transfer pump, line FL-02)
+Last PM: 2025-10-01 per PM schedule PM-P17-2025-Q4
+Pump-head seal replacement frequency per maintenance plan: Every 90 days or at seal inspection failure, whichever first.
+Work Order WO-MNT-55391:
+  - Opened: 2025-11-08 following seal wear observation during routine PM check.
+  - Maintenance type: Planned (product-contact intervention).
+  - Technician assigned: H. Ramos.
+  - Parts used: Seal kit part number SK-P17-003; LOT 20251004.
+  - Replacement completed: 2025-11-10 06:18 per work order log.
+  - Maintenance verification: H. Ramos signed mechanical completion at 06:22.
+  - Post-maintenance leak test: Passed. Recorded in WO-MNT-55391 test section.
+  - Known gap in WO closure: Work order did not contain a mandatory field linking to FRM-MFG-022 completion status; this gap was identified as a contributing factor in investigation.
+Prior maintenance history for P-17:
+  - 2025-07-09: Seal replacement (WO-MNT-54017). Clear-Clean-Check completed with witness in 28 minutes; no issues.
+  - 2025-04-03: Pump-head replacement (WO-MNT-52491). Clear-Clean-Check delayed 45 minutes; witness available at shift boundary; no deviation opened.
+  - 2024-12-18: Routine PM (WO-MNT-50888). No product-contact intervention; Clear-Clean-Check not required.
+  - 2024-09-11: Seal replacement (WO-MNT-49203). Completed within shift without delay.
+Pattern: Delays in Clear-Clean-Check completion were observed in 2 of 4 maintenance events on P-17 in the 12 months prior to the event.
+
+SECTION 7 - ENVIRONMENTAL MONITORING SUMMARY FOR DATE OF MANUFACTURE
+Settle plates (active air and passive):
+  - 06:00-07:00 setup period: 0 CFU/plate (Grade A zone target); within limits.
+  - 07:00-09:00 fill start: 1 CFU/plate (Grade A limit: 1 CFU/plate); at limit but within.
+  - 09:00-11:00: 0 CFU/plate.
+  - 11:00-13:00: 0 CFU/plate.
+  - 13:00-15:00: 1 CFU/plate.
+  - 15:00-17:00: 0 CFU/plate.
+  - 17:00-19:00: 0 CFU/plate.
+  - No EM exceedances observed during the batch.
+Particle count (0.5 micron, Grade A):
+  - All readings within Grade A specification throughout batch.
+  - No particle count exceedances correlated with the particulate defects in filled vials.
+  - Interpretation: Environmental contamination not identified as the primary particulate source.
+Temperature and humidity:
+  - FL-02 room temperature: 21.5 to 22.1 degrees Celsius throughout batch; within 18-25 degree limit.
+  - Relative humidity: 42-46 percent; within 30-60 percent limit.
+Differential pressure:
+  - Corridor C-2 to Grade B: 12-15 Pa throughout; within 10-15 Pa target range.
+  - No pressure exceedances.
+
+SECTION 8 - PRODUCTION PRESSURE AND SCHEDULE CONTEXT
+Original dispatch commitment for Batch CF-882: 2025-11-10 end of Shift A.
+Upstream staging delay (prior to day of manufacture): 1 hour 40 minutes due to incoming material hold release.
+Impact: Batch start was compressed; Shift A already had reduced runway to complete scheduled volume.
+Planning communication: Production planning team contacted supervisor S. Patel directly at 06:34 requesting schedule recovery.
+Shift A throughput progression (documented pressure-response pattern):
+  - 06:55-07:00: 0 (pre-start checks)
+  - 07:00: 145 vials/min (normal start)
+  - 10:00: 160 vials/min (planned maximum was 165)
+  - 13:01: 169 vials/min (exceeded planned maximum to recover schedule)
+Throughput at handover: 169 vials/min - above normal plan of 165 vials/min.
+Prior communication from Production Manager A. Blum to S. Patel (recorded in email dated 2025-11-09): "Tomorrow is a critical dispatch day. The CF-882 lot must clear fill-finish by end of shift to meet distribution commitment. All support should be planned accordingly."
+Note: Email pre-dates the batch; no mention of compliance controls in that communication.
+
+SECTION 9 - RELEVANT SYSTEM AUDIT TRAIL EXTRACT (MES SYSTEM)
+MES terminal ID: TRM-FL02-A
+Operator login: J.Thomas (authenticated 06:02)
+06:55:34 - Status change command entered: SETUP → HOLD (standard pre-start state).
+07:00:02 - Status change command entered: HOLD → RUN. Confirmation dialog presented.
+07:00:04 - Confirmation accepted by J.Thomas.
+System behavior at status change: No witness field validation performed by MES. System allowed transition without checking FRM-MFG-022-882 signature status. This is the documented gap pending resolution under ITR-2024-0443.
+13:47:19 - Shift handover logged by J.Thomas: "open item: clearance checklist pending closure."
+13:54:08 - Login by R.Singh (authenticated).
+16:33:41 - Status change command entered: RUN → HOLD by R.Singh.
+16:33:43 - Reason entered by R.Singh: "QA directive pending deviation assessment."
+17:15:02 - Status change command entered: HOLD → RUN by R.Singh.
+17:15:04 - Witness field for FRM-MFG-022-882-B confirmed signed; transition allowed (manual QA confirmation).
+Note: The transition at 17:15 was allowed based on manual QA verbal confirmation, not an automated field check. MES still does not have automated lock. This confirms ITR-2024-0443 remains undeployed as of batch date.
+
+SECTION 10 - EQUIPMENT CALIBRATION AND PREVENTIVE MAINTENANCE STATUS
+Equipment covered: All product-contact and process-critical equipment on Line FL-02 active during Batch CF-882.
+
+10.1 Calibration Status Table (as of 2025-11-10)
+
+Equipment            | Tag ID    | Last Calibration | Next Due   | Calibrated By       | Certificate     | Status
+Transfer Pump P-17   | CAL-P17   | 2025-10-01       | 2026-04-01 | Internal Metrology  | CAL-2025-1001   | CURRENT
+Fill Nozzle Assembly | CAL-FN02  | 2025-10-08       | 2026-04-08 | Internal Metrology  | CAL-2025-1008   | CURRENT
+Flow Meter FM-04     | CAL-FM04  | 2025-09-18       | 2026-03-18 | Internal Metrology  | CAL-2025-0918   | CURRENT
+Pressure Transducer  | CAL-PT22  | 2025-09-22       | 2026-03-22 | Internal Metrology  | CAL-2025-0922   | CURRENT
+Temperature Sensor   | CAL-TS11  | 2025-09-30       | 2026-03-30 | Internal Metrology  | CAL-2025-0930   | CURRENT
+Line Speed Encoder   | CAL-LS03  | 2025-10-05       | 2026-04-05 | Internal Metrology  | CAL-2025-1005   | CURRENT
+Vial Inspection Camera| CAL-IC01 | 2025-10-12       | 2026-04-12 | Vendor (Optec Ltd.) | CAL-2025-1012   | CURRENT
+MES Terminal TRM-FL02| CAL-MES01 | 2025-10-20       | 2026-04-20 | IT Metrology        | CAL-2025-1020   | CURRENT
+
+Calibration findings: All equipment calibrated and within calibration interval at time of batch. No calibration deficiency contributed to the event. Calibration records reviewed and confirmed complete by QA during investigation.
+
+Note on temperature sensor accuracy: CAL-TS11 calibration certificate shows accuracy within ±0.3°C across the relevant range. No sensor drift identified. Temperature readings during the batch are considered accurate.
+Note on pressure transducer: CAL-PT22 accuracy ±0.2 kPa. Pressure dip alarm at 07:40 was a genuine process event, not a sensor artifact.
+
+10.2 Preventive Maintenance History for Line FL-02 (past 12 months)
+
+Equipment          | PM Date    | WO Reference  | PM Type         | Performed By | Finding            | Outcome
+P-17 Transfer Pump | 2025-10-01 | WO-MNT-54900  | Scheduled PM    | H. Ramos     | Seal wear observed | Seal replacement planned (WO-MNT-55391)
+P-17 Transfer Pump | 2025-11-10 | WO-MNT-55391  | Seal replacement| H. Ramos     | Completed correct  | Mechanically sound post-replacement
+Fill Nozzle FL-02  | 2025-09-14 | WO-MNT-54601  | Scheduled PM    | H. Ramos     | No issues          | Returned to service
+Transfer Hose      | 2025-11-10 | (Ad hoc check)| Post-event insp.| H. Ramos     | Exterior abrasion  | Flagged for replacement; routing clip to be repositioned
+Conveyor Guards    | 2025-07-22 | WO-MNT-53801  | Scheduled PM    | H. Ramos     | Gasket wear minor  | Noted for next scheduled change (due 2026-01)
+HVAC FL-02         | 2025-08-15 | WO-MNT-54100  | Filter change   | Facilities   | Normal             | Filters replaced per schedule
+Line FL-02 General | 2025-06-03 | WO-MNT-53300  | Quarterly PM    | H. Ramos     | No issues          | Signed off
+
+PM program adequacy assessment:
+- PM schedule for P-17 is 90-day seal inspection and replacement schedule; this is appropriate and was followed.
+- Transfer hose exterior inspection was not part of any scheduled PM or pre-batch qualification checklist. Hose exterior showing abrasion at routing clip point is a gap in the PM scope.
+- Conveyor guard gasket wear was observed in July 2025 and noted for future change. No urgency assigned. On 2025-11-10 a post-event inspection confirmed gasket still worn; it is outside the product-contact path and is not implicated in the batch event, but represents an open equipment condition that was inadequately prioritized.
+- Transfer hose routing design has never been formally assessed as a potential particulate shed risk. No hazard assessment or FMEA has been performed on hose routing configurations on FL-02.
+
+10.3 Equipment Qualification Status
+
+Equipment            | Qualification Type | Last Qualified | Status at Batch Date | Notes
+P-17 Transfer Pump   | IQ/OQ/PQ           | 2023-06-12     | Current (3-yr cycle) | Pump-head replacement requires post-maintenance verification; not a full requalification trigger per current qualification plan QP-P17-001.
+Fill Nozzle          | IQ/OQ/PQ           | 2023-07-18     | Current              | -
+Line FL-02 (overall) | IQ/OQ/PQ           | 2024-01-15     | Current              | Full requalification triggered by line modification Dec 2023.
+Transfer Hose Routing| Risk assessment    | Never performed| Gap identified       | Hose routing risk assessment was not part of IQ/OQ scope. Gap identified INV-2026-0019.
+
+Important qualification gap: The qualification plan QP-P17-001 specifies that pump-head replacement triggers a post-maintenance verification (PMV) rather than a full OQ requalification. The PMV requires the Clear-Clean-Check (FRM-MFG-022) to be completed and the pump operation to be verified at commissioning flow rate before releasing to fill. The PMV was not completed because FRM-MFG-022 was not completed before filling began. Therefore, the equipment technically entered service for this batch without completing its post-maintenance qualification verification.
+
+10.4 Equipment Change Control History (12 months)
+
+Change Reference | Description                          | Date       | QA Approved | Status
+CCR-2025-0201    | P-17 seal specification upgrade       | 2025-03-14 | Yes         | Implemented
+CCR-2025-0318    | MES terminal TRM-FL02 software update | 2025-06-20 | Yes         | Implemented
+CCR-2025-0441    | Transfer hose routing clip relocation | Not raised | N/A         | Gap: routing design not through change control
+CCR-2025-0502    | Convey guard gasket replacement       | 2025-11-25 | Yes         | Raised post-event; implemented
+
+Transfer hose routing gap: The current hose routing configuration (with clip causing exterior abrasion) was installed as part of a facility maintenance action approximately 18 months prior to the batch event. This action was not raised as a formal change control because it was classified as "like-for-like maintenance." The change control policy (POL-QA-028) requires formal change control for changes affecting product-contact flow. A routing clip repositioning may not directly affect product-contact flow but its load on the hose exterior creates a particulate shed risk. The classification decision was incorrect; this should have been assessed under change control.
+
+SECTION 11 - INCOMING MATERIAL TRACEABILITY RECORDS
+Reference: All materials used in Batch CF-882 manufacturing.
+
+11.1 Active Pharmaceutical Ingredient
+Material: Ceftriaxone Sodium (as Ceftriaxone for Injection 1g)
+Supplier: PharmaChem Solutions Ltd.
+Lot: CZ-20251008-A
+CoA Reference: CoA-CZ-20251008-A
+Incoming Inspection Report: IIR-2025-1028
+Assay: 99.3% (specification 97.0-101.0%). Pass.
+Appearance: White to off-white crystalline powder. Pass.
+Endotoxin: <0.05 EU/mg (specification <0.1 EU/mg). Pass.
+Sterility: Not tested at incoming (sterilized in process). Standard exclusion.
+Water content (KF): 2.1% (specification <5.0%). Pass.
+Approved for use: 2025-10-30.
+Storage condition confirmed: 2-8°C cold room on receipt; transferred to manufacturing staging as per SOP-MFG-018.
+Conclusion: API meets all incoming specifications. No material quality issue identified.
+
+11.2 Water for Injection (WFI)
+Source: In-house WFI generation system WFI-LOOP-B2.
+Batch date WFI test result: Conductivity 0.8 µS/cm (limit 1.3 µS/cm). Pass.
+TOC: 68 ppb (limit 500 ppb). Pass.
+Endotoxin (WFI loop): <0.05 EU/mL (limit 0.25 EU/mL). Pass.
+Bioburden: <0.1 CFU/100 mL (alert limit 10 CFU/100 mL). Pass.
+All WFI quality parameters within specification. WFI system eliminated as a contributing source.
+
+11.3 Primary Packaging: Vials and Closures
+Vials: Type I hydrolytic glass vials, 10 mL.
+Supplier: GlassCo Pharma Packaging.
+Lot: GCP-VIAL-20251030.
+Incoming inspection: Dimensional check, particulate check per AQL plan. Pass.
+Closures: Rubber stoppers, 20mm.
+Supplier: SealTech Components.
+Lot: STC-STOP-20251102.
+Incoming inspection: Visual defects, dimensional. Pass.
+Conclusion: Primary packaging materials meet specifications. No contribution to particulate defects.
+
+11.4 Seal Kit and Maintenance Consumables
+Seal Kit: SK-P17-003, Lot 20251004.
+Supplier: PumpPro Engineering.
+CoA confirmed: Dimensions, material hardness, chemical compatibility test results.
+Incoming Inspection Report: IIR-2025-1020.
+Result: All parameters meet seal kit specification. Pass.
+SEM-EDS analysis (post-event): Seal material does not match particulate profile. Seal eliminated as particulate source.
+
+11.5 Nitrogen and Compressed Air
+N2: Supplier certificate of analysis confirmed <5 ppm moisture, <1 ppm O2. Pass.
+Compressed air: In-house generation; oil-free class 1 per ISO 8573-1. Daily point-of-use filter check confirmed clear. Pass.
+Both utilities meet specification; gas utility contributions eliminated.
+
+SECTION 12 - PROCESS PARAMETER SPECIFICATION AND DEVIATION THRESHOLDS
+Reference: defines the measurement acceptance window against which process data in pan_speed_temp_B-202-process_data.csv is assessed.
+
+12.1 Process Parameter Specifications for Batch CF-882 (Sterile Fill and Finish, Line FL-02)
+
+Parameter                  | Alert Limit            | Action Limit           | Reference
+Transfer Pump P-17 Speed   | ±5% of setpoint        | ±10% of setpoint       | SOP-MFG-011
+Transfer Pressure          | 0.8-1.2 bar            | <0.5 or >1.5 bar       | SOP-MFG-011
+Fill Nozzle Flow Rate       | ±3%                    | ±7%                    | SOP-MFG-012
+Room Temperature FL-02     | 18-24°C                | <16°C or >26°C         | SOP-ENV-001
+Room Humidity FL-02        | 30-60% RH              | <25% or >65% RH        | SOP-ENV-001
+Differential Pressure C-2  | 10-15 Pa               | <8 Pa or >18 Pa        | SOP-ENV-001
+Throughput (vials/min)     | 145-165                | <130 or >175           | SOP-MFG-010
+Alarm Count (30-min window)| Alert: >2 unique alarms| Action: >5 unique      | POL-ENG-031
+
+Actual max throughput reached during batch: 175 vials/min (at action limit; not over).
+Actual alarm count per 30-min window: Max 1; never reached alert threshold.
+All room parameters: within alert limits throughout batch.
+Process parameters: all within specification from a product quality standpoint.
+
+Critical note: The process parameter specifications listed here relate to product quality outcomes. All process parameters were within or at limits. This confirms that the product quality event (particulate) was not caused by parameter exceedances but by the governance failure in the restart control, which allowed product-contact conditions to proceed without the required post-maintenance verification.
+
+12.2 In-Process Sampling Plan and Results
+
+Sampling Point       | Planned Frequency | Actual Samples | Results Summary
+Visual inspection    | Every 30 min      | 11 checks      | All recorded acceptable; defective vials not individually identifiable during production-speed inspection
+Fill volume check    | Every 60 min      | 8 checks       | All within ±2% acceptance
+Seal integrity       | Every 2 hours     | 4 checks       | All passed
+Enhanced visual (after 17:00 restart) | Every 15 min | 3 checks | 3-4 vials with visible white fiber per 50-vial sample at enhanced inspection
+
+In-process detection gap:
+- Standard visual inspection at production speed (160-175 vials/min) is not expected to detect sub-visible or borderline-visible particulate with high reliability. The detection capability at production speed is estimated at 60-70 percent for particles in the 50-300 micrometer range.
+- Enhanced inspection at 50 vials per 15-minute sample detected 2-3 defective vials per sample from 17:31 onward. But by 17:31, over 8,000 vials had already been filled (from 07:00 restart).
+- Enhanced in-process visual is retrospectively effective but prospectively latent: detection happened 10+ hours after the risk was introduced.
+
+12.3 Final Visual Inspection Method
+Method: Certified visual inspection, controlled booth, 100-lux transmitted light, certified inspectors EMP-0801 and EMP-0802.
+AQL plan: ISO 2859-1, General Inspection Level II, AQL 0.65 for critical defects.
+Result: 142 defective vials detected — reject rate 1.42 percent — exceeds AQL action level.
+Particulate description by inspectors: "White filamentous fiber-type material within vial contents; observed against transmitted light."
+Inspector reliability: Both inspectors recertified within prior 6 months. No reliability gap.
+
+SECTION 13 - WORK ENVIRONMENT AND ERGONOMIC FACTORS
+13.1 Shift Conditions on 2025-11-10
+Shift A start time: 06:00.
+Planned shift length: 8 hours (to 14:00).
+Actual extension: S. Patel stayed until 14:20 for handover completion.
+J. Thomas logged 8.1 hours on-site.
+Prior shift (2025-11-09 night, 22:00-06:00): Line FL-02 was in cleaning and maintenance preparation mode; J. Thomas was assigned to Line FL-03 for a half shift (4.5 hours). Not a full back-to-back double shift but close in hours.
+Rest interval (J. Thomas): estimated 5.5 hours between end of 2025-11-09 FL-03 stint and start of 2025-11-10 Shift A.
+Note: This is below the 8-hour minimum rest interval recommended in site HR policy HR-WRK-015. No formal fatigue risk assessment was conducted for J. Thomas on this day.
+
+13.2 Workload Assessment for Shift A
+Maintenance restart events add documentation and coordination load above normal fill-finish operations. The Clear-Clean-Check requirement is in addition to standard pre-batch activities. S. Patel's team was managing:
+- Pump-head replacement close-out (WO-MNT-55391)
+- Normal batch startup documentation
+- Schedule recovery communication from planning
+- Reduced window due to upstream staging delay
+- Parallel environmental monitoring initiation
+This workload concentration at a critical decision window (06:18-07:00) represents a cognitive load risk that was not assessed or mitigated.
+
+13.3 Communication Environment
+Planning communication structure on the day of manufacture:
+- 06:34: Production planning called S. Patel requesting schedule recovery.
+- 2025-11-09 email (A. Blum to S. Patel): Batch urgency reminder.
+- Real-time throughput target raised from 145 to 175 vials/min over the course of the batch.
+No communication from QA leadership on 2025-11-10 reinforcing compliance priorities at batch start.
+The communication environment on the batch day sent one signal (throughput urgency) with no counterbalancing compliance leadership signal. This environmental communication imbalance is a contributing organizational factor.
+
+13.4 Physical Environment of Documentation Station
+Clear-Clean-Check form (FRM-MFG-022-882) was kept at the line desk document station. Document station is located approximately 8 meters from the operator's primary fill station. During high-throughput operation, operators are expected to remain near the fill station. Walking to the document station for updates interrupts the monitoring role.
+This physical layout creates a practical friction point against real-time documentation: the form and the process are spatially separated.
+Proposed improvement: Digital tablet-based FRM-MFG-022 accessible at the fill station, eliminating the spatial barrier to contemporaneous entry.
+
+SECTION 14 - REGULATORY AND STANDARDS COMPLIANCE CROSS-REFERENCE
+14.1 Applicable Regulatory Frameworks
+- EU GMP Annex 1 (Manufacture of Sterile Medicinal Products, 2022): Section 8 (contamination control strategy), Section 9 (premises), Section 10 (equipment).
+- 21 CFR Part 211 (US FDA cGMP for finished pharmaceuticals): Subpart F (production and process controls), Subpart J (records and reports).
+- ICH Q10 (Pharmaceutical Quality System): Section 3.2 (CAPA), Section 3.3 (change management), Section 4 (management review).
+- EU GMP Chapter 4 (documentation): Real-time documentation requirement.
+- EU GMP Chapter 5 (production): Maintenance restart and line clearance requirements.
+- PIC/S Guide PE 009 (GMP): Equipment cleaning and maintenance.
+
+14.2 Standards Gaps Identified in This Event
+EU GMP Annex 1 Section 8.14 (Contamination Control Strategy - CCS):
+- Batch CF-882 was manufactured without having completed the required post-maintenance verification (PMV) per QP-P17-001. The CCS for Line FL-02 identifies the Clear-Clean-Check as a control barrier for post-maintenance contamination risk. This barrier was bypassed.
+- Non-compliance confirmed.
+
+ICH Q10 Section 3.2 (CAPA):
+- CAPA-2024-0097 was closed without confirming deployment of its primary technical corrective action (MES lock). ICH Q10 requires that CAPA effectiveness is confirmed.
+- Non-compliance confirmed (effectiveness confirmation method was inadequate).
+
+ICH Q10 Section 3.3 (Change Management):
+- Transfer hose routing clip repositioning was not raised through change control despite potential impact on product-contact equipment integrity.
+- Non-compliance confirmed.
+
+EU GMP Chapter 4 (Documentation) - real-time entry:
+- FRM-MFG-022-882 witness field remained blank from 06:45 to 16:33 during an active fill run. Multiple entries in the manufacturing logbook were not made contemporaneously (operator intent to close "at the next hold").
+- Non-compliance confirmed.
+
+14.3 Prior Regulatory Commitments Status
+Commitment 1 (from Obs-2024-INS-07): KPI reform to include compliance weighting. Status: Not completed by batch event date (13 months overdue). Directly contributing factor.
+Commitment 2 (from Obs-2024-INS-08): MES lock deployment confirmed. Status: Not completed (14 months overdue). Directly contributing factor.
+Summary: Two open regulatory commitments were directly implicated in the batch event. Neither had generated a formal extension request or risk acceptance document with the regulatory authority.
+
+14:07 - Shift B accepted line in running condition.
+14:14 - Operator R. Singh confirmed checklist still unsigned by witness.
+14:22 - Throughput 170 vials/min.
+14:30 - Decision made to continue and close paperwork during reconciliation.
+14:39 - No alarm escalation.
+14:47 - Throughput 169 vials/min.
+14:55 - In-process visual check remains acceptable.
+15:04 - Shift B requested QA support for retroactive review.
+15:13 - QA said review at end of run.
+15:21 - Throughput 168 vials/min.
+15:30 - No product-contact interventions.
+15:38 - Housekeeping round complete.
+15:47 - Throughput 166 vials/min.
+15:55 - Micro trend preliminary normal.
+16:03 - Stability retain sample pull confirmed.
+16:12 - Throughput 164 vials/min.
+16:20 - No deviation ticket open.
+16:29 - Checklist still pending witness close.
+16:38 - Throughput 161 vials/min.
+16:46 - Alarm count increment due short pause.
+16:55 - Hold duration 6 min logged.
+17:03 - Line resumed.
+17:12 - Throughput 158 vials/min.
+17:20 - No visible fibers in immediate line checks.
+17:29 - Throughput 154 vials/min.
+17:37 - Final filling phase started.
+17:46 - Reconciliation prep started.
+17:55 - Line stop planned at 18:30.
+18:04 - Final in-process checks complete.
+18:13 - No additional alarms.
+18:22 - End-of-run checklist compilation started.
+18:30 - Filling run stopped.
+18:39 - Batch packet review identified witness sign-off still missing.
+18:47 - Operator initiated delayed form completion.
+18:56 - Clearance completed field set true by operator.
+19:05 - Witness signature remained false.
+19:16 - QA notified for non-conformance review.
+19:24 - Batch set to conditional hold pending QA decision.
+19:33 - End-of-shift summary signed by R. Singh.
+19:40 - Logbook closed with note: documentation completion occurred post-run.
+
+SECTION 4 - COMPLIANCE OBSERVATIONS
+Observation 1: Restart after maintenance occurred before complete documented and witnessed line clearance.
+Observation 2: Open compliance item transferred via verbal handover.
+Observation 3: Deviation workflow not opened in real time despite policy triggers.
+Observation 4: Schedule recovery pressure repeatedly cited in operator comments.
+
+SECTION 5 - SIGNATURES
+Operator Shift A: J. Thomas
+Operator Shift B: R. Singh
+Supervisor: S. Patel
+QA Review Status: Pending at time of log closure
+
+END OF DOCUMENT

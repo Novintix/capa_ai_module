@@ -1,0 +1,168 @@
+ASSEMBLY LOGBOOK AND SHIFT RECORD
+Document ID: ASM-LOG-IS517-M517
+Site: NOVINTIX MedTech Campus - Building 4
+Manufacturing Unit: Sterile Single-Use Device Assembly
+Product: Smart Infusion Set with Anti-Free-Flow Clamp (Model IFX-20)
+Batch Number: IS-517
+Legacy Cross Reference: M-517
+Date of Manufacture: 2026-02-18
+Prepared By: Assembly Operations
+Reviewed By: Manufacturing Supervisor
+
+SECTION 1 - BATCH CONTEXT
+- Planned batch size: 8,000 units
+- Assembly line: ASM-03
+- Critical station: UV-curing manifold and fluid-path bonding lane
+- Linked maintenance work order: WO-MNT-78112
+- Triggering event: UV nozzle manifold replacement
+- Required restart control: FRM-ASM-109 complete + QA witness sign-off + lot reconciliation green status
+
+SECTION 2 - PRE-SHIFT AND STARTUP DETAILS
+06:00 - Shift A huddle complete; high-priority dispatch communicated.
+06:06 - Gowning and cleanroom access checks complete.
+06:12 - Environmental dashboard reviewed; no critical alerts.
+06:18 - Utilities check complete for compressed air and UV system cooling.
+06:25 - Maintenance begins final torque verification on manifold assembly.
+06:41 - Maintenance marks mechanical completion in WO-MNT-78112.
+06:47 - Operator L. Martin initiates FRM-ASM-109 checklist; witness field pending.
+06:53 - Supervisor R. Gomez requests QA witness availability.
+06:57 - QA responds witness delayed due concurrent line review in ASM-01.
+07:02 - MES shows unresolved lane-B tubing lot scan mapping warning.
+07:06 - Line moved HOLD to RUN despite pending witness and unresolved lot mapping warning.
+
+SECTION 3 - DETAILED EVENT TIMELINE
+07:10 - Throughput 118 units/min.
+07:14 - Operator note: witness expected before first hold.
+07:18 - In-process visual acceptable.
+07:24 - Throughput 121 units/min.
+07:31 - Alarm count increment 1 for transient UV intensity dip; auto-recovered.
+07:37 - Lot reconciliation warning acknowledged; unresolved status retained.
+07:44 - Throughput 124 units/min.
+07:51 - No deviation ticket opened.
+08:03 - QA patrol asks for FRM-ASM-109 update; pending closure noted.
+08:12 - Throughput 128 units/min to recover schedule.
+08:28 - Supervisor reminder issued to close release packet.
+08:41 - DHR packet still incomplete for witness and lot map resolution.
+09:05 - In-process flow check acceptable at sample size n=20.
+09:27 - Throughput 133 units/min.
+09:48 - No hold initiated.
+10:10 - QA desk informed witness can attend after 11:30.
+10:34 - Throughput 136 units/min.
+11:02 - Operator note references dispatch pressure from planning.
+11:25 - Warning status remains open in MES quality banner.
+11:54 - Midday packet check still incomplete.
+12:18 - QA floor walkthrough requests immediate closure.
+12:43 - Team defers closure to shift-end window.
+13:12 - Throughput 139 units/min.
+13:31 - Handover notes drafted with open quality item.
+13:49 - Verbal transfer to Shift B operator N. Ali; no signed DHR transfer form.
+
+SECTION 4 - SHIFT B CONTINUATION
+14:05 - Shift B brief confirms witness pending and unresolved lot mapping warning.
+14:14 - Supervisor M. Dsouza reviews packet; no stop called.
+14:27 - Throughput 141 units/min.
+14:41 - Operator requests QA witness ETA; response pending.
+14:55 - In-process visual acceptable.
+15:09 - Flow test spot check acceptable n=20.
+15:24 - Throughput 144 units/min.
+15:36 - Operator queries whether to open deviation; advised to wait for QA arrival.
+15:57 - QA duty manager informs floor monitor arrival at 16:20.
+16:20 - QA floor monitor V. Rao arrives and reviews FRM-ASM-109 and MES warnings.
+16:23 - QA declines retroactive witness signature.
+16:26 - Deviation DEV-2026-0073 opened; line moved RUN to HOLD.
+16:30 - Filled count at hold: 6,872 units.
+16:36 - All produced units marked quarantine pending risk assessment.
+16:48 - QA manager E. Chandra confirms controlled restart prerequisites.
+16:57 - New release form FRM-ASM-109-B opened.
+17:08 - Physical verification completed with QA present.
+17:12 - Witness field signed; lot reconciliation corrected and confirmed green.
+17:15 - Line moved HOLD to RUN.
+17:22 - Enhanced visual sampling initiated: 50 units every 15 minutes.
+17:31 - Sample 1: 2 units with translucent fragments retained.
+17:45 - Sample 2: 1 unit with intermittent flow restriction.
+17:59 - Sample 3: 0 defects.
+18:14 - Batch completion reached 8,000 units.
+18:20 - End-of-batch reconciliation complete; original form remains known deviation.
+
+SECTION 5 - POST-BATCH QUALITY ACTIVITIES
+18:35 - Retained suspect samples delivered to QC device lab.
+18:44 - Borescope inspection of lane-B tubing guide performed.
+18:52 - Minor polymer abrasion observed at guide insert edge.
+19:03 - Sample swab and material clipping collected for microscopy.
+19:14 - Environmental records reviewed; no exceedances.
+19:26 - DHR completeness review confirms missing witness in original form and delayed reconciliation closure.
+19:35 - QA manager directs expanded investigation scope to include governance system causes.
+
+SECTION 6 - MAINTENANCE BACKGROUND
+Equipment: UV nozzle manifold assembly (Station ASM-03-BOND)
+Work Order: WO-MNT-78112
+- Opened: 2026-02-16 (UV nozzle drift and cure profile deviation)
+- Completed: 2026-02-18 06:41
+- Technician: C. Pereira
+- Verification: mechanical and leak check passed
+Known closure gap:
+- WO template does not require FRM-ASM-109 completion checkpoint.
+- WO template does not force QA notification before technician release.
+
+Prior related maintenance on ASM-03:
+- 2025-11-07: manifold clean and reseat; restart compliant.
+- 2025-12-18: tubing lane guide replacement; checklist delayed but completed before RUN.
+- 2026-01-29: UV lamp change; fully compliant.
+Pattern: one delayed restart-control documentation event in prior quarter.
+
+SECTION 7 - ENVIRONMENTAL MONITORING SUMMARY
+- ISO 7 room viable EM: within limits across all periods.
+- Non-viable particle counts (0.5 micron): within operational limits.
+- Temperature: 21.7 to 22.4 C.
+- Relative humidity: 41 to 46 percent.
+- Differential pressure: 11 to 14 Pa.
+Interpretation: environmental contamination not indicated as primary source.
+
+SECTION 8 - SCHEDULE PRESSURE CONTEXT
+- Dispatch commitment requested same-day shipment preparation.
+- Upstream packaging delay compressed available runtime.
+- Throughput target temporarily raised from nominal 132 to 144 units/min.
+- Planning communications emphasized recovery without explicit compliance-first reminder.
+
+SECTION 9 - MES AUDIT TRAIL EXTRACT
+Terminal ID: ASM03-TRM-A
+Operator login: L.Martin at 06:02
+07:06:14 - HOLD to RUN accepted.
+07:06:16 - System warning acknowledged: LOT-MAP-LB unresolved.
+13:49:02 - Handover note entered: open release form item pending.
+16:26:41 - RUN to HOLD executed by N.Ali on QA direction.
+17:15:05 - HOLD to RUN after new form witness confirmation and lot map resolution.
+Note: System permitted initial RUN transition despite open release witness and unresolved lot mapping warning.
+
+SECTION 10 - EQUIPMENT CALIBRATION STATUS
+- UV intensity sensor CAL-UV-112: current.
+- Flow verification bench CAL-FLOW-19: current.
+- Pressure transducer CAL-PT-44: current.
+- Vision station CAL-CAM-08: current.
+Conclusion: No calibration lapse contributed.
+
+SECTION 11 - MATERIAL TRACEABILITY STATUS
+- Tubing lot TB-260216-B mapped late for lane B at startup.
+- Connector lot CN-260210-A verified.
+- Clamp lot CL-260211-C verified.
+- Sterile pouch lot SP-260214-D verified.
+Traceability gap: lot-mapping warning acknowledged but unresolved during active RUN.
+
+SECTION 12 - PROCESS PARAMETER SPECIFICATION SUMMARY
+- Throughput range target: 120-138 units/min; action threshold >145.
+- UV cure intensity target: 98-102 percent; transient dip recovered.
+- Flow check acceptance: 45-55 mL/min at standard pressure.
+- Alarm threshold: >2 recurring events/30-minute window.
+Observation: parameters largely within limits, reinforcing governance/control failure as main event driver.
+
+SECTION 13 - HUMAN FACTOR OBSERVATIONS
+- Operator and supervisor documented intent to close records later.
+- Decision authority blurred between production and QA for stop call.
+- Shift boundary handover relied on verbal carry-forward.
+
+SECTION 14 - SHIFT C FORMAL HANDOVER
+18:42 - Shift C supervisor receives written handover of open deviation and retained sample actions.
+18:47 - Chain-of-custody signed for sample transfer.
+18:53 - DHR packet sealed for QA investigation.
+
+END OF ASSEMBLY LOGBOOK

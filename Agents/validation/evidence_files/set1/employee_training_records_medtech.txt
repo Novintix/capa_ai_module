@@ -1,0 +1,108 @@
+EMPLOYEE TRAINING AND QUALIFICATION RECORDS
+Document ID: HR-QMS-TRN-2026-AS04
+Site: NOVINTIX Medical Device Campus - Building 4
+Manufacturing Unit: Sterile Device Assembly - Line AS-04
+Compiled By: QA Training Coordinator
+Review Date: 2026-03-05
+Scope: Operators, supervisors, QA, and maintenance personnel assigned to AS-04
+
+SECTION 1 - TRAINING GOVERNANCE OVERVIEW
+Training governance references:
+- POL-HR-QMS-014 Training and Qualification
+- POL-QA-012 Good Documentation Practice
+- POL-QA-022 CAPA Governance
+- TRN-STD-004 Medical Device Competency Framework
+
+Training categories:
+Cat A: GMP and sterile assembly fundamentals
+Cat B: Role-based SOP qualification
+Cat C: Equipment and station-specific practical qualification
+Cat D: Data integrity and GDP
+Cat E: Behavioral escalation and scenario-based decision-making
+Cat F: Specialist modules (particulate science, reliability testing)
+
+Site indicators (2025 to early 2026):
+- On-time completion: 95.1 percent
+- Critical SOP refresher completion: 97.8 percent
+- Average assessment score: 87.2 percent
+- Observation audit behavioral compliance: 89.0 percent
+- Overdue critical modules in AS-04 population: 11 modules across 7 individuals
+
+SECTION 2 - TEAM ROSTER AND STATUS
+Employee ID | Name      | Role                  | Shift | Qualification Status
+MD-0441     | L. Chen   | Assembly Operator     | A     | Fully Qualified
+MD-0318     | M. Ortiz  | Assembly Operator     | B     | Fully Qualified
+MD-0501     | R. Iqbal  | Shift Supervisor      | A     | Fully Qualified
+MD-0499     | C. Nguyen | Shift Supervisor      | B     | Fully Qualified
+MD-0112     | N. Rao    | QA Floor Specialist   | B/C   | Fully Qualified
+MD-0207     | E. Walters| Maintenance Technician| A     | Fully Qualified
+MD-0388     | P. Mendez | QA Manager            | Day   | Fully Qualified
+MD-0455     | T. Banerjee | Shift Supervisor    | C     | Fully Qualified
+MD-0302     | A. Sethi  | Production Director   | Day   | Leadership Qualified
+
+SECTION 3 - INDIVIDUAL RECORDS (ABRIDGED DETAILED VIEW)
+3.1 L. Chen - Assembly Operator
+- SOP-MDT-058 v3.3 completed 2025-08-14 (score 90 percent)
+- SOP-MDT-058 v3.4 completed 2026-01-22 (score 92 percent)
+- GDP Refresher completed 2025-11-03 (score 88 percent)
+- Restart Governance OJT completed 2025-12-12 (pass)
+- Escalation Under Schedule Pressure simulation overdue (due 2026-01-31)
+Observation audit:
+- Two compliant events, one delayed escalation note; behavioral compliance 67 percent in latest cycle.
+
+3.2 M. Ortiz - Assembly Operator
+- SOP-MDT-058 v3.4 completed 2026-01-24 (score 85 percent)
+- GDP Refresher completed 2025-12-10 (score 83 percent)
+- Handover Governance Practicum overdue (due 2026-01-31)
+- Escalation simulation overdue (due 2026-01-31)
+Observation audit:
+- One compliant event, one borderline event; proactive escalation rated below expected standard.
+
+3.3 R. Iqbal - Shift Supervisor
+- Supervisor track for SOP-MDT-058 v3.4 completed (score 91 percent)
+- Throughput-vs-Compliance scenario completed 2025-10-28 (pass)
+- Supervisor Accountability workshop overdue (due 2026-01-20)
+Behavioral note:
+- Under high dispatch pressure, tends to defer line-hold decisions until QA confirmation.
+
+3.4 C. Nguyen - Shift Supervisor
+- SOP-MDT-058 v3.4 completed (score 89 percent)
+- Escalation scenario completed (pass)
+- Supervisor Accountability workshop overdue (due 2026-01-20)
+Behavioral note:
+- Demonstrates strong process control, but delayed direct hold initiation in one observed event.
+
+3.5 E. Walters - Maintenance Technician
+- Product-contact maintenance SOP completed (score 87 percent)
+- Work order closure standards completed (score 89 percent)
+- WO-to-Readiness linkage module overdue (due 2026-01-25)
+Behavioral note:
+- Strong technical execution; downstream readiness handoff obligations under-emphasized.
+
+3.6 N. Rao - QA Floor Specialist
+- All required modules current.
+- Witness standards and stop-authority modules completed with high performance.
+- Event behavior during IPC-117A: fully compliant response.
+
+SECTION 4 - COMPETENCY MATRIX
+Competency                                | L.Chen | M.Ortiz | R.Iqbal | C.Nguyen | E.Walters | N.Rao
+SOP-MDT-058 current                       | CURRENT| CURRENT | CURRENT | CURRENT  | CURRENT   | CURRENT
+GDP real-time documentation                | CURRENT| CURRENT | CURRENT | CURRENT  | CURRENT   | CURRENT
+Restart governance practical               | CURRENT| CURRENT | CURRENT | CURRENT  | CURRENT   | CURRENT
+Escalation under schedule pressure         | OVERDUE| OVERDUE | CURRENT | CURRENT  | N/A       | CURRENT
+Handover governance practicum              | N/A    | OVERDUE | CURRENT | CURRENT  | N/A       | N/A
+Supervisor accountability workshop         | N/A    | N/A     | OVERDUE | OVERDUE  | N/A       | CURRENT
+WO closure to readiness linkage            | N/A    | N/A     | N/A     | N/A      | OVERDUE   | N/A
+
+SECTION 5 - CRITICAL TRAINING GAP SUMMARY
+- Multiple event-chain participants had overdue scenario modules directly related to the event conditions.
+- Knowledge scores were acceptable, but behavioral readiness under pressure was inadequate.
+- Observation audit findings below threshold were not consistently escalated for remediation.
+
+SECTION 6 - CORRECTIVE TRAINING ACTIONS
+- Mandatory completion of overdue scenario modules within 15 days.
+- Add post-training observation audit within 30 days for all affected roles.
+- Trigger automatic QA Manager notification for behavioral audit scores below 90 percent.
+- Add assignment lock preventing critical-role scheduling when specific high-critical modules are overdue.
+
+END OF RECORD

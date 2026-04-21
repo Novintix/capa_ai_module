@@ -6,45 +6,21 @@ FastAPI route for CAPA Action Plan Agent.
 
 from fastapi import APIRouter, HTTPException
 from .graph import build_graph
-from .model import CapaActionPlanRequest, CapaActionPlanResponse
+from .model import CapaInput, CapaActionPlanResponse
 
 router = APIRouter()
 graph = build_graph()
 
 
 @router.post("/action_plan", response_model=CapaActionPlanResponse)
-def generate_capa_action_plan(request: CapaActionPlanRequest):
+def generate_capa_action_plan(request: CapaInput):
     """
     Generate CAPA Action Plan from investigation and root cause data.
-    
-    Input:
-    - investigation_summary
-    - containment_actions
-    - five_why_analysis
-    - primary_root_cause
-    - contributing_root_causes
-    - systemic_root_causes
-    - evidence_collected
-    - root_cause_verification_status
-    - severity_level
-    - timeline_constraint
-    - available_resources
-    
-    Output:
-    - action_items (9-column action plan, audit-ready)
-    - total_actions
-    - primary_actions
-    - preventive_systemic_actions
-    - confidence_score
-    - notes
+    Accepts flat CapaInput fields directly — no nested wrapper needed.
     """
     try:
-        # Invoke graph
-        result = graph.invoke({
-            "capa_input": request.capa_input.dict()
-        })
+        result = graph.invoke(request.model_dump())
 
-        # Return response
         return CapaActionPlanResponse(
             action_items=result.get("action_items", []),
             total_actions=result.get("total_actions", 0),

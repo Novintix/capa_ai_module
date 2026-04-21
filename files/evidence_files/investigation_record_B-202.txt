@@ -1,0 +1,75 @@
+INVESTIGATION RECORD
+Title     : Film Coat Peeling and Dissolution Failure - Batch B-202
+Inv. No   : INV-2026-0019
+Product   : Metformin HCl 500mg Film-Coated Tablets
+Batch     : B-202
+Initiated : 2026-02-17
+Investigator : M. Krishnan (QA)
+
+-----------------------------------------------------------
+1. PROBLEM STATEMENT
+Stability report SR-2026-0041 identified film coat peeling on ~22% of tablets and
+dissolution failure (63% vs. spec NLT 75%) at the 3-month accelerated stability
+timepoint (40 C / 75% RH). Investigation initiated to determine root cause.
+
+-----------------------------------------------------------
+2. EVIDENCE GATHERED
+
+2.1 Batch Record Review
+- Coating operation conducted on 2025-11-10 using pan CP-04.
+- Batch record incomplete: no deviation form filed for temperature or pan speed events.
+- Shift A handover section blank.
+
+2.2 Operator Log Review (coating_process_log_B-202.txt)
+- Inlet temperature alarm at 08:30 (74 C). Alarm acknowledged. No action taken. Spray
+  continued during excursion.
+- Pan speed reduced to 6 RPM at 10:15. Deviation not escalated.
+- Written handover not completed at shift change (14:00).
+- Shift B operator ran pan at 6 RPM for approximately 2 hours before correcting.
+
+2.3 Process Data Review (pan_speed_temp_B-202.csv)
+- Temperature excursion confirmed: 08:28-08:57 (duration ~29 minutes), peak 74.2 C.
+- Pan speed at 6 RPM confirmed: 10:14-16:03 (duration ~5 hours, 49 minutes).
+
+2.4 Equipment Review
+- Thermocouple CP-04 calibration current (last calibrated 2025-09-12). No equipment fault.
+- HVAC unit serviced 2025-10-15. Auto-correction function operating as designed.
+- Pan drive motor inspection: no faults. Operator manually reduced speed.
+
+2.5 Material Review
+- Coating polymer: HPMC E5 lot COA reviewed. All parameters within spec.
+- Core tablets: hardness 10.8 kP average (within spec 8-14 kP). No core material issue identified.
+- API particle size: within specification per incoming QC records.
+
+-----------------------------------------------------------
+3. TIMELINE OF EVENTS
+  2025-11-10 08:30 : Inlet temp alarm. Operator acknowledges, does not act.
+  2025-11-10 10:15 : Pan speed reduced to 6 RPM by Shift A operator.
+  2025-11-10 13:50 : Verbal-only handover. Temperature and speed deviations not communicated.
+  2025-11-10 16:03 : Shift B corrects pan speed after routine check.
+  2026-02-15 : Stability failure identified at T3.
+  2026-02-17 : Investigation opened.
+
+-----------------------------------------------------------
+4. PRELIMINARY FINDINGS
+
+a. HIGH-TEMPERATURE EXCURSION: Inlet air temperature exceeded specification limit (74 C vs. max
+   60 C) for approximately 29 minutes. Elevated temperature may have caused rapid moisture
+   evaporation, leading to brittle, poorly adhered coat film.
+
+b. EXTENDED LOW PAN SPEED: Pan speed below specification (6 RPM vs. min 7 RPM) for nearly
+   6 hours. Low pan speed reduces tablet-to-tablet movement, causing uneven coat deposition
+   and localized thick/thin areas susceptible to peeling.
+
+c. PROCEDURAL NON-COMPLIANCE: SOP-MFG-018 requires immediate escalation of parameter
+   deviations and written shift handover. Neither requirement was fulfilled.
+
+-----------------------------------------------------------
+5. STATUS
+Open. Awaiting CAPA generation and sign-off.
+
+Investigator : M. Krishnan
+Reviewed by  : Dr. S. Mehta
+Date         : 2026-02-20
+-----------------------------------------------------------
+END OF INVESTIGATION RECORD

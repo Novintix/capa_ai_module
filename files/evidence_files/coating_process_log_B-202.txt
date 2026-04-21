@@ -1,0 +1,36 @@
+COATING PROCESS OPERATOR LOG
+Product   : Metformin HCl 500mg Film-Coated Tablets
+Batch     : B-202
+Equipment : Coating Pan CP-04
+Date      : 2025-11-10
+Shift     : A (06:00 - 14:00) / B (14:00 - 22:00)
+
+-----------------------------------------------------------
+TIME     OPERATOR   EVENT
+-----------------------------------------------------------
+06:15    J. Thomas   Pan startup. Pre-heat initiated. Target inlet temp: 55-60 C.
+06:45    J. Thomas   Coating solution prepared. Viscosity checked: 280 cP (spec 250-300 cP). OK.
+07:00    J. Thomas   Tablet bed loaded: 80 kg. Pan speed set to 8 RPM (spec 7-10 RPM).
+07:10    J. Thomas   Coating spray initiated. Inlet temp: 58 C. Exhaust temp: 38 C.
+08:30    J. Thomas   Inlet temp alarm triggered: 72 C. Alarm acknowledged. No corrective action taken. Spray continued.
+08:45    J. Thomas   Inlet temp: 74 C. Operator noted "temp fluctuating" in logbook. No supervisor notified.
+09:00    J. Thomas   Inlet temp returned to 61 C after HVAC auto-correction.
+10:15    J. Thomas   Pan speed reduced to 6 RPM (below spec). Reason logged: "excessive tablet noise."
+10:15    J. Thomas   Pan speed deviation not escalated to QA.
+11:00    J. Thomas   Visual inspection: coat appearance acceptable.
+13:50    J. Thomas   Handover to Shift B. Verbal handover only. No written entry of temp alarm or pan speed deviation.
+
+14:00    R. Singh    Shift B start. Pan speed noted at 6 RPM. No correction made.
+14:30    R. Singh    Coating spray continued. Inlet temp stable at 57 C.
+16:00    R. Singh    Pan speed increased to 8 RPM after routine check against batch record.
+18:30    R. Singh    Coating complete. Spray stopped. Drying phase initiated.
+19:00    R. Singh    Tablets discharged. Visual: uniform appearance, no obvious defects.
+19:30    R. Singh    Batch transferred to QC hold area.
+
+-----------------------------------------------------------
+SUMMARY OF DEVIATIONS NOTED IN LOG:
+1. Inlet air temperature exceeded upper limit (74 C vs. spec 60 C max) at 08:30-09:00.
+2. Pan speed below specification (6 RPM vs. spec 7-10 RPM) from 10:15 to 16:00.
+3. Deviations not formally escalated or documented on deviation form during shift.
+-----------------------------------------------------------
+END OF LOG

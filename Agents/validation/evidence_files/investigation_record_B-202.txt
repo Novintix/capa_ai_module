@@ -1,75 +1,399 @@
-INVESTIGATION RECORD
-Title     : Film Coat Peeling and Dissolution Failure - Batch B-202
-Inv. No   : INV-2026-0019
-Product   : Metformin HCl 500mg Film-Coated Tablets
-Batch     : B-202
-Initiated : 2026-02-17
-Investigator : M. Krishnan (QA)
+﻿INVESTIGATION RECORD
+Investigation Number: INV-2026-0019
+Product: Ceftriaxone for Injection 1g (Vial)
+Batch Number: CF-882
+Legacy Reference: B-202
+Investigation Type: Product quality event with documentation and process governance concerns
+Initiation Date: 2026-02-17
+Investigation Owner: QA Investigation Cell
 
------------------------------------------------------------
-1. PROBLEM STATEMENT
-Stability report SR-2026-0041 identified film coat peeling on ~22% of tablets and
-dissolution failure (63% vs. spec NLT 75%) at the 3-month accelerated stability
-timepoint (40 C / 75% RH). Investigation initiated to determine root cause.
+1. INCIDENT DESCRIPTION
+During final visual inspection, 142 vials out of 10,000 were rejected for white lint-like particulate appearance. The reject ratio exceeded established AQL limits and triggered formal investigation.
 
------------------------------------------------------------
-2. EVIDENCE GATHERED
+2. INVESTIGATION OBJECTIVES
+- Determine direct and contributing causes.
+- Assess quality and patient risk.
+- Confirm whether process execution and documentation controls were followed.
+- Define immediate containment and long-term CAPA recommendations.
 
-2.1 Batch Record Review
-- Coating operation conducted on 2025-11-10 using pan CP-04.
-- Batch record incomplete: no deviation form filed for temperature or pan speed events.
-- Shift A handover section blank.
+3. SCOPE
+- Manufacturing records for 2025-11-10 batch run.
+- Maintenance and restart controls related to pump-head replacement.
+- Shift handover records and policy compliance.
+- Process trend data and supporting quality reports.
 
-2.2 Operator Log Review (coating_process_log_B-202.txt)
-- Inlet temperature alarm at 08:30 (74 C). Alarm acknowledged. No action taken. Spray
-  continued during excursion.
-- Pan speed reduced to 6 RPM at 10:15. Deviation not escalated.
-- Written handover not completed at shift change (14:00).
-- Shift B operator ran pan at 6 RPM for approximately 2 hours before correcting.
+4. DOCUMENTS REVIEWED
+- MFG-LOG-CF882-B202 (manufacturing logbook)
+- SOP-MFG-044 (line clearance after maintenance)
+- policy.txt compendium (site policies)
+- pan_speed_temp_B-202-process_data.csv (process dataset)
+- stability_report_B-202.txt (quality and trend report)
+- historical_capa_coating.txt (prior events)
 
-2.3 Process Data Review (pan_speed_temp_B-202.csv)
-- Temperature excursion confirmed: 08:28-08:57 (duration ~29 minutes), peak 74.2 C.
-- Pan speed at 6 RPM confirmed: 10:14-16:03 (duration ~5 hours, 49 minutes).
+5. EVIDENCE MATRIX
+E1: Restart occurred with incomplete witness signature on line clearance form.
+E2: Open compliance item transferred verbally at shift handover.
+E3: No real-time deviation initiation despite trigger conditions.
+E4: Throughput pressure documented in timeline notes.
+E5: Historical CAPA trend indicates recurrence risk around handover and documentation timing.
 
-2.4 Equipment Review
-- Thermocouple CP-04 calibration current (last calibrated 2025-09-12). No equipment fault.
-- HVAC unit serviced 2025-10-15. Auto-correction function operating as designed.
-- Pan drive motor inspection: no faults. Operator manually reduced speed.
+6. TIMELINE OF RELEVANT EVENTS
+2025-11-10 06:44 - Maintenance indicates pump-head replacement complete.
+2025-11-10 07:03 - Process resumed while checklist still pending witness sign-off.
+2025-11-10 12:11 - QA walkthrough notes incomplete checklist.
+2025-11-10 13:54 - Verbal handover of unresolved quality item.
+2025-11-10 19:16 - End-of-run packet review identifies witness signature still missing.
+2026-02-15 - Defect trend report confirms reject spike.
+2026-02-17 - Investigation opened.
 
-2.5 Material Review
-- Coating polymer: HPMC E5 lot COA reviewed. All parameters within spec.
-- Core tablets: hardness 10.8 kP average (within spec 8-14 kP). No core material issue identified.
-- API particle size: within specification per incoming QC records.
+7. INTERVIEW SUMMARIES
+7.1 Operator Shift A (J. Thomas)
+- Stated intent was to complete documentation at first hold window.
+- Confirmed schedule recovery pressure communicated by planning.
+- Confirmed no deliberate concealment, but accepted delayed recording.
 
------------------------------------------------------------
-3. TIMELINE OF EVENTS
-  2025-11-10 08:30 : Inlet temp alarm. Operator acknowledges, does not act.
-  2025-11-10 10:15 : Pan speed reduced to 6 RPM by Shift A operator.
-  2025-11-10 13:50 : Verbal-only handover. Temperature and speed deviations not communicated.
-  2025-11-10 16:03 : Shift B corrects pan speed after routine check.
-  2026-02-15 : Stability failure identified at T3.
-  2026-02-17 : Investigation opened.
+7.2 Operator Shift B (R. Singh)
+- Received verbal handover that paperwork was pending.
+- Chose to continue operation expecting end-of-run closure.
+- Confirmed no formal signed transfer of open item.
 
------------------------------------------------------------
-4. PRELIMINARY FINDINGS
+7.3 Supervisor (S. Patel)
+- Confirmed repeated reminders for closure but no enforced line hold.
+- Noted concern about dispatch deadlines.
 
-a. HIGH-TEMPERATURE EXCURSION: Inlet air temperature exceeded specification limit (74 C vs. max
-   60 C) for approximately 29 minutes. Elevated temperature may have caused rapid moisture
-   evaporation, leading to brittle, poorly adhered coat film.
+7.4 QA Floor Monitor
+- Confirmed incomplete checklist observed mid-shift.
+- Requested immediate closure; no immediate stop request documented.
 
-b. EXTENDED LOW PAN SPEED: Pan speed below specification (6 RPM vs. min 7 RPM) for nearly
-   6 hours. Low pan speed reduces tablet-to-tablet movement, causing uneven coat deposition
-   and localized thick/thin areas susceptible to peeling.
+8. CAUSAL ANALYSIS
+8.1 Primary Cause
+- Breakdown in enforcement of mandatory post-maintenance restart control.
+8.2 Contributing Cause 1
+- Inadequate handover control for unresolved compliance item.
+8.3 Contributing Cause 2
+- Throughput pressure influenced operational prioritization.
+8.4 Contributing Cause 3
+- Delay in deviation initiation and GDP-compliant real-time recording.
 
-c. PROCEDURAL NON-COMPLIANCE: SOP-MFG-018 requires immediate escalation of parameter
-   deviations and written shift handover. Neither requirement was fulfilled.
+9. RISK ASSESSMENT
+Severity: High (product quality signal observed)
+Occurrence: Medium (control failures observed in prior trend)
+Detectability: Medium (detected at final visual, not prevented at source)
+Initial Risk Level: High
 
------------------------------------------------------------
-5. STATUS
-Open. Awaiting CAPA generation and sign-off.
+10. CONTAINMENT ACTIONS
+- Quarantine retained and unreleased units.
+- Expanded visual inspection sampling.
+- Temporary requirement: QA witness pre-booking for all post-maintenance restarts.
+- Shift briefing issued on written handover requirement.
 
-Investigator : M. Krishnan
-Reviewed by  : Dr. S. Mehta
-Date         : 2026-02-20
------------------------------------------------------------
+11. PROPOSED CAPA PLAN
+CAPA-1: MES lock to prevent RUN status with blank witness field on FRM-MFG-022.
+CAPA-2: Mandatory deviation auto-prompt if restart event occurs before checklist closure.
+CAPA-3: Supervisor accountability KPI on open item handover compliance.
+CAPA-4: Focused retraining with practical simulation on restart governance.
+CAPA-5: Monthly recurrence review with QA, Production, and Engineering.
+
+12. EFFECTIVENESS CRITERIA
+- 100 percent post-maintenance restarts with complete witness sign-off before RUN.
+- Zero verbal-only transfer of open critical items for 3 consecutive months.
+- At least 90 percent reduction in delayed critical entries within 2 quarters.
+
+13. EXTENDED INTERVIEW SUMMARIES
+
+13.1 QA Manager D. Verma
+- Confirmed awareness of recurring pattern of restart control failures from prior CAPA portfolio.
+- Stated CAPA-2024-0097 was considered effective based on effectiveness review outcomes but acknowledged the effectiveness criteria did not verify MES lock deployment.
+- Confirmed ITR-2024-0443 status was monitored but no formal risk acceptance document was generated when the system lock go-live slipped from Q1 2025.
+- Acknowledged that the monthly management review meeting recorded "in progress" status without formally invoking the risk escalation protocol defined in POL-QA-022.
+- Stated that in retrospect, the residual risk notation in CAPA-2024-0097-EFF should have triggered a formal interim risk document rather than passive monitoring.
+- Identified management review process as a system-level gap contributing to this event.
+
+13.2 Production Director A. Blum
+- Confirmed production performance scorecard is throughput-based.
+- Acknowledged communication on 2025-11-09 to supervisor S. Patel regarding dispatch priority for CF-882.
+- Stated the intent was to ensure resource planning, not to direct a compliance shortcut.
+- Confirmed awareness of Obs-2024-INS-07 (KPI misalignment observation) but stated KPI redesign work was deprioritized during ERP migration in Q2-Q3 2025.
+- Acknowledged that no risk acceptance document was filed when KPI redesign was deprioritized.
+- Conceded that the absence of a compliance-weighted KPI means supervisors receive no formal positive recognition for holding the line under schedule pressure.
+
+13.3 IT Project Manager (ITR-2024-0443)
+- Confirmed ITR-2024-0443 was downgraded in Q2 2025 due to ERP migration consuming IT resource capacity.
+- Stated the downgrade was approved internally by IT management; no formal communication to QA about the risk implications of the delay.
+- Confirmed no compensating risk documentation was generated by the IT team when the priority was lowered.
+- Stated UAT defects extended the timeline; expected go-live was Q3 2025, then Q4 2025, now targeted Q1 2026.
+- Acknowledged that 14 months elapsed between CAPA-2024-0097 identifying the need for the MES lock and the batch CF-882 event without the control being deployed.
+
+13.4 Shift Supervisor S. Patel (Shift A - additional details)
+- Confirmed receipt of 2025-11-09 email from A. Blum about dispatch priority.
+- Stated pressure to recover schedule was "normal" context for high-priority batches.
+- Acknowledged that the decision to allow production to continue without witness sign-off was influenced by belief that documentation closure would happen "before end of shift."
+- Confirmed no formal calculation of risk was done at decision point to continue.
+- Stated training had taught the requirement but provided no scenario practice for decision-making under real schedule pressure.
+- Identified scenario-based training gap as something he felt personally.
+
+13.5 Maintenance Technician H. Ramos
+- Confirmed pump-head replacement was completed correctly per work order requirements.
+- Stated the work order did not contain a field linking to FRM-MFG-022 completion.
+- Was not aware at time of completion that the downstream line clearance governance had a timing requirement for witness sign-off.
+- Stated he handed off mechanical completion verbally to J. Thomas and S. Patel, then departed the area.
+- Work order WO-MNT-55391 contained no mandatory notification to QA upon closure.
+- Identified gap: Maintenance procedure does not include a step requiring verification that FRM-MFG-022 has been initiated before the technician leaves the area.
+
+14. SYSTEMIC CAUSE ANALYSIS - SEVEN WHY LEVELS
+The following structured causal chain supports the why-analysis framework used in formal RCA methodology.
+
+WHY LEVEL 1
+Observation: 142 out of 10,000 vials in Batch CF-882 were rejected at final visual inspection for white lint-like particulate.
+Why did product defects occur?
+Because white particulate material was present inside the filled vials, introduced during the filling process on line FL-02.
+
+WHY LEVEL 2
+Why was white particulate present in the product?
+Because the product-contact transfer pathway (pump P-17, transfer hose, and downstream fittings) was not adequately verified as clear and free of contamination-risk conditions before filling was resumed after the pump-head replacement maintenance event.
+Supporting evidence: Stability report SR-2026-0041 identifies the maintenance restart as the strongest linkage; FRM-MFG-022-882 was incomplete at restart; particulate morphology (thin white fibers) is consistent with potential material shed from transfer path contacts.
+
+WHY LEVEL 3
+Why was the product-contact pathway not adequately verified before filling resumed?
+Because line filling began at 07:00 while the Clear-Clean-Check form FRM-MFG-022-882 was still open (witness signature field blank), in violation of SOP-MFG-044 Section 7 (pre-restart control flow) and POL-MFG-044 Section 4 (no restart before Clear-Clean-Check completion with witness sign-off).
+Supporting evidence: Manufacturing logbook MFG-LOG-CF882-B202 entry at 07:00 confirms RUN status while checklist was incomplete. MES audit trail confirms status change J.Thomas at 07:00:02 with no witness field check.
+
+WHY LEVEL 4
+Why did filling begin before the witness signature was obtained?
+Because there was no system-level gate preventing the MES line status transition from HOLD to RUN when the FRM-MFG-022 witness field was blank, AND the shift supervisor S. Patel did not enforce a line hold despite knowing the checklist was incomplete - influenced by production planning pressure to recover schedule.
+Supporting evidence: MES audit trail confirms system allowed HOLD→RUN transition without witness field check (ITR-2024-0443 not deployed). Manufacturing logbook shows schedule recovery discussion at 06:34. Supervisor interview confirms decision to continue based on intent to close documentation later.
+
+WHY LEVEL 5
+Why was there no system-level gate AND why did the supervisor not enforce the hold?
+No system gate: Because ITR-2024-0443 (the MES witness field lock) was not deployed. It was identified as a required control in CAPA-2024-0097 (closed December 2024) but remained in UAT for 11 months due to IT project reprioritization caused by ERP migration resource conflict - without a formal risk acceptance document authorizing the gap.
+No supervisor hold: Because the supervisor's performance in shift is evaluated purely on throughput (vials/min); compliance-mandated holds generate negative throughput scores with no compensating positive recognition - creating an implicit incentive structure that penalizes correct compliance behavior.
+Supporting evidence: CAPA-2025-0141 documents ITR-2024-0443 deployment delay. IT project manager interview confirms priority downgrade. A. Blum interview confirms KPI structure. Obs-2024-INS-07 independently observed the same KPI misalignment in 2024.
+
+WHY LEVEL 6
+Why was the MES lock deployment allowed to remain unresolved for 11 months AND why had the KPI misalignment not been corrected despite being identified?
+MES lock gap: Because the CAPA effectiveness review for CAPA-2024-0097 (closed February 2025) assessed effectiveness based on activity completion (SOP revised, training done, 10/11 audits compliant) rather than verifying technical control deployment. The residual risk of the undeployed MES lock was noted but did not trigger a formal risk acceptance document or management escalation. Monthly management review meetings recorded "in progress" status without applying decision criteria to distinguish acceptable delay from unacceptable unmanaged risk.
+KPI gap: Because the KPI redesign action from Obs-2024-INS-07 was deprioritized during ERP migration, and the deprioritization decision did not generate a formal risk acceptance document from Site Quality Council. The site's change and priority management process did not require QA approval or risk documentation when compliance-related commitments were deferred.
+Supporting evidence: CAPA-2024-0097-EFF review record and management review minutes (March, June, and September 2025). D. Verma and A. Blum interviews. CAPA-2025-0141 status documentation.
+
+WHY LEVEL 7
+Why did the management review process fail to apply adequate decision criteria for extended technical control gaps AND why did the priority management process not protect compliance-related commitments?
+Management review inadequacy: Because the Quality Management System's management review procedure (POL-QA-022 and site QMS Charter) does not define decision triggers that differentiate "in progress" statuses by risk level. The management review template includes an "open CAPA status" agenda item, but provides no criteria requiring formal risk acceptance when a high-risk action item exceeds its due date. The procedure was last substantively revised in 2023 and had not been updated after the 2024 regulatory observation. The review process was operating on annual substantive review cycle, meaning systemic gaps identified in the observation period would not be addressed until at least 12 months later.
+Priority management process gap: Because the site's IT and business change prioritization process (managed by Operations and IT jointly) does not have a mandatory QA review step when Quality-sensitive projects are deprioritized. The site governance structure created a pathway where a compliance-critical system control could be downgraded without formal QA notification, risk documentation, or escalation to Site Leadership. This structural gap was not identified in any prior CAPA or audit, making it an emergent systemic finding in this investigation.
+Supporting evidence: POL-QA-022 review date 2023; no 2024 or 2025 revision record. IT project manager and QA manager interviews confirming no QA notification process for priority changes. Management review minutes showing absence of risk-tier differentiation language for overdue actions.
+
+15. ORGANIZATIONAL AND CULTURAL FACTOR ANALYSIS
+15.1 Throughput Culture and Implicit Pressure
+Interview data from five participants (J. Thomas, S. Patel, R. Singh, D. Verma, A. Blum) consistently identifies a workplace culture where schedule pressure is treated as legitimate grounds for deferring compliance controls. This is not a case of deliberate non-compliance; rather, the culture has normalized a belief that documentation closure is something that happens "after" rather than "before or simultaneously."
+This cultural pattern is reinforced by:
+- KPI structures that reward vials/min without compliance weighting.
+- Prior events (CAPA-2024-0097, CAPA-2023-0181) where documentation gaps did not result in visible product quality signals, creating false evidence that the risk is theoretical.
+- Communication patterns where planning team emails emphasize dispatch urgency without compliance-first reminders.
+15.2 Authority Gradient in Compliance Decisions
+There is evidence of an authority gradient inhibiting compliance stops. J. Thomas (operator) identified the violation, documented it in notes, but did not raise a deviation or stop the line. R. Singh (Shift B operator) received verbal carry-forward and continued operation. M. Okafor (Shift B supervisor) saw the incomplete packet but did not stop the line. It was not until M. Kapoor (QA Floor Monitor, a different chain of authority) arrived and made direct determination that a stop occurred.
+This gradient indicates operators and supervisors did not feel empowered or obligated to stop the line based on their own compliance judgment. The stop came from QA. While QA stopped the line correctly, the delay from 07:00 to 16:33 (over 9 hours) during which vials were filled without the control in place represents the full exposure window.
+15.3 Documentation Safety Net Illusion
+Multiple participants described intent to "close the paperwork later." This reflects a misunderstanding or normalization of the difference between contemporaneous documentation and retrospective documentation. GDP principles (POL-QA-012) require real-time entry for critical controls, but the practical pattern in this batch was that completing forms after the fact was considered acceptable. This belief was not challenged by training alone and represents a cultural misconception that formed despite repeated training completion.
+15.4 CAPA System Confidence Without Verification
+The organization closed CAPA-2024-0097 as "effective" and CAPA-2024-0097-EFF as confirming the close. This gave management review meetings a signal of process improvement without verifying that the underlying technical control was deployed. This creates a false sense of security that can persist until a recurrence reveals the gap. The pattern of closing CAPAs based on activity completion rather than outcome verification is a systemic CAPA quality issue.
+
+16. IMMEDIATE POST-INVESTIGATION COMMITMENTS
+COMMIT-01: MES Lock ITR-2024-0443 - escalate to Site Director if not live by 2026-02-28.
+COMMIT-02: Generate formal risk acceptance document for the period 2025-Q1 through live date of ITR-2024-0443.
+COMMIT-03: Revise management review template to include risk-tier decision criteria for overdue action items.
+COMMIT-04: Mandate QA approval step in IT project priority change process for Quality-sensitive items.
+COMMIT-05: Complete KPI redesign (CAPA-2025-0189) by 2026-Q1; no further deferral without Site Director approval.
+COMMIT-06: Deploy scenario-based training (behavioral compliance module) by 2026-Q1.
+COMMIT-07: Add maintenance work order closure field linking to FRM-MFG-022 initiation confirmation.
+COMMIT-08: Revise CAPA effectiveness review template to require explicit technical control deployment confirmation.
+
+17. ISHIKAWA 6M CAUSE ANALYSIS
+This section structures all identified causes and contributing factors under the standard six Ishikawa fishbone categories: Man, Machine, Method, Measurement, Material, and Environment. It supplements the seven-level why analysis (Section 14) with a branched causal map for use in fishbone diagramming and completeness review.
+
+17.1 MAN (People / Human Factors)
+Primary direct cause (MAN-01):
+- J. Thomas initiated line RUN status at 07:00 while the witness signature field on FRM-MFG-022-882 was blank, in direct violation of SOP-MFG-044 Section 7.
+- Action motive: Schedule recovery pressure combined with belief that documentation could be closed at the next hold window.
+
+Contributing cause (MAN-02):
+- S. Patel (Shift A Supervisor) was aware the checklist was incomplete from 06:45 and directed the team to "prepare for startup while waiting for witness" rather than enforcing a line hold. Repeated reminders to close the document were given but never converted into a stop instruction.
+-  Root: Supervisor did not feel empowered — or motivated — to hold the line against planning urgency from senior management. Overdue training module "Supervisor Accountability Workshop" specifically covered this scenario.
+
+Contributing cause (MAN-03):
+- R. Singh (Shift B Operator) received verbal handover of the open compliance item at 13:54 and continued operation without requiring written transfer or initiating a hold.
+- Root: Overdue "Handover Governance Practicum" module. R. Singh mentored by J. Thomas; behavioral normalization of deferred compliance.
+
+Contributing cause (MAN-04):
+- M. Okafor (Shift B Supervisor) reviewed the incomplete batch packet at 14:14 and did not stop the line, deferring to QA to make the formal stop decision.
+- Root: Cultural pattern of treating stop authority as a QA prerogative rather than a shared supervisory obligation. Overdue "Supervisor Accountability Workshop" module.
+
+Contributing cause (MAN-05):
+- H. Ramos (Maintenance Technician) completed pump-head replacement and verbally notified the operator but did not confirm or initiate FRM-MFG-022. He had no awareness of the obligation to ensure the form was started before leaving the area.
+- Root: Overdue module "Link between WO Closure and FRM-MFG-022." Work order form did not contain a prompt for this step.
+
+Contributing cause (MAN-06):
+- QA Floor Monitor M. Kapoor was assigned to a different hold review at the time of the planned restart; no pre-booking had been made for CF-882 restart witness requirement.
+- Root: No formal QA witness pre-booking process. QA resource planning did not cross-reference pending maintenance restarts with QA availability.
+
+Contributing cause (MAN-07):
+- All five individuals in the event chain received training completion certificates showing adequate knowledge assessment scores. Behavioral compliance was not verified adequately: J. Thomas' 90-day observational audit showed 67 percent behavioral compliance (below 90 percent threshold) with no follow-up action. Three team members had overdue simulation modules directly relevant to the event.
+- Root: Training design gap (knowledge-only, no pressure scenario); LMS did not alert QA Manager; performance reviews rewarded throughput without compliance weighting.
+
+Contributing cause (MAN-08):
+- R. Singh was mentored during onboarding by J. Thomas, who shared the deferred-documentation behavioral pattern. The mentor qualification process does not screen for behavioral compliance, enabling transfer of non-compliant norms to new employees.
+
+17.2 MACHINE (Equipment / Systems)
+Primary equipment gap (MCH-01):
+- MES system did not prevent the line status transition from HOLD to RUN when the FRM-MFG-022-882 witness field was blank. This is the single most critical technical control failure.
+- Required control: ITR-2024-0443 (MES witness-field lock) was identified in CAPA-2024-0097 (December 2024) but remained in UAT for 11 months due to IT project reprioritization.
+- No automated lock, no automated alert, no system-generated deviation ticket at restart.
+
+Contributing factor (MCH-02):
+- Transfer pump P-17 underwent pump-head replacement (WO-MNT-55391) on 2025-11-10. This is the maintenance event that triggered the Clear-Clean-Check requirement. The pump replacement itself was executed correctly per WO; no mechanical defect in the pump.
+- Post-event pump inspection (Section 5 of MFG-LOG-CF882-B202) showed seals intact, no material retention. Pump was not a direct source of the particulate.
+
+Contributing factor (MCH-03):
+- Transfer hose exterior showed abrasion at routing clip contact point. SEM-EDS analysis of retained particulate in defective vials matched polymer fiber profile consistent with this hose exterior. The hose routing was a known configuration and had not been formally assessed as a potential particulate shed risk.
+- Root: No periodic assessment of hose exterior integrity as part of pre-batch line qualification. Hose inspection criteria in FRM-MFG-022 do not include an exterior abrasion check at the routing clip zones.
+
+Contributing factor (MCH-04):
+- Work order form WO-MNT-55391 (and the WO template generally) does not contain a mandatory field linking WO closure to FRM-MFG-022 initiation confirmation. Maintenance can close and depart without any system or form prompt to verify that the post-maintenance control documentation has been started.
+- Root: WO form design gap not identified in prior CAPA portfolio. First formally identified in INV-2026-0019.
+
+Contributing factor (MCH-05):
+- Conveyor guard gasket showed wear (identified in Section 5 of MFG-LOG-CF882-B202). Gasket is outside the product-contact path and was not directly implicated in the particulate findings. Its existence as a near-miss degradation item indicates equipment condition monitoring scope may need broadening to include non-product-contact components that could eventually affect nearby product zones.
+
+Contributing factor (MCH-06):
+- LMS (TrackGMP v5.2) does not generate QA Manager alerts when high-criticality modules are overdue; does not validate training currency before batch assignment; does not route below-threshold behavioral audit results to QA. LMS is classified as a quality-supporting IT system but was not included in the Quality-Critical IT Project Register (which did not exist as a formal instrument).
+
+17.3 METHOD (Process / Procedural)
+Primary procedural failure (MTH-01):
+- SOP-MFG-044 Section 7 (pre-restart control flow) was not followed. Step 5 (obtain QA witness signature) was bypassed in transition to Step 7 (release HOLD and resume operation).
+- The SOP contains the correct requirement. The failure was in execution, not in SOP design — however, Method weaknesses contributed to the execution failure.
+
+Contributing method gap (MTH-02):
+- The "compensating control" for the undeployed MES lock (manual supervisor/QA gatekeeping) is defined in SOP-MFG-044 but is dependent entirely on human compliance without any independent verification step. A compensating control that requires the same individuals who are under schedule pressure to self-enforce a stop is structurally inadequate.
+- Root: SOP revision process did not include a requirement to evaluate whether the compensating control is robust to known behavioral risk factors.
+
+Contributing method gap (MTH-03):
+- Shift handover process (SOP-MFG-044 Section 10, FRM-MFG-031) was not followed. The open compliance item was transferred verbally at 13:54. This is the second documented failure of the written handover requirement within 15 months (prior: CAPA-2024-0097).
+- The SOP contains the correct requirement. The repeat failure indicates the method of training and consequence management for handover violations is insufficient.
+
+Contributing method gap (MTH-04):
+- The deviation initiation requirement (SOP-MFG-044 Section 11) specifies immediate deviation when restart occurs without witness sign-off. No deviation was opened at 07:00 when the violation occurred. The method for detecting and acting on a deviation trigger in real time failed because: (a) the operator did not believe the risk was immediate; (b) the supervisor accepted a deferred closure intent; (c) no automated detection/prompt existed.
+- Root: Deviation trigger awareness is in training but not in real-time system enforcement.
+
+Contributing method gap (MTH-05):
+- QA witness pre-booking is not defined in any current SOP or procedure. The method by which QA witnesses are allocated to planned post-maintenance restarts relies on informal communication. This informal method fails when QA resource demand peaks coincide with planned maintenance events.
+- Root: No formal procedure governs witness scheduling. POST-INV-2026-0019 proposed policy POL-QA-MFG-WIT-001 addresses this gap.
+
+Contributing method gap (MTH-06):
+- The maintenance work order closure method does not include a mandatory interface step with the operational restart documentation process. Maintenance and operations procedures are siloed: WO closure is governed by Engineering; FRM-MFG-022 initiation is governed by Manufacturing Operations; QA witness is governed by Quality. No cross-functional checkmark is required before any party can advance to the next step.
+- Root: Process design did not map end-to-end the responsibility handoff between maintenance, operations, and QA in a post-maintenance restart scenario. An end-to-end process map was not created until INV-2026-0019.
+
+Contributing method gap (MTH-07):
+- CAPA effectiveness verification method (FRM-QA-CAPA-EFF-01, 2022 version) uses activity completion checkboxes only. This method was applied to CAPA-2024-0097 and resulted in a closure declaration without confirming MES lock deployment. The effectiveness method was structurally incapable of catching the residual risk.
+- Root: Effectiveness method last updated 2022; not revised after CAPA-2024-0097 raised the importance of technical control confirmation.
+
+17.4 MEASUREMENT (Monitoring / Inspection / Detection)
+Primary measurement failure (MSR-01):
+- In-process visual checks during the batch did not detect the white particulate during the filling run (all recorded as "acceptable"). The particulate at the vial level was sub-visible or at detection threshold for manual visual inspection under production-line speed conditions.
+- Root: In-process visual sampling frequency and method are calibrated for routine operations, not for heightened-risk scenarios (post-maintenance restart with incomplete controls). No enhanced inspection protocol was triggered at the restart.
+
+Contributing factor (MSR-02):
+- Process parameter monitoring in MES records throughput and alarms but does not flag the open status of FRM-MFG-022 as a process control datapoint. The MES data stream shows no evidence of the governance failure; an analyst reviewing only process parameter trends would not detect the control lapse.
+- Root: Integration between quality documentation status (clearance form) and process parameter monitoring (MES) is absent. Systems are siloed.
+
+Contributing factor (MSR-03):
+- Environmental Monitoring (EM) showed no exceedances throughout the batch day. The EM program was effective at confirming the room environment was controlled. However, EM is not designed to detect process-contact particulate shed from inside the transfer system. The two measurement systems address different risk planes; the absence of EM exceedance does not contradict the process-contact origin of the defect.
+- Root: Measurement scope adequacy: EM addresses ambient contamination; it does not address internal process-contact material shed. Particulate risk from post-maintenance restarts requires an additional in-process measurement dimension (e.g., enhanced sub-visible particle testing for initial fill output after maintenance).
+
+Contributing factor (MSR-04):
+- Sub-visible particulate testing (USP <788>) on retention samples confirmed elevated particle counts, with 3 of 5 samples exceeding action levels. However, this measurement was performed as part of stability and release testing after the batch was completed — it was not performed as an in-process trigger during the run.
+- Root: No triggered in-process sub-visible particulate test protocol exists for post-maintenance restart events. USP <788> is a release/stability test, not a continuous manufacturing monitor.
+
+Contributing factor (MSR-05):
+- Alarm measurement system on line FL-02 logged the transfer pressure dip (alarm count = 1 at 07:40) as an auto-recovered alarm and closed the event without requiring documented corrective action.
+- Root: Alarm classification system categorized this as a non-critical auto-recoverable alarm. POL-ENG-031 states that alarm acknowledgement is not corrective action; however the alarm management system does not distinguish between alarms that require corrective action documentation and those that do not. The categorization gap allows certain process-indicator alarms to pass through without generating a formal review requirement.
+
+Contributing factor (MSR-06):
+- Batch packet completeness is reviewed item-by-item at end-of-batch release review. This review occurs after the batch is completed and units are filled. Detection of the missing witness signature at the release stage (timeline entry: 19:16) is too late to prevent exposure. The measurement/review point is post-hoc for a pre-start control.
+- Root: Batch packet completeness check is a lagging indicator for pre-start controls. No real-time packet status check is embedded in MES or visible to QA during the run.
+
+Contributing factor (MSR-07):
+- Training behavioral audit showed J. Thomas at 67 percent compliance (below 90 percent threshold) at the 90-day post-training check in August 2025. This measurement was made, the threshold breach was recorded, but no alert was routed to QA Manager and no action was taken.
+- Root: Measurement existed; the response system (alert routing) failed. The measurement had no effective consequence pathway.
+
+17.5 MATERIAL (Input Materials / Consumables / Components)
+Primary material finding (MAT-01):
+- Transfer hose exterior abrasion at routing clip zone is the most probable particulate source per SEM-EDS analysis (Appendix C of SR-2026-0041). The hose material (polymer) is approved for use on the line. The abrasion is a wear condition, not a material quality defect.
+- Root: Hose routing design generates mechanical wear at the clip point. This was not identified as a risk during line qualification or periodic preventive maintenance assessment.
+
+Contributing factor (MAT-02):
+- Pump seal kit (SK-P17-003, Lot 20251004) was correctly installed and did not contribute to the particulate findings. Material was within specification; incoming inspection records confirm no defects. Pump seal material ruled out as particulate source.
+
+Contributing factor (MAT-03):
+- Operator garments (Grade B coverall) were submitted for fiber comparison. Garment fiber width does not match observed particle dimensions; garment origin ruled out as primary source. However, the submission of garment fibers for analysis is a standard containment action confirming adequate secondary investigation was performed.
+
+Contributing factor (MAT-04):
+- Packaging materials (primary container: vials; secondary: cartons/labels) were not implicated. Vial quality confirmed from supplier CoA and incoming inspection records. No atypical vial defect population.
+
+Contributing factor (MAT-05):
+- Bulk product (Ceftriaxone for Injection 1g) chemical quality was confirmed within specification for all release and retention samples. No formulation instability contributing to the particulate defects. The active pharmaceutical ingredient and excipients are eliminated as contributing materials.
+
+Material management adequacy note:
+- Incoming material inspection records for all materials used in CF-882 were reviewed and confirmed adequate. The material-related root of this event is not a supplier quality failure or incoming inspection failure. It is a process-contact material integrity issue (hose abrasion) that falls within the plant's own equipment/maintenance responsibility domain.
+
+17.6 ENVIRONMENT (Facility / HVAC / Cleanroom / External Conditions)
+Primary environment finding (ENV-01):
+- All room environmental monitoring data for FL-02 on 2025-11-10 was within specification (Appendix F of SR-2026-0041). Temperature, humidity, differential pressure, settle plates, and active air sampling were all compliant.
+- Environmental contamination is eliminated as the primary cause. This is a confirmed finding, not an assumption.
+
+Contributing observation (ENV-02):
+- Grade A airflow in the filling zone was maintained throughout the batch. No HVAC alarms were recorded. Filter change schedule was current. Grade A particle counts were within specification throughout the run.
+- Conclusion: The operational environment did not contribute to the product defect event.
+
+Contributing observation (ENV-03):
+- Corridor C-2 differential pressure was maintained within the approved 10-15 Pa range throughout the batch. No pressure exceedance events. Cleanroom breach is eliminated as a contributing cause.
+
+Environmental management adequacy note:
+- The environment category in this investigation provides confirmatory evidence rather than causal content. All environmental systems functioned correctly. The absence of environmental cause strengthens the assignment of root cause to the process-contact internal pathway (machine/material) combined with the governance failure (man/method/measurement).
+
+Environmental monitoring program adequacy for this event type:
+- EM program is designed to detect ambient room contamination. It is not designed to detect contamination originating inside closed product-contact systems.
+- This is an appropriate scope limitation for EM; it is not a program deficiency. The deficiency lies in the absence of an in-process measurement tier specifically for post-maintenance restart risk (addressed in MSR-03 and MSR-04).
+
+17.7 MANAGEMENT SYSTEM (Organizational Root)
+Note: A seventh "M" (Management/Organization) is added here as it represents the systemic causal layer that enabled all six primary M categories to fail simultaneously.
+
+Primary management system failure (MGT-01):
+- Effectiveness review for CAPA-2024-0097 was closed without confirming MES lock deployment, creating false assurance that technical controls were in place.
+
+Contributing (MGT-02):
+- IT project ITR-2024-0443 was deprioritized without generating a QA risk acceptance document, removing the primary technical control from the protection layer for 11 months.
+
+Contributing (MGT-03):
+- Management review meetings received "in progress" status for high-risk delayed items without applying risk-tier decision criteria. No escalation was triggered for ITR-2024-0443 or KPI reform.
+
+Contributing (MGT-04):
+- KPI structure rewarded throughput and penalized holds, creating an organizational incentive that was directly opposed to the behavioral compliance required by SOP-MFG-044.
+
+Contributing (MGT-05):
+- QA resource planning did not account for witness availability at known maintenance restart windows. The organizational process for the most basic pre-condition of the control (QA presence) was not formalized.
+
+18. INVESTIGATION SIGN-OFFS
+Lead Investigator: QA Investigation Cell
+Review: QA Manager D. Verma
+Approval: QA Director (pending)
+Investigation Completion Target: 2026-03-31
+
+13. INVESTIGATION STATUS
+Current state: Open - pending CAPA board approval and final particulate source characterization.
+Planned closure target: 2026-03-31
+
+14. APPROVALS
+Investigator: M. Krishnan
+QA Reviewer: S. Mehta
+Production Reviewer: S. Patel
+Quality Head Approval: Pending
+
 END OF INVESTIGATION RECORD

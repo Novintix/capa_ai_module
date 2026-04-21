@@ -1,0 +1,61 @@
+STABILITY STUDY REPORT
+Product   : Metformin HCl 500mg Film-Coated Tablets
+Batch     : B-202
+Protocol  : STAB-MET-007
+Condition : 40 C / 75% RH (Accelerated)
+Timepoint : 3 Months
+Report No : SR-2026-0041
+Date      : 2026-02-15
+
+-----------------------------------------------------------
+1. OBJECTIVE
+To evaluate physical and chemical stability of Batch B-202 at the 3-month accelerated
+stability timepoint per ICH Q1A guidelines.
+
+-----------------------------------------------------------
+2. OBSERVATIONS
+
+2.1 Visual / Appearance
+  Initial (T0)   : Smooth, white film coat. No defects observed.
+  3 Month (T3)   : Peeling and flaking of film coat observed on approximately 22% of tablets.
+                   Cracks noted on coat surface, primarily at tablet edges.
+                   Coat adhesion appears weakened.
+
+2.2 Dissolution (USP Apparatus II, 900 mL, 0.1N HCl, 50 RPM, 45 min)
+  Spec           : NLT 75% at 45 min
+  T0 result      : 91% (average of 6 units)
+  T3 result      : 63% (average of 6 units) -- FAIL
+
+2.3 Assay (HPLC)
+  Spec           : 95.0 - 105.0%
+  T0 result      : 100.2%
+  T3 result      : 99.6% -- PASS
+
+2.4 Related Substances
+  Spec           : Total impurities NMT 0.5%
+  T3 result      : 0.18% -- PASS
+
+2.5 Hardness (at T3)
+  Spec           : 8 - 14 kP
+  T3 result      : 9.2 kP (average) -- PASS
+
+-----------------------------------------------------------
+3. ANALYST COMMENTS
+
+The peeling and cracking of the film coat is the primary finding of concern. Coat failure
+is likely contributing to the dissolution failure by exposing uneven tablet surface area
+to dissolution media. Chemical stability appears unaffected. Coating process parameters
+should be reviewed as the most probable cause of coat integrity failure.
+
+-----------------------------------------------------------
+4. CONCLUSION
+
+Batch B-202 FAILS the 3-month accelerated stability criteria.
+Failure attributed to film coat defect (peeling/cracking).
+Formal investigation and CAPA required per SOP-QA-021.
+
+Analyst      : P. Nair
+Reviewed by  : Dr. S. Mehta (QC Manager)
+Date         : 2026-02-15
+-----------------------------------------------------------
+END OF REPORT

@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 from router import register_routes
@@ -24,8 +25,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routes
+# Register API routes FIRST (before static files)
 register_routes(app)
+
+# Mount static files LAST (so API routes take precedence)
+# This serves UI files at root, but API routes are checked first
+# app.mount("/", StaticFiles(directory="UI", html=True), name="ui")
 
 
 if __name__ == "__main__":

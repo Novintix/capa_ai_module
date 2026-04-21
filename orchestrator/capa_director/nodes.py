@@ -223,7 +223,7 @@ def action_plan_node(state: DirectorState) -> dict:
 
     try:
         graph  = build_action_graph()
-        result = graph.invoke({"capa_input": capa_input.model_dump()})
+        result = graph.invoke(capa_input.model_dump())
     except Exception as exc:
         return {
             "error": f"Action Plan exception: {exc}",

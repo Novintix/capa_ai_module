@@ -1,0 +1,191 @@
+INVESTIGATION RECORD
+Investigation Number: INV-MDT-2026-0047
+Product: Single-Use Infusion Pump Cartridge Set 10 mL (Sterile)
+Batch Number: IPC-117A
+Legacy Reference: MT-117
+Investigation Type: Product quality event with process governance and documentation control concerns
+Initiation Date: 2026-03-03
+Investigation Owner: QA Investigation Cell - MedTech Division
+
+1. INCIDENT DESCRIPTION
+During final outgoing inspection, 186 cartridge sets out of 12,000 were rejected for visible translucent fiber-like particulate in the fluid pathway chamber. The reject ratio exceeded internal action limits and triggered formal investigation.
+
+2. INVESTIGATION OBJECTIVES
+- Determine direct and contributing causes.
+- Assess patient and clinical-use risk.
+- Verify adherence to maintenance-restart controls and handover governance.
+- Define immediate containment and long-term CAPA recommendations.
+
+3. SCOPE
+- Manufacturing records for 2026-02-12 batch run IPC-117A.
+- Maintenance and restart controls related to ultrasonic weld horn replacement.
+- Shift handover records and policy compliance.
+- Process trend data, particulate analysis, and historical CAPA records.
+
+4. DOCUMENTS REVIEWED
+- ASSY-LOG-IPC117A-MT117 (assembly and shift logbook)
+- SOP-MDT-058 (post-maintenance line clearance and restart control)
+- policy.txt compendium (site governance policies)
+- assembly_speed_env_MT-117-process_data.csv (time-series process data)
+- stability_report_MT-117.txt (quality and reliability report)
+- historical_capa_medtech.txt (prior trend and recurrence records)
+- employee_training_records_medtech.txt (qualification and competency records)
+
+5. EVIDENCE MATRIX
+E1: Restart occurred while Line Readiness Form FRM-MDT-041 witness field remained blank.
+E2: Open compliance item was transferred verbally during shift handover.
+E3: No immediate deviation was raised when trigger condition was met.
+E4: Throughput recovery pressure documented in timeline and planning communication.
+E5: Historical CAPA data shows repeated weakness in handover and real-time documentation.
+E6: Particulate morphology is consistent with polymer shed from worn guide rail sleeve near tubing feed path.
+
+6. TIMELINE OF RELEVANT EVENTS
+2026-02-12 06:18 - Maintenance indicates ultrasonic weld horn replacement complete.
+2026-02-12 06:56 - Process resumed while readiness checklist witness sign-off pending.
+2026-02-12 11:44 - QA patrol notes incomplete readiness checklist.
+2026-02-12 13:49 - Verbal handover of unresolved quality item to Shift B.
+2026-02-12 16:21 - QA witness arrives and directs immediate hold.
+2026-02-12 16:25 - Deviation DEV-MDT-2026-0073 opened; line moved to HOLD.
+2026-03-01 - Defect trend report confirms reject spike above action limit.
+2026-03-03 - Formal investigation opened.
+
+7. INTERVIEW SUMMARIES
+7.1 Operator Shift A (L. Chen)
+- Stated intent was to complete readiness documentation at first pause window.
+- Confirmed schedule recovery pressure from planning and dispatch team.
+- Confirmed no intent to conceal, but accepted delayed recording behavior.
+
+7.2 Operator Shift B (M. Ortiz)
+- Received verbal handover that witness field was pending.
+- Continued production expecting closure before end-of-run review.
+- Confirmed no signed written transfer for open compliance item.
+
+7.3 Shift Supervisor A (R. Iqbal)
+- Confirmed reminders were issued but no mandatory line hold enforced.
+- Noted concern over same-day hospital order dispatch commitments.
+
+7.4 QA Floor Specialist (N. Rao)
+- Confirmed incomplete checklist observed during patrol.
+- Requested immediate closure; no immediate stop instruction recorded by operations.
+
+7.5 Maintenance Technician (E. Walters)
+- Confirmed weld horn replacement per work order and leak test completion.
+- Stated work order did not include mandatory linkage to FRM-MDT-041 completion.
+
+8. CAUSAL ANALYSIS
+8.1 Primary Cause
+- Breakdown in enforcement of mandatory post-maintenance restart gate.
+8.2 Contributing Cause 1
+- Weak handover control for unresolved critical compliance item.
+8.3 Contributing Cause 2
+- Throughput pressure influenced decision-making.
+8.4 Contributing Cause 3
+- Delayed deviation initiation and non-contemporaneous critical documentation.
+8.5 Contributing Cause 4
+- Technical lock (MES gate) not deployed despite prior CAPA commitment.
+
+9. RISK ASSESSMENT
+Severity: High (sterile fluid pathway particulate risk)
+Occurrence: Medium (prior signals in CAPA trend)
+Detectability: Medium (detected at final stage, not prevented at source)
+Initial Risk Level: High
+
+10. CONTAINMENT ACTIONS
+- Quarantine all 12,000 units from IPC-117A.
+- Expand visual and sub-visible particulate reinspection scope.
+- Temporary rule: QA pre-assigned for all post-maintenance restarts.
+- Issue controlled shift briefing on written handover requirement.
+- Replace and inspect tubing feed guide rail sleeves on line AS-04.
+
+11. PROPOSED CAPA PLAN
+CAPA-1: Deploy MES lock to block RUN transition while FRM-MDT-041 witness field is blank.
+CAPA-2: Auto-prompt deviation ticket creation when restart occurs before checklist closure.
+CAPA-3: Add mandatory QA approval in IT priority changes for quality-critical controls.
+CAPA-4: Revise supervisor KPIs to include compliance-hold positive weighting.
+CAPA-5: Implement scenario-based retraining for escalation under schedule pressure.
+CAPA-6: Add maintenance work order field confirming readiness form initiation before area handoff.
+CAPA-7: Add periodic particulate-shed inspection to guide rail sleeve PM checklist.
+
+12. EFFECTIVENESS CRITERIA
+- 100 percent post-maintenance restarts with completed witness sign-off before RUN.
+- Zero verbal-only transfer of open critical items for 90 days.
+- At least 90 percent reduction in delayed critical entries within two quarters.
+- No particulate reject trend above alert limit for three consecutive production months.
+
+13. EXTENDED INTERVIEW DETAILS
+13.1 QA Manager (P. Mendez)
+- Confirmed prior CAPA CAPA-MDT-2025-0112 was closed as effective without confirming MES lock go-live.
+- Stated residual risk was noted but no formal risk acceptance document was generated after deployment delay.
+- Acknowledged management review used generic "in progress" statuses with no risk-tier trigger.
+
+13.2 Production Director (A. Sethi)
+- Confirmed dispatch urgency communication was sent before production date.
+- Stated intent was planning clarity, not encouragement of compliance shortcuts.
+- Acknowledged KPI redesign action from prior observation remained unimplemented.
+
+13.3 IT Project Lead (J. Costa)
+- Confirmed ITR-MDT-2025-0314 (MES witness lock) was deprioritized during ERP transition.
+- Stated no mandatory QA sign-off was required before priority downgrade.
+- Confirmed revised go-live slipped from Q4 2025 to Q2 2026.
+
+14. SYSTEMIC WHY ANALYSIS (7 LEVELS)
+WHY 1: Why were defective units produced?
+Because polymer-like fibers entered the sterile fluid pathway during cartridge assembly.
+
+WHY 2: Why did fibers enter the pathway?
+Because line restart occurred without complete post-maintenance readiness verification, and material-shed risk near tubing path was not detected before operation resumed.
+
+WHY 3: Why was readiness verification incomplete at restart?
+Because RUN status was allowed while FRM-MDT-041 witness field remained blank.
+
+WHY 4: Why was RUN allowed and not stopped immediately?
+Because MES had no witness-field lock and supervisor chose continuation under throughput pressure.
+
+WHY 5: Why was MES lock absent and supervision weak?
+Because quality-critical IT control deployment was delayed without formal risk acceptance, while KPI design penalized holds and rewarded throughput.
+
+WHY 6: Why were these delays and KPI gaps tolerated?
+Because CAPA effectiveness checks emphasized activity completion over technical control verification, and governance lacked formal trigger rules for overdue high-risk actions.
+
+WHY 7: Why did governance lack these trigger rules?
+Because management review and IT prioritization procedures were not updated after prior observations, leaving no mandatory risk-tier escalation pathway for deferred quality-critical controls.
+
+15. ORGANIZATIONAL FACTOR ANALYSIS
+15.1 Culture of Deferred Closure
+Operators and supervisors described an informal norm: close documentation at the next convenient window rather than before restart.
+
+15.2 Authority Gradient
+Operators deferred stop authority to QA rather than exercising line-hold responsibility themselves.
+
+15.3 KPI and Behavioral Incentives
+Throughput-only performance metrics created implicit penalty for compliance-related holds.
+
+15.4 CAPA Confidence Without Outcome Verification
+Past CAPA closures signaled completion but did not confirm deployment of core technical controls.
+
+16. IMMEDIATE COMMITMENTS
+COMMIT-01: Escalate MES lock deployment to Site Director if not live by 2026-04-30.
+COMMIT-02: Issue formal risk acceptance for lock-gap period between planned and actual go-live.
+COMMIT-03: Revise management review template with risk-tier criteria for overdue actions.
+COMMIT-04: Add mandatory QA approval in IT project reprioritization workflow.
+COMMIT-05: Implement KPI redesign with compliance weighting by 2026-Q2.
+COMMIT-06: Deploy scenario-based compliance decision training by 2026-Q2.
+COMMIT-07: Update PM checklist for guide rail sleeve abrasion and particulate-shed checks.
+
+17. ISHIKAWA 6M SUMMARY
+MAN: Delayed documentation and non-escalation under pressure.
+MACHINE: No MES lock; worn guide rail sleeve near tubing feed path.
+METHOD: Incomplete adherence to restart and handover procedures.
+MEASUREMENT: Detection occurred late at final inspection rather than in-process control.
+MATERIAL: Polymer fiber profile linked to guide rail sleeve abrasion.
+ENVIRONMENT: No cleanroom excursion signal; environmental trend not primary driver.
+
+18. FINAL INVESTIGATION CONCLUSION
+The IPC-117A event is primarily a governance and control-enforcement failure in post-maintenance restart and handover management, compounded by undeployed technical controls and throughput-biased incentives. Particulate characterization supports a process-contact-adjacent polymer shed source. Investigation recommends immediate containment, systemic CAPA, and governance redesign focused on enforceable controls.
+
+19. APPROVALS
+Prepared By: QA Investigation Cell - MedTech
+Reviewed By: Quality Systems Manager
+Approved By: Site Quality Head (pending)
+
+END OF RECORD

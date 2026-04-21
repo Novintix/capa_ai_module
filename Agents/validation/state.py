@@ -31,6 +31,7 @@ class AgentState(TypedDict, total=False):
 	evidence_records: List[Dict[str, Any]]
 	file_evidence_records: List[Dict[str, Any]]
 	evidence_chunk_count: int           # number of chunks indexed by semantic_retriever
+	request_id: str                     # key used for the per-request semantic index (= complaint_id)
 	cause_validation_results: List[Dict[str, Any]]
 	validated_causes: List[Dict[str, Any]]
 
