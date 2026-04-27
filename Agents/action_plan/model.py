@@ -9,13 +9,14 @@ from typing import List, Optional, Dict, Any
 
 
 class CapaActionItem(BaseModel):
-    """Single action plan row with 9 columns"""
+    """Single action plan row with 10 columns"""
     action_type: str = Field(..., description="Correction/Corrective/Preventive/Systemic")
-    action_description: str = Field(..., description="Specific, measurable description")
+    action_description: str = Field(..., description="Specific, measurable description of what will change")
     assigned_to: str = Field(..., description="Department (not individual name)")
     planned_due_date: str = Field(..., description="YYYY-MM-DD format")
     resources_required: str = Field(..., description="Tools, personnel, equipment needed")
-    verification_plan: str = Field(..., description="Measurable validation method")
+    verification_plan: str = Field(..., description="Measurable validation method (how to verify)")
+    success_criteria: str = Field(..., description="Explicit, measurable definition of what constitutes success for this action (what must be true when the action is done)")
     training_requirements: str = Field(..., description="Yes/No + Training ID or N/A")
     document_updates_required: str = Field(..., description="Document IDs (SOP-XXX, WI-XXX) or N/A")
     change_control_reference: str = Field(..., description="CC-###, EC-###, SC-### or N/A")
