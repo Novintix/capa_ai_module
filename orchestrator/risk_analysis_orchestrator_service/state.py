@@ -15,6 +15,9 @@ from typing_extensions import TypedDict
 
 class RiskAnalysisState(TypedDict, total=False):
 
+    # ── Run identity (set by router so nodes can write status to Redis) ─────────
+    thread_id:              Optional[str]
+
     # ── Input ─────────────────────────────────────────────────────────────────
     raw_input:              str
     complaint_id:           Optional[str]   # business-level ID — set by context_node from extracted data

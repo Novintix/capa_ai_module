@@ -74,7 +74,7 @@ from .state    import RiskAnalysisState
 # REDIS — use centralised config (reads REDIS_URL from .env)
 # ══════════════════════════════════════════════════════════════════════════════
 
-from config.redis_config import redis_client, REDIS_URL  # noqa: E402
+from config.redis_config import redis_client, REDIS_URL, write_agent_status, publish_agent_event  # noqa: E402
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -485,12 +485,13 @@ def payload_builder_node(state: RiskAnalysisState) -> dict:
 
 def dispatch_parallel(state: RiskAnalysisState) -> list[Send]:
     inputs = state["enriched_inputs"]
+    tid    = state.get("thread_id", "unknown")
     print("\n[STEP 3] 📤 Dispatching parallel agents: A5, A1, A2, A3...")
     return [
-        Send("A5_detection_agent",     {"agent_input": inputs["detection"]}),
-        Send("A1_similar_cases_agent", {"agent_input": inputs["similar_cases"]}),
-        Send("A2_pattern_agent",       {"agent_input": inputs["pattern"]}),
-        Send("A3_severity_agent",      {"agent_input": inputs["severity"]}),
+        Send("A5_detection_agent",     {"agent_input": inputs["detection"],     "thread_id": tid}),
+        Send("A1_similar_cases_agent", {"agent_input": inputs["similar_cases"], "thread_id": tid}),
+        Send("A2_pattern_agent",       {"agent_input": inputs["pattern"],       "thread_id": tid}),
+        Send("A3_severity_agent",      {"agent_input": inputs["severity"],      "thread_id": tid}),
     ]
 
 
@@ -972,6 +973,45 @@ def finalize_node(state: RiskAnalysisState) -> dict:
 # Full flow visible in one place.
 # ══════════════════════════════════════════════════════════════════════════════
 
+def _tracked(node_name: str, fn):
+    """
+    Wraps a node function so it writes running/done/error status to Redis
+    and publishes to the agent_events Pub/Sub channel on each state change.
+    Zero changes required to the individual node functions.
+    """
+    from config.redis_config import _NODE_LABELS, _NODE_AGENT_IDS
+    label    = _NODE_LABELS.get(node_name, node_name)
+    agent_id = _NODE_AGENT_IDS.get(node_name)
+
+    def wrapper(state):
+        tid = state.get("thread_id", "unknown") if isinstance(state, dict) else "unknown"
+        write_agent_status(tid, node_name, "running")
+        publish_agent_event(tid, {"type": "node_start", "node": node_name,
+                                  "label": label, "agent_id": agent_id, "ts": _now()})
+        try:
+            result = fn(state)
+            write_agent_status(tid, node_name, "done")
+            end_event = {"type": "node_end", "node": node_name,
+                         "label": label, "agent_id": agent_id, "ts": _now()}
+            # Attach live RPN scores when calculator finishes
+            if node_name == "rpn_calculator_node" and isinstance(result, dict):
+                end_event["rpn_update"] = {
+                    "severity":   result.get("severity_score"),
+                    "occurrence": result.get("occurrence_score"),
+                    "detection":  result.get("detection_score"),
+                    "rpn":        result.get("rpn_value"),
+                }
+            publish_agent_event(tid, end_event)
+            return result
+        except Exception as exc:
+            write_agent_status(tid, node_name, "error")
+            publish_agent_event(tid, {"type": "node_error", "node": node_name,
+                                      "label": label, "agent_id": agent_id,
+                                      "error": str(exc), "ts": _now()})
+            raise
+    return wrapper
+
+
 def build_orchestrator():
     """
     Assembles the full O2 Risk Analysis Orchestrator graph.
@@ -993,21 +1033,22 @@ def build_orchestrator():
     """
     g = StateGraph(RiskAnalysisState)
 
-    # ── Register nodes ────────────────────────────────────────────────────────
-    g.add_node("input_validator",         input_validator)
-    g.add_node("request_correction_node", request_correction_node)
-    g.add_node("context_node",            context_node)
-    g.add_node("enriched_context_node",   enriched_context_node)
-    g.add_node("payload_builder_node",    payload_builder_node)
-    g.add_node("A5_detection_agent",      A5_detection_agent)
-    g.add_node("A1_similar_cases_agent",  A1_similar_cases_agent)
-    g.add_node("A2_pattern_agent",        A2_pattern_agent)
-    g.add_node("A3_severity_agent",       A3_severity_agent)
-    g.add_node("A4_occurrence_agent",     A4_occurrence_agent)
-    g.add_node("rpn_calculator_node",     rpn_calculator_node)
-    g.add_node("A6_regulatory_agent",     A6_regulatory_agent)
-    g.add_node("A7_reasoning_agent",      A7_reasoning_agent)
-    g.add_node("finalize_node",           finalize_node)
+    # ── Register nodes (all wrapped with status tracker) ─────────────────────
+    t = _tracked  # shorthand
+    g.add_node("input_validator",         t("input_validator",         input_validator))
+    g.add_node("request_correction_node", t("request_correction_node", request_correction_node))
+    g.add_node("context_node",            t("context_node",            context_node))
+    g.add_node("enriched_context_node",   t("enriched_context_node",   enriched_context_node))
+    g.add_node("payload_builder_node",    t("payload_builder_node",    payload_builder_node))
+    g.add_node("A5_detection_agent",      t("A5_detection_agent",      A5_detection_agent))
+    g.add_node("A1_similar_cases_agent",  t("A1_similar_cases_agent",  A1_similar_cases_agent))
+    g.add_node("A2_pattern_agent",        t("A2_pattern_agent",        A2_pattern_agent))
+    g.add_node("A3_severity_agent",       t("A3_severity_agent",       A3_severity_agent))
+    g.add_node("A4_occurrence_agent",     t("A4_occurrence_agent",     A4_occurrence_agent))
+    g.add_node("rpn_calculator_node",     t("rpn_calculator_node",     rpn_calculator_node))
+    g.add_node("A6_regulatory_agent",     t("A6_regulatory_agent",     A6_regulatory_agent))
+    g.add_node("A7_reasoning_agent",      t("A7_reasoning_agent",      A7_reasoning_agent))
+    g.add_node("finalize_node",           t("finalize_node",           finalize_node))
 
     # ── Entry ─────────────────────────────────────────────────────────────────
     g.add_edge(START, "input_validator")
