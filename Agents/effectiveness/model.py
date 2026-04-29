@@ -17,6 +17,8 @@ from typing import List, Optional, Literal
 class ActionItemInput(BaseModel):
     action_id: str = Field(..., description="Action ID e.g. CA-01, PA-01")
     action_description: str = Field(..., description="Description of the action")
+    verification_plan: Optional[str] = Field(None, description="HOW to verify — audit, report, test, inspection (from action plan)")
+    success_criteria: Optional[str] = Field(None, description="WHAT success looks like — measurable outcome threshold defined during action planning")
 
 
 class EffectivenessEvaluationInput(BaseModel):
@@ -42,6 +44,16 @@ class EvaluatedAction(BaseModel):
     system_impact: Literal["High", "Medium", "Low"] = Field(..., description="System Impact")
     effectiveness_score: int = Field(..., ge=0, le=100, description="Effectiveness Score (0-100)")
     confidence_level: Literal["High", "Medium", "Low"] = Field(..., description="Confidence Level")
+    success_criteria_met: Literal["Yes", "Partial", "No"] = Field(
+        ...,
+        description=(
+            "Whether the pre-defined success criteria for this action was met. "
+            "'Yes' = criteria fully satisfied by evidence. "
+            "'Partial' = criteria partially met (e.g. some but not all thresholds reached). "
+            "'No' = criteria not met or no evidence of completion. "
+            "If no success_criteria was provided, infer from implementation evidence."
+        )
+    )
     explanation_of_evaluation: str = Field(..., description="Explanation of Evaluation (min 50 chars)")
 
 

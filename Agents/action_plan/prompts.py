@@ -11,16 +11,17 @@ def build_capa_action_plan_prompt(capa_input: dict) -> str:
 Your responsibility:
 Generate a structured, audit-ready Action Plan aligned exactly with the following table columns:
 
-COLUMNS (9 required):
+COLUMNS (10 required):
 1. Action Type
 2. Action Description
 3. Assigned To
 4. Planned Due Date
 5. Resources Required
 6. Verification Plan
-7. Training Requirements
-8. Document Updates Required
-9. Change Control Reference
+7. Success Criteria
+8. Training Requirements
+9. Document Updates Required
+10. Change Control Reference
 
 -----------------------------------
 INPUT PROVIDED:
@@ -55,7 +56,16 @@ STRICT RULES (MANDATORY)
    • Be specific and measurable
    • Avoid generic wording
    • Describe exactly what will change
-   • Include success criteria
+
+3a. Success Criteria (NEW — MANDATORY separate field):
+   • Must be a concrete, measurable statement of what constitutes success
+   • Written as a threshold or outcome that can be objectively verified
+   • Examples:
+     - "100% of operators complete SOP-008 retraining with >80% quiz score by due date"
+     - "Zero reoccurrence of deviation type X in 90-day monitoring window post-implementation"
+     - "SOP-042 revised, approved, and distributed to all relevant departments by YYYY-MM-DD"
+   • Must NOT be the same as verification_plan (success_criteria = WHAT success looks like; verification_plan = HOW to check it)
+   • Must be specific enough that the Effectiveness Evaluation Agent can directly test the evidence against it
 
 3. Assigned To:
    • Use ONLY department-level assignment (Manufacturing, QA, R&D, Supplier Quality, Validation, Engineering, Regulatory, Supply Chain, etc.)
@@ -101,11 +111,12 @@ Return ONLY valid JSON. No explanations, no reasoning, no markdown.
   "action_items": [
     {{
       "action_type": "<Correction|Corrective|Preventive|Systemic>",
-      "action_description": "<specific, measurable description>",
+      "action_description": "<specific, measurable description of what will change>",
       "assigned_to": "<Department>",
       "planned_due_date": "<YYYY-MM-DD>",
       "resources_required": "<specific resources>",
-      "verification_plan": "<measurable validation>",
+      "verification_plan": "<HOW to verify — audit, report, test, inspection>",
+      "success_criteria": "<WHAT success looks like — measurable outcome threshold or condition>",
       "training_requirements": "<Yes - TR-XXX|No>",
       "document_updates_required": "<document IDs or N/A>",
       "change_control_reference": "<CC-###|EC-###|SC-###|N/A>"
