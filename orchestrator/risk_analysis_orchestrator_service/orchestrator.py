@@ -898,10 +898,13 @@ def finalize_node(state: RiskAnalysisState) -> dict:
             }
 
         elif t == "pattern":
+            full = r.get("full", {})
             agent_summary["pattern"] = {
-                "trend_score":    r.get("trend_score"),
-                "trend_category": r.get("trend_category"),
-                "pattern":        r.get("pattern"),
+                "trend_score":  r.get("trend_score"),
+                "pattern":      r.get("pattern"),
+                "confidence":   full.get("confidence"),
+                "matched_ids":  full.get("matched_complaint_ids", []),
+                "explanation":  full.get("explanation"),
             }
 
         elif t == "detection":

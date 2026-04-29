@@ -1,352 +1,335 @@
+"""
+MongoDB fetch tool for Pattern Agent.
+
+Two complementary search layers run in parallel and results are merged:
+
+  Layer 1 — Structured fields (type, category, region)
+              Catches complaints classified the same way regardless of wording.
+              Fast, deterministic, no ML needed.
+
+  Layer 2 — Vector similarity (semantic search)
+              Catches the same problem described in different words.
+              Handles all natural language variation.
+
+Merged results (union, deduplicated) are passed to the LLM which decides
+which records actually form a recurring pattern.
+
+Collection: capa_complaints
+"""
+
+import os
 import re
 import logging
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Optional
-from config.mongodb_config import get_complaints_collection
+from config.mongodb_config import get_capa_complaints_collection
+
+HISTORY_MONTHS = int(os.getenv("PATTERN_HISTORY_MONTHS", "63"))
 
 logger = logging.getLogger(__name__)
 
-# ─────────────────────────────────────────────────────────────
-# Field aliases — covers most company schemas
-# ─────────────────────────────────────────────────────────────
-DESCRIPTION_FIELD_ALIASES = [
-    "description",
-    "Description_of_issue",
-    "issue_description",
-    "complaint_description",
-    "problem_description",
-    "failure_description",
-    "details",
-    "summary",
-    "notes",
-]
+# ── Embedding model — lazy singleton ──────────────────────────────────────────
+_model = None
 
-DATE_FIELD_ALIASES = [
-    "created_at",
-    "Date_Received",
-    "date_received",
-    "date",
-    "complaint_date",
-    "reported_date",
-    "received_date",
-    "timestamp",
-]
+def _get_model():
+    global _model
+    if _model is None:
+        from sentence_transformers import SentenceTransformer
+        model_name = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+        logger.info(f"[PatternTool] Loading embedding model: {model_name}")
+        _model = SentenceTransformer(model_name)
+        logger.info("[PatternTool] Embedding model ready")
+    return _model
 
-ID_FIELD_ALIASES = [
-    "complaint_id",
-    "NC_ID",
-    "nc_id",
-    "record_id",
-    "issue_id",
-    "ticket_id",
-    "case_id",
-]
 
-# ─────────────────────────────────────────────────────────────
-# Failure Class Synonym Map
-# triggers  → detect failure class from incoming description
-# search    → expand MongoDB query beyond exact keywords
-# ─────────────────────────────────────────────────────────────
-FAILURE_CLASS_SYNONYMS = {
-    "Software/Firmware Failure": {
-        "triggers": [
-            "firmware", "software", "reboot", "watchdog", "lockout",
-            "calculation", "dosage", "miscalculation", "interruption",
-            "overcurrent", "overheating", "alarm", "connectivity",
-            "display", "keypad", "sensor", "over-infusion", "underdose",
-            "overdose", "therapy shutdown", "infusion stop", "discrepancy"
-        ],
-        "search": [
-            "firmware", "software", "reboot", "watchdog", "lockout",
-            "calculation", "dosage", "miscalculation", "interruption",
-            "overheating", "alarm", "infusion", "therapy", "shutdown",
-            "discrepancy", "malfunction", "failure", "error"
-        ]
-    },
-    "Seal Integrity Failure": {
-        "triggers": [
-            "seal", "sterility", "packaging", "burst", "rupture",
-            "sterilization", "breach", "pouch", "integrity"
-        ],
-        "search": [
-            "seal", "sterility", "packaging", "burst", "rupture",
-            "sterilization", "breach", "integrity"
-        ]
-    },
-    "Structural Failure": {
-        "triggers": [
-            "fracture", "crack", "cracking", "fatigue", "bending",
-            "deformation", "strut", "porosity", "micro-fracture", "loosening"
-        ],
-        "search": [
-            "fracture", "crack", "fatigue", "bending", "deformation",
-            "strut", "loosening", "structural"
-        ]
-    },
-    "Mechanical Failure": {
-        "triggers": [
-            "stiffness", "binding", "separation", "torque", "clamp",
-            "handle", "hinge", "expansion", "motor", "roller", "mechanism"
-        ],
-        "search": [
-            "stiffness", "binding", "separation", "torque", "clamp",
-            "motor", "roller", "mechanism", "mechanical"
-        ]
-    },
-    "Surface Defect": {
-        "triggers": [
-            "abrasion", "scratch", "pitting", "roughness", "coating",
-            "corrosion", "machining mark", "burr", "anodizing", "passivation"
-        ],
-        "search": [
-            "abrasion", "scratch", "pitting", "roughness", "coating",
-            "corrosion", "burr", "surface"
-        ]
-    },
-    "Calibration Drift": {
-        "triggers": [
-            "calibration", "drift", "flow rate", "deviation", "accuracy",
-            "threshold", "tolerance", "frequency", "transducer"
-        ],
-        "search": [
-            "calibration", "drift", "flow", "deviation",
-            "threshold", "tolerance", "transducer"
-        ]
-    },
-    "Reagent Instability": {
-        "triggers": [
-            "reagent", "assay", "sensitivity", "false negative", "false positive",
-            "lot-to-lot", "stability", "contamination", "signal decay"
-        ],
-        "search": [
-            "reagent", "assay", "sensitivity", "false", "stability",
-            "contamination", "diagnostic"
-        ]
-    },
-    "Labeling Defect": {
-        "triggers": [
-            "label", "barcode", "expiry", "lot number", "marking",
-            "traceability", "udi", "print"
-        ],
-        "search": [
-            "label", "barcode", "expiry", "marking", "traceability"
-        ]
-    },
-    "Dimensional Non-conformance": {
-        "triggers": [
-            "dimensional", "tolerance", "geometry", "variance",
-            "mismatch", "alignment", "porosity"
-        ],
-        "search": [
-            "dimensional", "tolerance", "geometry", "variance",
-            "mismatch", "alignment"
-        ]
-    },
+# ── Failure class detection (provides LLM context label) ─────────────────────
+
+FAILURE_CLASS_TRIGGERS = {
+    "Software/Firmware Failure": [
+        "firmware", "software", "reboot", "watchdog", "lockout",
+        "calculation", "dosage", "miscalculation", "interruption",
+        "overcurrent", "overheating", "alarm", "connectivity",
+        "display", "keypad", "sensor", "over-infusion", "underdose",
+        "overdose", "therapy shutdown", "infusion stop", "discrepancy",
+    ],
+    "Electrical Failure": [
+        "power", "electrical", "voltage", "current", "battery",
+        "short circuit", "power failure", "power loss", "surge",
+    ],
+    "Seal Integrity Failure": [
+        "seal", "sterility", "packaging", "burst", "rupture",
+        "sterilization", "breach", "pouch", "integrity", "leakage", "leak",
+    ],
+    "Structural Failure": [
+        "fracture", "crack", "cracking", "fatigue", "bending",
+        "deformation", "strut", "porosity", "micro-fracture", "loosening",
+    ],
+    "Mechanical Failure": [
+        "stiffness", "binding", "separation", "torque", "clamp",
+        "handle", "hinge", "expansion", "motor", "roller", "mechanism",
+    ],
+    "Surface Defect": [
+        "abrasion", "scratch", "pitting", "roughness", "coating",
+        "corrosion", "machining mark", "burr", "anodizing", "passivation",
+    ],
+    "Calibration Drift": [
+        "calibration", "drift", "flow rate", "deviation", "accuracy",
+        "threshold", "tolerance", "frequency", "transducer",
+    ],
+    "Reagent Instability": [
+        "reagent", "assay", "sensitivity", "false negative", "false positive",
+        "lot-to-lot", "stability", "contamination", "signal decay",
+    ],
+    "Labeling Defect": [
+        "label", "barcode", "expiry", "lot number", "marking",
+        "traceability", "udi", "print",
+    ],
+    "Dimensional Non-conformance": [
+        "dimensional", "tolerance", "geometry", "variance",
+        "mismatch", "alignment", "porosity",
+    ],
 }
-
-STOP_WORDS = {
-    "during", "after", "before", "under", "with", "from", "that",
-    "this", "have", "been", "were", "they", "them", "their", "which",
-    "when", "where", "observed", "detected", "identified", "found",
-    "reported", "noted", "occurred", "causing", "caused", "while",
-    "into", "onto", "upon", "over", "within", "between", "through"
-}
-
-
-# ─────────────────────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────────────────────
-
-def resolve_field(doc: Dict, aliases: List[str]) -> Any:
-    for alias in aliases:
-        if alias in doc and doc[alias] not in (None, "", []):
-            return doc[alias]
-    return None
 
 
 def detect_failure_class(description: str) -> Optional[str]:
     desc_lower = description.lower()
-    for class_name, config in FAILURE_CLASS_SYNONYMS.items():
-        if any(trigger in desc_lower for trigger in config["triggers"]):
+    for class_name, triggers in FAILURE_CLASS_TRIGGERS.items():
+        if any(trigger in desc_lower for trigger in triggers):
             return class_name
     return None
 
 
-def extract_keywords(text: str, min_len: int = 4, max_keywords: int = 12) -> List[str]:
-    words = re.findall(r'\w+', text.lower())
-    keywords = list(dict.fromkeys([
-        w for w in words
-        if len(w) >= min_len and w not in STOP_WORDS
-    ]))
-    return keywords[:max_keywords]
+# ── Field normalisation ───────────────────────────────────────────────────────
 
-
-def get_doc_id(doc: Dict) -> Optional[str]:
-    """Extract any available unique ID from a document."""
-    for field in ID_FIELD_ALIASES:
-        if field in doc and doc[field]:
-            return str(doc[field])
-    return str(doc.get("_id", ""))
+ID_FIELD_ALIASES = [
+    "complaintId", "complaint_id", "NC_ID", "nc_id",
+    "record_id", "issue_id", "ticket_id", "case_id",
+]
 
 
 def normalize_document(doc: Dict) -> Dict:
     if "_id" in doc:
-        doc["_id"] = str(doc["_id"])
+        doc["_id"]          = str(doc["_id"])
+        doc["complaint_id"] = doc["_id"]
 
-    desc_value = resolve_field(doc, DESCRIPTION_FIELD_ALIASES)
-    doc["description"] = desc_value if desc_value else "No description available"
+    if "description" in doc:
+        doc["Description_of_issue"] = doc["description"]
 
-    date_value = resolve_field(doc, DATE_FIELD_ALIASES)
-    if date_value is not None:
-        doc["normalized_date"] = (
-            date_value.isoformat() if hasattr(date_value, "isoformat")
-            else str(date_value)
-        )
-    else:
-        doc["normalized_date"] = "Unknown Date"
+    if "productIdentifier" in doc:
+        doc["Product_Family"] = doc["productIdentifier"]
 
+    if "region" in doc:
+        doc["Region_Country"] = doc["region"]
+    elif "marketCountry" in doc:
+        doc["Region_Country"] = doc["marketCountry"]
+
+    if "site" in doc:
+        doc["Site"] = doc["site"]
+
+    if "fdaReportable" in doc:
+        doc["FDA_Reportable"] = doc["fdaReportable"]
+    if "euReportable" in doc:
+        doc["EU_Reportable"] = doc["euReportable"]
+
+    if "repeated" in doc:
+        doc["Repeated_NotRepeated"] = "Repeated" if doc["repeated"] else "Not Repeated"
+
+    doc.pop("descriptionEmbedding", None)
     return doc
 
 
-def build_search_query(keywords: List[str], current_id: str, desc_fields: List[str]) -> Dict:
-    """
-    Build MongoDB query:
-    - OR across all description fields with keyword regex
-    - Exclude current complaint via $nor across all ID fields
-    """
-    regex_pattern = "|".join([re.escape(kw) for kw in keywords])
-    regex_query = {"$regex": regex_pattern, "$options": "i"}
+# ── Layer 1 — Structured field search ────────────────────────────────────────
 
-    description_conditions = [
-        {field: regex_query} for field in desc_fields
-    ]
-
-    exclusion_conditions = [
-        {field: current_id} for field in ID_FIELD_ALIASES
-    ]
-
+def _time_window_filter() -> Dict:
+    """Returns a MongoDB filter for the last HISTORY_MONTHS months."""
+    cutoff = datetime.now(timezone.utc) - timedelta(days=HISTORY_MONTHS * 30)
+    cutoff_str = cutoff.strftime("%Y-%m-%d")
     return {
-        "$and": [
-            {"$or": description_conditions},
-            {"$nor": exclusion_conditions}
+        "$or": [
+            {"raisedDate": {"$gte": cutoff_str}},
+            {"createdAt":  {"$gte": cutoff}},
         ]
     }
 
 
-def run_fetch(
+def _fetch_by_structured_fields(
     collection,
-    keywords: List[str],
     current_id: str,
-    desc_fields: List[str],
-    date_fields: List[str],
-    limit: int
+    current_type: str,
+    current_category: str,
+    current_region: str,
+    limit: int,
 ) -> List[Dict]:
-    """Execute a single MongoDB fetch and return normalized docs."""
-    if not keywords:
+    """
+    Queries type, category, and region fields within the last HISTORY_MONTHS.
+    Results sorted by raisedDate descending — most recent first.
+    """
+    or_clauses = []
+
+    if current_type:
+        or_clauses.append({"type": {"$regex": re.escape(current_type), "$options": "i"}})
+
+    if current_category:
+        or_clauses.append({"category": {"$regex": re.escape(current_category), "$options": "i"}})
+
+    # Same region + same type — strongest regional pattern signal
+    if current_region and current_type:
+        or_clauses.append({
+            "region": {"$regex": re.escape(current_region), "$options": "i"},
+            "type":   {"$regex": re.escape(current_type),   "$options": "i"},
+        })
+
+    if not or_clauses:
         return []
 
-    query = build_search_query(keywords, current_id, desc_fields)
-    sort_order = [(field, -1) for field in date_fields]
-
-    logger.debug(f"[MongoTool] Query: {query}")
-
-    cursor = collection.find(query).sort(sort_order).limit(limit)
-    results = []
-    for doc in cursor:
-        results.append(normalize_document(doc))
-
-    logger.debug(f"[MongoTool] Fetched {len(results)} records")
+    query = {
+        "_id":  {"$ne": current_id},
+        "$and": [
+            {"$or": or_clauses},
+            _time_window_filter(),
+        ],
+    }
+    results = list(
+        collection.find(query)
+        .sort("raisedDate", -1)
+        .limit(limit)
+    )
+    logger.info(
+        f"[PatternTool] Structured search: {len(results)} records in last {HISTORY_MONTHS}m "
+        f"(type='{current_type}' category='{current_category}' region='{current_region}')"
+    )
     return results
 
 
-def merge_deduplicate(primary: List[Dict], secondary: List[Dict]) -> List[Dict]:
-    """Merge two result lists, deduplicating by ID. Primary comes first."""
-    seen_ids = set()
-    merged = []
+# ── Layer 2 — Vector similarity search ───────────────────────────────────────
 
-    for doc in primary + secondary:
-        doc_id = get_doc_id(doc)
-        if doc_id and doc_id not in seen_ids:
-            seen_ids.add(doc_id)
-            merged.append(doc)
-        elif not doc_id:
-            merged.append(doc)
+def _fetch_by_vector(
+    collection,
+    description: str,
+    current_id: str,
+    limit: int,
+    threshold: float = 0.35,
+) -> List[Dict]:
+    """
+    Semantic search on the description embedding.
+    Catches the same problem described in completely different words.
+    Requires a configured Atlas vector search index.
+    """
+    model        = _get_model()
+    vector_index = os.getenv("VECTOR_INDEX_NAME", "vector_index")
+    emb_field    = os.getenv("EMBEDDING_FIELD",   "descriptionEmbedding")
+    query_vector = model.encode(description.strip(), normalize_embeddings=True).tolist()
 
+    pipeline = [
+        {
+            "$vectorSearch": {
+                "index":         vector_index,
+                "path":          emb_field,
+                "queryVector":   query_vector,
+                "numCandidates": limit * 5,
+                "limit":         limit * 2,
+            }
+        },
+        {"$addFields": {"similarity": {"$meta": "vectorSearchScore"}}},
+        {
+            "$match": {
+                "$and": [
+                    {"_id":        {"$ne": current_id}},
+                    {"similarity": {"$gte": threshold}},
+                    _time_window_filter(),
+                ]
+            }
+        },
+        {"$limit": limit},
+    ]
+
+    results = list(collection.aggregate(pipeline))
+    logger.info(f"[PatternTool] Vector search: {len(results)} results (threshold={threshold})")
+    return results
+
+
+# ── Merge and deduplicate ─────────────────────────────────────────────────────
+
+def _merge(structured: List[Dict], vector: List[Dict], limit: int) -> List[Dict]:
+    """
+    Union of both result sets, deduplicated by _id.
+    Structured results take priority (inserted first).
+    Records found by both layers appear only once.
+    """
+    seen:   Dict[str, Dict] = {}
+
+    for doc in structured:
+        key = str(doc.get("_id", ""))
+        if key not in seen:
+            seen[key] = doc
+
+    for doc in vector:
+        key = str(doc.get("_id", ""))
+        if key not in seen:
+            seen[key] = doc
+
+    merged = list(seen.values())[:limit]
+    logger.info(
+        f"[PatternTool] Merged: {len(structured)} structured + "
+        f"{len(vector)} vector = {len(merged)} unique records"
+    )
     return merged
 
 
-# ─────────────────────────────────────────────────────────────
-# Main Tool
-# ─────────────────────────────────────────────────────────────
+# ── Public entry point ────────────────────────────────────────────────────────
 
 def fetch_similar_complaints(
     description: str,
     current_id: str,
+    failure_class: Optional[str] = None,
     company_schema: Optional[Dict] = None,
-    limit: int = 20
+    limit: int = 20,
 ) -> List[Dict[str, Any]]:
     """
-    Two-pass semantic fetch from MongoDB.
+    Fetch historical complaints for pattern/trend analysis.
 
-    Pass 1 — Keyword match:
-        Extracts keywords from the complaint description.
-        Searches across all description field aliases.
+    Runs two layers in parallel and merges the results:
+      Layer 1 — type + category + region (structured, deterministic)
+      Layer 2 — vector similarity on description (semantic, handles varied wording)
 
-    Pass 2 — Synonym expansion:
-        Detects which failure class the complaint belongs to.
-        Searches using ALL synonyms for that class.
-        This is what catches NC-112, NC-129, NC-148, NC-183 etc.
-        that use different words but same failure type.
-
-    Args:
-        description:    Current complaint description
-        current_id:     ID to exclude from results
-        company_schema: Optional resolved schema from orchestrator
-                        If provided, uses company-specific field names
-                        If None, uses generic aliases (fallback)
-        limit:          Max records per pass
+    The LLM receives the merged set and decides which records form a pattern.
     """
+    collection = get_capa_complaints_collection()
+
+    # ── Look up current complaint's stored fields ─────────────────
+    current_doc = collection.find_one(
+        {"_id": current_id},
+        {"type": 1, "category": 1, "region": 1},
+    )
+
+    current_type     = (current_doc.get("type")     or "").strip() if current_doc else ""
+    current_category = (current_doc.get("category") or "").strip() if current_doc else ""
+    current_region   = (current_doc.get("region")   or "").strip() if current_doc else ""
+
+    logger.info(
+        f"[PatternTool] Complaint '{current_id}' — "
+        f"type='{current_type}' category='{current_category}' region='{current_region}'"
+    )
+
+    # ── Layer 1: Structured search ────────────────────────────────
+    structured_results = _fetch_by_structured_fields(
+        collection, current_id,
+        current_type, current_category, current_region,
+        limit,
+    )
+
+    # ── Layer 2: Vector search ────────────────────────────────────
+    vector_results = []
     try:
-        collection = get_complaints_collection()
-
-        # Use company-specific field names if provided, else generic aliases
-        desc_fields  = (company_schema or {}).get("description_fields", DESCRIPTION_FIELD_ALIASES)
-        date_fields  = (company_schema or {}).get("date_fields", DATE_FIELD_ALIASES)
-
-        # ── Pass 1: Direct keyword match ──────────────────────
-        keywords = extract_keywords(description)
-        logger.info(f"[MongoTool] Pass 1 keywords: {keywords}")
-
-        primary_results = run_fetch(
-            collection, keywords, current_id,
-            desc_fields, date_fields, limit
-        )
-        logger.info(f"[MongoTool] Pass 1 results: {len(primary_results)}")
-
-        # ── Pass 2: Failure class synonym expansion ────────────
-        # This is the critical pass that finds semantically related
-        # records using different terminology
-        failure_class = detect_failure_class(description)
-        secondary_results = []
-
-        if failure_class:
-            synonym_keywords = FAILURE_CLASS_SYNONYMS[failure_class]["search"]
-            logger.info(
-                f"[MongoTool] Pass 2 — class: '{failure_class}' "
-                f"— synonyms: {synonym_keywords}"
-            )
-            secondary_results = run_fetch(
-                collection, synonym_keywords, current_id,
-                desc_fields, date_fields, limit
-            )
-            logger.info(f"[MongoTool] Pass 2 results: {len(secondary_results)}")
-        else:
-            logger.info("[MongoTool] Pass 2 skipped — no failure class detected")
-
-        # ── Merge & deduplicate ────────────────────────────────
-        all_results = merge_deduplicate(primary_results, secondary_results)
-        logger.info(f"[MongoTool] Total after dedup: {len(all_results)}")
-
-        return all_results
-
+        vector_results = _fetch_by_vector(collection, description, current_id, limit)
     except Exception as e:
-        raise Exception(f"MongoDB fetch tool failed: {str(e)}")
+        logger.warning(f"[PatternTool] Vector search unavailable: {e}")
+
+    # ── Merge and return ──────────────────────────────────────────
+    merged = _merge(structured_results, vector_results, limit)
+
+    if not merged:
+        logger.warning(f"[PatternTool] No historical records found for '{current_id}'")
+        return []
+
+    return [normalize_document(doc) for doc in merged]

@@ -181,7 +181,9 @@ def derive_trend_score(matched_count: int) -> int:
 def validate_and_fix_result(
     result: Dict,
     historical_complaints: List[Dict],
-    failure_class: str
+    failure_class: str,
+    current_product: Optional[str] = None,
+    current_region: Optional[str] = None,
 ) -> Dict:
     """
     Post-processing validation.
@@ -239,6 +241,12 @@ def validate_and_fix_result(
     if not result.get("identified_pattern"):
         matched_set = set(matched_ids)
         regions, sites, products = set(), set(), set()
+
+        # Seed with current complaint's own context
+        if current_product:
+            products.add(current_product.strip())
+        if current_region:
+            regions.add(current_region.strip())
 
         for doc in historical_complaints:
             for field in ID_FIELD_ALIASES:
@@ -310,7 +318,8 @@ def fetch_historical_data_node(state: AgentState) -> AgentState:
         historical_data = fetch_similar_complaints(
             description=state["complaint_description"],
             current_id=state["complaint_id"],
-            company_schema=state.get("company_schema")
+            failure_class=state.get("failure_class"),
+            company_schema=state.get("company_schema"),
         )
 
         fetched_ids = []
@@ -361,8 +370,11 @@ def analyze_trend_node(state: AgentState) -> AgentState:
             complaint_id=state["complaint_id"],
             complaint_description=state["complaint_description"],
             failure_class=failure_class,
+            product=state.get("product_family") or "Unknown",
+            region=state.get("region")         or "Unknown",
+            severity=state.get("severity")     or "Unknown",
             historical_data_text=data_text,
-            total_records=len(h_data)
+            total_records=len(h_data),
         )
 
         full_prompt = PATTERN_ANALYSIS_SYSTEM_PROMPT + "\n\n" + user_prompt
@@ -380,7 +392,11 @@ def analyze_trend_node(state: AgentState) -> AgentState:
                 )
 
                 # Post-processing — enforces company standards in code
-                result = validate_and_fix_result(result, h_data, failure_class)
+                result = validate_and_fix_result(
+                    result, h_data, failure_class,
+                    current_product=state.get("product_family"),
+                    current_region=state.get("region"),
+                )
 
                 updates = {
                     "trend_score":           result.get("trend_score"),
