@@ -19,10 +19,15 @@ def build_effectiveness_evaluation_prompt(
 
     actions_str = ""
     for action in evaluation_input.get("actions", []):
-        actions_str += (
+        action_line = (
             f"- ID: {action.get('action_id')}, "
-            f"Description: {action.get('action_description')}\n"
+            f"Description: {action.get('action_description')}"
         )
+        if action.get('success_criteria'):
+            action_line += f"\n  Success Criteria: {action.get('success_criteria')}"
+        if action.get('verification_plan'):
+            action_line += f"\n  Verification Plan: {action.get('verification_plan')}"
+        actions_str += action_line + "\n"
 
     supporting_evidence = (
         evaluation_input.get("supporting_evidence") or "No implementation evidence provided."
@@ -163,26 +168,49 @@ REASONING PROCESS:
    audit findings, system logs, approval records.
 
 2. For each CAPA action:
-   a. Find the specific evidence that relates to THIS action.
-   b. Determine if the action was fully, partially, or not implemented.
-   c. Judge whether the implementation actually fixes the root cause.
-   d. Check if there is evidence of sustained compliance or recurrence prevention.
-   e. Apply guardrail rules BEFORE assigning a score.
-   f. Write an explanation citing SPECIFIC evidence (names, dates, numbers, findings).
+   a. If a Success Criteria is listed for the action, use it as the PRIMARY pass/fail gate:
+      - Ask: "Does the evidence prove this criterion was met?"
+      - Met → root_cause_addressed eligible for "Yes" or "Partially"
+      - Not met → root_cause_addressed must be "No" or "Partially" and score accordingly
+   b. Find the specific evidence that relates to THIS action.
+   c. Determine if the action was fully, partially, or not implemented.
+   d. Judge whether the implementation actually fixes the root cause.
+   e. Check if there is evidence of sustained compliance or recurrence prevention.
+   f. Apply guardrail rules BEFORE assigning a score.
+   g. Write an explanation citing SPECIFIC evidence (names, dates, numbers, findings)
+      AND explicitly state whether the success criteria was met or not (if provided).
 
 3. Rank actions from highest to lowest effectiveness score.
 
 -----------------------------------
-SCORING GUIDANCE:
+SCORING GUIDANCE (anchored to success_criteria_met):
 -----------------------------------
-- Score 90-100 : Fully implemented, verified working, strong recurrence prevention evidence
-- Score 75-89  : Mostly implemented, minor gaps, good recurrence prevention
-- Score 60-74  : Partially implemented, some staff/steps incomplete, medium prevention
-- Score 40-59  : Implemented but root cause not fully addressed or prevention is weak
-- Score 0-39   : Not implemented, or implemented incorrectly, root cause still present
+Determine success_criteria_met FIRST, then use it as the score anchor:
+
+  success_criteria_met = "Yes":
+    → Score baseline is 65 or higher
+    → Yes + root_cause_addressed=Yes  → score 75-95
+    → Yes + root_cause_addressed=Partially → score 65-80
+    → Yes + root_cause_addressed=No  → score 65-75 (action met its own criteria but doesn't address root cause)
+
+  success_criteria_met = "Partial":
+    → Score range 40-69
+    → Partial + root_cause_addressed=Partially → score 45-65
+    → Partial + root_cause_addressed=No → score 40-55
+
+  success_criteria_met = "No":
+    → Score MUST be 45 or lower
+    → No + root_cause_addressed=No → score 0-35
+
+If no success_criteria was defined for the action, fall back to:
+  - Score 90-100 : Fully implemented, verified working, strong recurrence prevention evidence
+  - Score 75-89  : Mostly implemented, minor gaps, good recurrence prevention
+  - Score 60-74  : Partially implemented, some steps incomplete
+  - Score 40-59  : Implemented but root cause not fully addressed
+  - Score 0-39   : Not implemented or evidence of failure
 
 If evidence for a specific action is missing or unclear:
-  → Set confidence_level = "Low"
+  → Set confidence_level = "Low" AND success_criteria_met = "No"
   → Note what evidence is missing in the explanation
 
 -----------------------------------
@@ -210,7 +238,8 @@ Return ONLY valid JSON. No markdown, no code fences, no text outside the JSON.
       "system_impact": "<High|Medium|Low>",
       "effectiveness_score": <int 0-100>,
       "confidence_level": "<High|Medium|Low>",
-      "explanation_of_evaluation": "<cite specific evidence facts, minimum 50 chars>"
+      "success_criteria_met": "<Yes|Partial|No>",
+      "explanation_of_evaluation": "<cite specific evidence facts AND state whether success criteria was met; minimum 50 chars>"
     }}
   ],
   "confidence_score": <float 0.0-1.0>,

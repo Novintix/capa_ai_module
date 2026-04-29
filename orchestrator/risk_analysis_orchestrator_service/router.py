@@ -266,6 +266,7 @@ async def analyze(request: CAPARequest):
 
     # Build initial state — include enriched_input if the UI provided it
     initial_state = {
+        "thread_id":        thread_id,
         "raw_input":        raw_input,
         "agent_results":    [],
         "node_log":         [],
@@ -526,14 +527,6 @@ async def resume(thread_id: str, body: ResumeRequest = ResumeRequest()):
         )
 
     return _build_full_response(thread_id, result)
-
-# ------------------------------------------------------------------------------
-# WEBSOCKET /capa/events/{thread_id}
-#
-# Real-time event streaming for the orchestrator.
-# UI connects here, sends {"command":"start","raw_input":"..."} to trigger
-# astream_events, receives node_start / node_end / completed events.
-# ------------------------------------------------------------------------------
 
 from .orchestrator import deep_serialize, _now as _ts_now
 
