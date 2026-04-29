@@ -56,6 +56,8 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
 
+from agent_ops import agentops_agent, agentops_operation
+
 from Agents.detection.graph     import create_detection_graph  as build_detection_graph
 from Agents.pattern.graph       import create_pattern_graph    as build_pattern_graph
 from Agents.severity.graph      import build_graph             as build_severity_graph
@@ -180,6 +182,7 @@ def _now() -> str:
 # Malicious / max-attempts → hard END.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="input_validator")
 def input_validator(state: RiskAnalysisState) -> dict:
     print("\n[STEP 0] 🔍 Input Validator: checking input with LLM guardrails...")
 
@@ -300,6 +303,7 @@ def input_validator(state: RiskAnalysisState) -> dict:
 # Workflow ends here — resumes via POST /capa/correct/{thread_id}.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="request_correction_node")
 def request_correction_node(state: RiskAnalysisState) -> dict:
     print("\n[STEP 0b] 💬 Request Correction Node: surfacing correction to user...")
 
@@ -354,6 +358,7 @@ def route_after_validation(state: RiskAnalysisState) -> str:
 # Does NOT build per-agent payloads — that is payload_builder_node's job.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="context_node")
 def context_node(state: RiskAnalysisState) -> dict:
     print("\n[STEP 1] 🧠 Context Node: extracting context from input...")
 
@@ -396,6 +401,7 @@ def context_node(state: RiskAnalysisState) -> dict:
 # Maps enriched_input fields → `extracted` dict (same shape as context_node output).
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="enriched_context_node")
 def enriched_context_node(state: RiskAnalysisState) -> dict:
     print("\n[STEP 1b] ⚡ Enriched Context Node: using structured UI input (skipping LLM extraction)...")
 
@@ -460,6 +466,7 @@ def enriched_context_node(state: RiskAnalysisState) -> dict:
 # Adding a new agent = add its payload function in payloads.py only.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="payload_builder_node")
 def payload_builder_node(state: RiskAnalysisState) -> dict:
     print("\n[STEP 2] 📦 Payload Builder: building per-agent inputs...")
 
@@ -496,15 +503,66 @@ def dispatch_parallel(state: RiskAnalysisState) -> list[Send]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# AGENT RUNNERS FOR AGENTOPS TRACING
+# Defined at the module level so AgentOps extracts their names cleanly.
+# ══════════════════════════════════════════════════════════════════════════════
+
+@agentops_agent(name="detection_agent")
+class _DetectionRunner:
+    @agentops_operation(name="process_complaint")
+    def run(self, agent_input):
+        graph = build_detection_graph()
+        return deep_serialize(graph.invoke(agent_input))
+
+@agentops_agent(name="similar_cases_agent")
+class _SimilarCasesRunner:
+    @agentops_operation(name="find_similar_cases")
+    def run(self, agent_input):
+        return deep_serialize(similar_cases_graph.invoke(agent_input))
+
+@agentops_agent(name="pattern_agent")
+class _PatternRunner:
+    @agentops_operation(name="process_pattern")
+    def run(self, agent_input):
+        graph = build_pattern_graph()
+        return deep_serialize(graph.invoke(agent_input))
+
+@agentops_agent(name="severity_agent")
+class _SeverityRunner:
+    @agentops_operation(name="evaluate_severity")
+    def run(self, agent_input):
+        graph = build_severity_graph()
+        return deep_serialize(graph.invoke(agent_input))
+
+@agentops_agent(name="occurrence_agent")
+class _OccurrenceRunner:
+    @agentops_operation(name="analyze_with_pattern_and_similar_cases")
+    def run(self, graph_input):
+        return deep_serialize(occurrence_graph.invoke(graph_input))
+
+@agentops_agent(name="regulatory_agent")
+class _RegulatoryRunner:
+    @agentops_operation(name="process_complaint")
+    def run(self, graph, inp):
+        return deep_serialize(graph.invoke(inp))
+
+@agentops_agent(name="aireasoning_agent")
+class _AiReasoningRunner:
+    @agentops_operation(name="generate_reasoning")
+    def run(self, inp):
+        return deep_serialize(aireasoning_graph.invoke(inp))
+
+# ══════════════════════════════════════════════════════════════════════════════
 # PARALLEL AGENTS — A5, A1, A2, A3
 # Each wraps its sub-graph result with deep_serialize() before returning.
 # No Command goto — routing handled by edges in build_orchestrator().
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="A5_detection_agent")
 def A5_detection_agent(state: dict) -> dict:
     print("   ▶ A5 Detection Agent running...")
-    graph  = build_detection_graph()
-    result = deep_serialize(graph.invoke(state["agent_input"]))
+
+    result = _DetectionRunner().run(state["agent_input"])
     score  = result.get("detection_score", 5)
     print(f"     Detection score : {score}")
     return {
@@ -514,9 +572,11 @@ def A5_detection_agent(state: dict) -> dict:
     }
 
 
+@agentops_operation(name="A1_similar_cases_agent")
 def A1_similar_cases_agent(state: dict) -> dict:
     print("   ▶ A1 Similar Cases Agent running...")
-    result       = deep_serialize(similar_cases_graph.invoke(state["agent_input"]))
+
+    result       = _SimilarCasesRunner().run(state["agent_input"])
     final_output = result.get("final_output") or {}
 
     count       = final_output.get("similarCount", 0)
@@ -546,11 +606,11 @@ def A1_similar_cases_agent(state: dict) -> dict:
     }
 
 
+@agentops_operation(name="A2_pattern_agent")
 def A2_pattern_agent(state: dict) -> dict:
     print("   ▶ A2 Pattern Agent running...")
-    graph  = build_pattern_graph()
-    result = deep_serialize(graph.invoke(state["agent_input"]))
 
+    result = _PatternRunner().run(state["agent_input"])
     trend_score    = result.get("trend_score", 5)
     trend_category = result.get("trend_category", "UNKNOWN")
     pattern        = result.get("identified_pattern", "No pattern identified")
@@ -566,11 +626,11 @@ def A2_pattern_agent(state: dict) -> dict:
     }
 
 
+@agentops_operation(name="A3_severity_agent")
 def A3_severity_agent(state: dict) -> dict:
     print("   ▶ A3 Severity Agent running...")
-    graph  = build_severity_graph()
-    result = deep_serialize(graph.invoke(state["agent_input"]))
 
+    result = _SeverityRunner().run(state["agent_input"])
     score = result.get("severity_score", 5)
     label = result.get("severity_label", "MODERATE")
     print(f"     Severity : {score} ({label})")
@@ -610,6 +670,7 @@ def A3_severity_agent(state: dict) -> dict:
 #   Final result: fully plain dict, no Pydantic objects anywhere.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="A4_occurrence_agent")
 def A4_occurrence_agent(state: RiskAnalysisState) -> dict:
     print(f"\n[STEP 4] ▶ A4 Occurrence Agent running...")
 
@@ -712,8 +773,8 @@ def A4_occurrence_agent(state: RiskAnalysisState) -> dict:
     print(f"   pattern_data       : {'✓' if pattern_data       else '✗ not available'}")
     print(f"   similar_cases_data : {'✓ ' + str(similar_cases_data['similarCount']) + ' cases' if similar_cases_data else '✗ not available'}")
 
-    # ── Invoke + deep serialize ───────────────────────────────────────────────
-    occurrence_result = deep_serialize(occurrence_graph.invoke(occ_base))
+    # ── Invoke + deep serialize via agent span ───────────────────────────────
+    occurrence_result = _OccurrenceRunner().run(occ_base)
 
     final      = occurrence_result.get("final_output") or {}
     occ_score  = final.get("weighted_score", 5)
@@ -741,6 +802,7 @@ def A4_occurrence_agent(state: RiskAnalysisState) -> dict:
 # Uses safe defaults (5) for any score that is None or missing.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="rpn_calculator_node")
 def rpn_calculator_node(state: RiskAnalysisState) -> dict:
     print(f"\n[STEP 4.5] ▶ RPN Calculator Node...")
 
@@ -787,9 +849,9 @@ def rpn_calculator_node(state: RiskAnalysisState) -> dict:
 # deep_serialize() at invoke.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="A6_regulatory_agent")
 def A6_regulatory_agent(state: RiskAnalysisState) -> dict:
     print("\n[STEP 5] ▶ A6 Regulatory Agent: evaluating compliance...")
-    graph = build_regulatory_graph()
 
     reg_input = {
         **state["enriched_inputs"]["regulatory"],
@@ -800,7 +862,10 @@ def A6_regulatory_agent(state: RiskAnalysisState) -> dict:
         "severity":         state.get("severity_label"),
     }
 
-    result     = deep_serialize(graph.invoke(reg_input))
+    # ── Invoke + deep serialize via agent span ───────────────────────────────
+
+    graph      = build_regulatory_graph()
+    result     = _RegulatoryRunner().run(graph, reg_input)
     reportable = result.get("reportable", False)
     risk_level = result.get("compliance_risk_level", "unknown")
     print(f"   Reportable : {reportable} | Risk level : {risk_level}")
@@ -818,6 +883,7 @@ def A6_regulatory_agent(state: RiskAnalysisState) -> dict:
 # deep_serialize() at invoke.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="A7_reasoning_agent")
 def A7_reasoning_agent(state: RiskAnalysisState) -> dict:
     print("\n[STEP 6] ▶ A7 AI Reasoning Agent: synthesizing justification...")
 
@@ -855,7 +921,9 @@ def A7_reasoning_agent(state: RiskAnalysisState) -> dict:
         "iteration": 0,
     }
 
-    result     = deep_serialize(aireasoning_graph.invoke(reasoning_input))
+    # ── Invoke + deep serialize via agent span ───────────────────────────────
+
+    result     = _AiReasoningRunner().run(reasoning_input)
     final      = result.get("final_output", {}) or {}
     confidence = final.get("confidence_level", "N/A") if isinstance(final, dict) else "N/A"
     print(f"   Confidence : {confidence}")
@@ -872,6 +940,7 @@ def A7_reasoning_agent(state: RiskAnalysisState) -> dict:
 # All sub-graph results already deep_serialized — safe to read directly.
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="finalize_node")
 def finalize_node(state: RiskAnalysisState) -> dict:
     print("\n✅ Risk Analysis complete — building final report...")
 

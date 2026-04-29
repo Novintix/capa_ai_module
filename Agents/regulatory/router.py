@@ -10,6 +10,7 @@ from typing import Optional
 from .schemas import ComplaintInput, RegulatoryPolicy, RegulatoryDecision
 from .logger import log_api_request, log_api_response
 from .agent import RegulatoryAgentLangGraph
+from agent_ops import agentops_session
 
 
 # Create API router
@@ -28,6 +29,7 @@ def get_regulatory_agent():
 
 
 @router.post("/", response_model=RegulatoryDecision)
+@agentops_session(name="regulatory@router.post(_, response_model=RegulatoryDecision)", tags=["agents", "regulatory"])
 def evaluate_regulatory_compliance(
     complaint: ComplaintInput,
     policy: Optional[RegulatoryPolicy] = None

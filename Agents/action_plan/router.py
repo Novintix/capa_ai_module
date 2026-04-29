@@ -7,13 +7,14 @@ FastAPI route for CAPA Action Plan Agent.
 from fastapi import APIRouter, HTTPException
 from .graph import build_graph
 from .model import CapaInput, CapaActionPlanResponse
-from agent_ops import agentops_operation
+from agent_ops import agentops_operation, agentops_session
 
 router = APIRouter()
 graph = build_graph()
 
 
 @router.post("/action_plan", response_model=CapaActionPlanResponse)
+@agentops_session(name="action_plan@router.post(_action_plan, response_model=CapaActionPlanResponse)", tags=["agents", "action_plan"])
 @agentops_operation(name="action_plan")
 def generate_capa_action_plan(request: CapaInput):
     """

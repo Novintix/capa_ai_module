@@ -47,6 +47,7 @@ from Agents.zero_evidence_agent.schemas import ZeroEvidenceInput
 from .logger import log_error, log_node_entry, log_node_exit
 from .state import WhyAnalysisV3State
 from .payloads import build_all_payloads
+from agent_ops import agentops_operation
 
 try:
     from config.redis_config import REDIS_URL as _REDIS_URL
@@ -279,6 +280,7 @@ def _build_fallback_causes(question: str) -> List[Dict[str, Any]]:
 # Validates input and sets up initial state
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Initialize")
 def initialize_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 0] Initialize: validating input and setting up state...")
     log_node_entry("initialize", state)
@@ -329,6 +331,7 @@ def initialize_node(state: WhyAnalysisV3State) -> dict:
 # Builds all agent payloads using payloads.py
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Payload_Builder")
 def payload_builder_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 1] Payload Builder: building per-agent inputs...")
     log_node_entry("payload_builder", state)
@@ -361,6 +364,7 @@ def payload_builder_node(state: WhyAnalysisV3State) -> dict:
 # Generates Why question
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Question_Agent")
 def question_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 2] Question Agent: generating Why question...")
     log_node_entry("question_agent", state)
@@ -432,6 +436,7 @@ def question_agent_node(state: WhyAnalysisV3State) -> dict:
 # Generates list of potential causes
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Cause_Generation_Agent")
 def cause_generation_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 3] Cause Generation Agent: generating causes...")
     log_node_entry("cause_generation_agent", state)
@@ -525,6 +530,7 @@ def cause_generation_agent_node(state: WhyAnalysisV3State) -> dict:
 # Validates causes against evidence
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Validation_Agent")
 def validation_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 4] Validation Agent: validating causes against evidence...")
     log_node_entry("validation_agent", state)
@@ -609,6 +615,7 @@ def validation_agent_node(state: WhyAnalysisV3State) -> dict:
 # Pauses workflow for human cause selection
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Human_Review")
 def human_review_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 5] Human Review: awaiting human cause selection...")
     log_node_entry("human_review", state)
@@ -883,6 +890,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
 # Selects cause by criticality when no validated causes
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Zero_Evidence_Agent")
 def zero_evidence_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 5-ALT] Zero Evidence Agent: selecting by criticality...")
     log_node_entry("zero_evidence_agent", state)
@@ -1005,6 +1013,7 @@ def zero_evidence_agent_node(state: WhyAnalysisV3State) -> dict:
 # Assembles final output
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Finalize")
 def finalize_node(state: WhyAnalysisV3State) -> dict:
     print("\n[COMPLETE] Why Analysis V3 complete - building final report...")
     log_node_entry("finalize", state)

@@ -10,6 +10,7 @@ from typing import List
 from .schemas import DocumentInput, ExtractionResult, BatchDocumentInput, BatchExtractionResult, ExtractionMode
 from .logger import log_api_request, log_api_response
 from .agent import DocumentIngestionAgent
+from agent_ops import agentops_session
 
 
 # Create API router
@@ -28,6 +29,7 @@ def get_ingestion_agent():
 
 
 @router.post("/", response_model=ExtractionResult)
+@agentops_session(name="ingestion@router.post(_, response_model=ExtractionResult)", tags=["agents", "ingestion"])
 def extract_document(document: DocumentInput):
     """
     Extract content from a single document with advanced processing capabilities
@@ -88,6 +90,7 @@ def extract_document(document: DocumentInput):
 
 
 @router.post("/batch", response_model=BatchExtractionResult)
+@agentops_session(name="ingestion@router.post(_batch, response_model=BatchExtractionResult)", tags=["agents", "ingestion"])
 def extract_batch(batch: BatchDocumentInput):
     """
     Extract content from multiple documents in batch with advanced processing

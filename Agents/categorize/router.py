@@ -4,12 +4,13 @@ from typing import List
 from Agents.categorize.state import CategorizeInput, CategorizeOutput, Cause
 from Agents.categorize.graph import categorize_graph
 from Agents.categorize.logger import log_request, log_final_output, log_error
-from agent_ops import agentops_operation
+from agent_ops import agentops_operation, agentops_session
 
 router = APIRouter(prefix="/categorize", tags=["categorize"])
 
 
 @router.post("/analyze", response_model=CategorizeOutput)
+@agentops_session(name="categorize@router.post(_analyze, response_model=CategorizeOutput)", tags=["agents", "categorize"])
 @agentops_operation(name="categorize.analyze")
 async def categorize_causes_endpoint(request: CategorizeInput):
     """

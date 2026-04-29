@@ -6,10 +6,11 @@ SDK is not installed or the API key is missing.
 """
 
 from contextlib import contextmanager
+import functools
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 _agentops_initialized = False
 
@@ -30,8 +31,9 @@ def init_agentops(default_tags: Optional[List[str]] = None) -> bool:
         return False
 
     kwargs: Dict[str, Any] = {
-        "instrument_llm_calls": False,
-        "log_level": "CRITICAL",
+        "auto_start_session":     False,       # prevent phantom "Default" trace on init
+        "instrument_llm_calls":   False,       # Disables noisy LangGraph .task and Bedrock embeddings spans
+        "log_level":              "CRITICAL",
         "log_session_replay_url": False,
     }
     if default_tags:
@@ -45,7 +47,7 @@ def init_agentops(default_tags: Optional[List[str]] = None) -> bool:
     except TypeError:
         if "default_tags" in kwargs:
             kwargs["tags"] = kwargs.pop("default_tags")
-        for key in ["instrument_llm_calls", "log_level", "log_session_replay_url"]:
+        for key in ["log_level", "log_session_replay_url"]:
             kwargs.pop(key, None)
         agentops.init(api_key=api_key, **kwargs)
 
@@ -102,6 +104,66 @@ def agentops_workflow(name: Optional[str] = None, attributes: Optional[Dict[str,
         return _noop_decorator()
     from agentops.sdk.decorators import workflow as _workflow
     return _safe_decorator_call(_workflow, name, attributes)
+
+
+def agentops_session(
+    name: str = "agent_run",
+    tags: Optional[List[str]] = None,
+):
+    """
+    Decorator that creates a single AgentOps trace per call with the given
+    name and tags. Replaces the phantom "Default" trace produced by
+    agentops.init(auto_start_session=True).
+
+    Usage:
+        @agentops_session(name="risk_analysis", tags=["capa_ai_module"])
+        async def analyze(request: CAPARequest): ...
+    """
+    def decorator(fn: Callable) -> Callable:
+        @functools.wraps(fn)
+        async def async_wrapper(*args, **kwargs):
+            ao = _get_agentops()
+            if ao is None:
+                return await fn(*args, **kwargs)
+            trace = None
+            try:
+                trace = ao.start_trace(trace_name=name, tags=tags or [])
+                result = await fn(*args, **kwargs)
+                ao.end_trace(trace, end_state="Success")
+                return result
+            except Exception:
+                if trace is not None:
+                    try:
+                        ao.end_trace(trace, end_state="Error")
+                    except Exception:
+                        pass
+                raise
+
+        @functools.wraps(fn)
+        def sync_wrapper(*args, **kwargs):
+            ao = _get_agentops()
+            if ao is None:
+                return fn(*args, **kwargs)
+            trace = None
+            try:
+                trace = ao.start_trace(trace_name=name, tags=tags or [])
+                result = fn(*args, **kwargs)
+                ao.end_trace(trace, end_state="Success")
+                return result
+            except Exception:
+                if trace is not None:
+                    try:
+                        ao.end_trace(trace, end_state="Error")
+                    except Exception:
+                        pass
+                raise
+
+        import asyncio
+        if asyncio.iscoroutinefunction(fn):
+            return async_wrapper
+        return sync_wrapper
+
+    return decorator
 
 
 def _get_tracer():

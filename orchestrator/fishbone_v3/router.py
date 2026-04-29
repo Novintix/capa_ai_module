@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from .schemas import FishboneV3Input, FishboneV3Output, FishboneV3DecisionInput
 from .agent import FishboneOrchestratorV3
 from .logger import log_error
+from agent_ops import agentops_session
 
 router = APIRouter(prefix="/fishbone-v3", tags=["Fishbone V3 (HITL)"])
 
@@ -14,6 +15,7 @@ orchestrator = FishboneOrchestratorV3()
 
 
 @router.post("/analyze", response_model=FishboneV3Output)
+@agentops_session(name="Fishbone_Analysis", tags=["capa_ai_module", "fishbone_analysis", "orchestrator"])
 async def analyze_complaint(input_data: FishboneV3Input):
     """
     Phase 1: Run Fishbone analysis and pause for human review.
@@ -36,6 +38,7 @@ async def analyze_complaint(input_data: FishboneV3Input):
 
 
 @router.post("/decide", response_model=FishboneV3Output)
+@agentops_session(name="Fishbone_Decide", tags=["capa_ai_module", "fishbone_analysis", "hitl"])
 async def submit_decisions(decision_input: FishboneV3DecisionInput):
     """
     Phase 2: Submit human decisions (RCA, PROCEED) for the causes.

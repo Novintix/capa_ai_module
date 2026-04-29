@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from Agents.loop_control.agent import LoopControlAgent
 from Agents.loop_control.logger import log_error, log_request
 from Agents.loop_control.state import LoopControlInput, LoopControlOutput
+from agent_ops import agentops_session
 
 
 router = APIRouter(prefix="/loop-control", tags=["loop-control"])
@@ -22,6 +23,7 @@ def get_loop_control_agent() -> LoopControlAgent:
 
 
 @router.post("/analyze", response_model=LoopControlOutput)
+@agentops_session(name="loop_control@router.post(_analyze, response_model=LoopControlOutput)", tags=["agents", "loop_control"])
 async def analyze_loop_control(payload: LoopControlInput):
 	"""
 	Decide whether RCA should continue or stop based on chain quality and cause strength.
@@ -36,4 +38,3 @@ async def analyze_loop_control(payload: LoopControlInput):
 	except Exception as exc:
 		log_error("router", str(exc))
 		raise HTTPException(status_code=500, detail=f"Error processing loop control: {str(exc)}")
-
