@@ -11,7 +11,9 @@ from Agents.occurrence.state import ComplaintData, PatternData, SimilarCasesData
 from Agents.occurrence.graph import occurrence_graph
 from Agents.occurrence.logger import log_request, log_final_output, log_error
 import json
+from agent_ops import agentops_agent, agentops_operation
 
+@agentops_agent(name="occurrence_agent")
 class OccurrenceAgent:
     """
     Main interface for the Occurrence Agent.
@@ -21,6 +23,7 @@ class OccurrenceAgent:
     def __init__(self):
         self.graph = occurrence_graph
     
+    @agentops_operation(name="analyze_with_pattern_and_similar_cases")
     def analyze_with_pattern_and_similar_cases(
         self,
         complaint_id: str,
@@ -108,6 +111,7 @@ class OccurrenceAgent:
             log_error("analyze_with_pattern_and_similar_cases", str(e))
             raise
     
+    @agentops_operation(name="analyze_legacy_format")
     def analyze_legacy_format(
         self,
         complaint_id: str,
@@ -188,6 +192,7 @@ class OccurrenceAgent:
             raise
 
 # Convenience function for direct usage
+@agentops_operation(name="analyze_occurrence")
 def analyze_occurrence(
     complaint_id: str,
     description: str,

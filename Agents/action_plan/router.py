@@ -7,12 +7,14 @@ FastAPI route for CAPA Action Plan Agent.
 from fastapi import APIRouter, HTTPException
 from .graph import build_graph
 from .model import CapaInput, CapaActionPlanResponse
+from agent_ops import agentops_operation
 
 router = APIRouter()
 graph = build_graph()
 
 
 @router.post("/action_plan", response_model=CapaActionPlanResponse)
+@agentops_operation(name="action_plan")
 def generate_capa_action_plan(request: CapaInput):
     """
     Generate CAPA Action Plan from investigation and root cause data.

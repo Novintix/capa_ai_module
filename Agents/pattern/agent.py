@@ -1,7 +1,9 @@
 from .graph import create_pattern_graph
 from .schemas import PatternAnalysisRequest, PatternAnalysisResponse
 from .state import AgentState
+from agent_ops import agentops_agent, agentops_operation
 
+@agentops_agent(name="pattern_agent")
 class PatternAgentLangGraph:
     """
     Pattern Agent for Trend Analysis and Pattern Recognition.
@@ -10,6 +12,7 @@ class PatternAgentLangGraph:
     def __init__(self):
         self.graph = create_pattern_graph()
     
+    @agentops_operation(name="process_pattern")
     def process_pattern(self, request: PatternAnalysisRequest) -> dict:
         """Run the Pattern Agent with the given request."""
         

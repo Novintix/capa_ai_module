@@ -4,11 +4,13 @@ from typing import List
 from Agents.categorize.state import CategorizeInput, CategorizeOutput, Cause
 from Agents.categorize.graph import categorize_graph
 from Agents.categorize.logger import log_request, log_final_output, log_error
+from agent_ops import agentops_operation
 
 router = APIRouter(prefix="/categorize", tags=["categorize"])
 
 
 @router.post("/analyze", response_model=CategorizeOutput)
+@agentops_operation(name="categorize.analyze")
 async def categorize_causes_endpoint(request: CategorizeInput):
     """
     Categorize root causes into 6M categories (Fishbone Diagram).

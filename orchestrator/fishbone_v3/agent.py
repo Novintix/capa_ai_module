@@ -17,6 +17,7 @@ from .logger import (
 )
 from .state_machine import FishboneV3StateMachine, FishboneV3State, IterationMemory, StopReason
 from .session_memory import SessionMemoryManagerV3
+from agent_ops import agentops_agent, agentops_operation
 
 # Import agents (re-using V2 agent logic)
 from Agents.cause_generation.schemas import QuestionInput
@@ -29,6 +30,7 @@ from Agents.zero_evidence_agent.agent import ZeroEvidenceAgent
 from Agents.zero_evidence_agent.schemas import ZeroEvidenceInput, CauseInput as ZeroEvidenceCauseInput
 
 
+@agentops_agent(name="fishbone_v3_orchestrator")
 class FishboneOrchestratorV3:
     """
     Fishbone v3 Orchestrator - HITL Flow
@@ -48,6 +50,7 @@ class FishboneOrchestratorV3:
         redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379")
         self.session_manager = SessionMemoryManagerV3(redis_url=redis_url)
     
+    @agentops_operation(name="analyze")
     def analyze(self, input_data: FishboneV3Input) -> Dict[str, Any]:
         """Phase 1: Run analysis up to validation and wait for human"""
         try:
@@ -150,6 +153,7 @@ class FishboneOrchestratorV3:
             log_error("analyze", str(e))
             return {"error": f"Orchestrator error in analyze: {str(e)}", "status": "ERROR"}
 
+    @agentops_operation(name="submit_decisions")
     def submit_decisions(self, decision_input: FishboneV3DecisionInput) -> Dict[str, Any]:
         """Phase 2: Record human decisions and complete analysis"""
         try:

@@ -5,11 +5,13 @@ import json
 from Agents.aireasoning.state import AIReasoningInput, AIReasoningResponse
 from Agents.aireasoning.graph import aireasoning_graph
 from Agents.aireasoning.logger import log_request, log_final_output, log_error, reset_log, log_output, log_output_audit
+from agent_ops import agentops_operation
 
 router = APIRouter(prefix="/aireasoning", tags=["aireasoning"])
 
 
 @router.post("/analyze", response_model=AIReasoningResponse)
+@agentops_operation(name="aireasoning.analyze")
 async def analyze_aireasoning(
     complaint_id: str = Form(...),
     risk_score: int = Form(...),

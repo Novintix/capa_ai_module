@@ -15,6 +15,7 @@ Responsibilities:
 from fastapi import APIRouter, HTTPException
 from .graph import build_graph
 from .model import SeverityRequest, SeverityResponse
+from agent_ops import agentops_operation
 router = APIRouter()
 
 graph = build_graph()
@@ -31,6 +32,7 @@ graph = build_graph()
 
 # -------- API Route --------
 @router.post("/severity", response_model=SeverityResponse)
+@agentops_operation(name="severity.evaluate")
 def evaluate_severity(request: SeverityRequest):
     try:
         result = graph.invoke({
