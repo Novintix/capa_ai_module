@@ -125,6 +125,9 @@ RULE 5 — explanation:
 PATTERN_ANALYSIS_USER_PROMPT_TEMPLATE = """
 ## New Complaint
 - ID             : {complaint_id}
+- Product        : {product}
+- Region         : {region}
+- Severity       : {severity}
 - Description    : {complaint_description}
 - Failure Class  : {failure_class}
 
@@ -134,7 +137,7 @@ PATTERN_ANALYSIS_USER_PROMPT_TEMPLATE = """
 ## Step-by-step Instructions
 
 Step 1 — Understand the new complaint:
-  What is the failure type? What product? What is the risk?
+  What is the failure type? What product ({product})? What is the risk?
 
 Step 2 — For EACH historical record ask:
   "Does this record describe the same failure type as the new complaint?"

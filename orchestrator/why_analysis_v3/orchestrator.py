@@ -47,11 +47,14 @@ from Agents.zero_evidence_agent.schemas import ZeroEvidenceInput
 from .logger import log_error, log_node_entry, log_node_exit
 from .state import WhyAnalysisV3State
 from .payloads import build_all_payloads
+from agent_ops import agentops_operation
 
 try:
-    from config.redis_config import REDIS_URL as _REDIS_URL
+    from config.redis_config import REDIS_URL as _REDIS_URL, write_agent_status, publish_agent_event
 except Exception:
     _REDIS_URL = "redis://localhost:6379"
+    write_agent_status = lambda *args: None
+    publish_agent_event = lambda *args: None
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CONSTANTS
@@ -279,6 +282,7 @@ def _build_fallback_causes(question: str) -> List[Dict[str, Any]]:
 # Validates input and sets up initial state
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Initialize")
 def initialize_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 0] Initialize: validating input and setting up state...")
     log_node_entry("initialize", state)
@@ -329,6 +333,7 @@ def initialize_node(state: WhyAnalysisV3State) -> dict:
 # Builds all agent payloads using payloads.py
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Payload_Builder")
 def payload_builder_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 1] Payload Builder: building per-agent inputs...")
     log_node_entry("payload_builder", state)
@@ -361,6 +366,7 @@ def payload_builder_node(state: WhyAnalysisV3State) -> dict:
 # Generates Why question
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="A12_Question_Agent")
 def question_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 2] Question Agent: generating Why question...")
     log_node_entry("question_agent", state)
@@ -432,6 +438,7 @@ def question_agent_node(state: WhyAnalysisV3State) -> dict:
 # Generates list of potential causes
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="A13_Cause_Generation_Agent")
 def cause_generation_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 3] Cause Generation Agent: generating causes...")
     log_node_entry("cause_generation_agent", state)
@@ -525,6 +532,7 @@ def cause_generation_agent_node(state: WhyAnalysisV3State) -> dict:
 # Validates causes against evidence
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="A14_Validation_Agent")
 def validation_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 4] Validation Agent: validating causes against evidence...")
     log_node_entry("validation_agent", state)
@@ -609,6 +617,7 @@ def validation_agent_node(state: WhyAnalysisV3State) -> dict:
 # Pauses workflow for human cause selection
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Human_Review")
 def human_review_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 5] Human Review: awaiting human cause selection...")
     log_node_entry("human_review", state)
@@ -883,6 +892,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
 # Selects cause by criticality when no validated causes
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="A17_Zero_Evidence_Agent")
 def zero_evidence_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 5-ALT] Zero Evidence Agent: selecting by criticality...")
     log_node_entry("zero_evidence_agent", state)
@@ -1005,6 +1015,7 @@ def zero_evidence_agent_node(state: WhyAnalysisV3State) -> dict:
 # Assembles final output
 # ══════════════════════════════════════════════════════════════════════════════
 
+@agentops_operation(name="Finalize")
 def finalize_node(state: WhyAnalysisV3State) -> dict:
     print("\n[COMPLETE] Why Analysis V3 complete - building final report...")
     log_node_entry("finalize", state)
@@ -1183,6 +1194,40 @@ def route_after_finalize(state: WhyAnalysisV3State) -> str:
 # All routing lives here — full flow visible in one place
 # ══════════════════════════════════════════════════════════════════════════════
 
+def _tracked(node_name: str, fn):
+    """
+    Wraps a node function so it writes running/done/error status to Redis
+    and publishes to the agent_events Pub/Sub channel on each state change.
+    """
+    try:
+        from config.redis_config import _NODE_LABELS, _NODE_AGENT_IDS
+        label    = _NODE_LABELS.get(node_name, node_name)
+        agent_id = _NODE_AGENT_IDS.get(node_name)
+    except Exception:
+        label = node_name
+        agent_id = None
+
+    def wrapper(state):
+        tid = state.get("session_id", "unknown") if isinstance(state, dict) else "unknown"
+        write_agent_status(tid, node_name, "running")
+        publish_agent_event(tid, {"type": "node_start", "node": node_name,
+                                  "label": label, "agent_id": agent_id, "ts": _now()})
+        try:
+            result = fn(state)
+            write_agent_status(tid, node_name, "done")
+            end_event = {"type": "node_end", "node": node_name,
+                         "label": label, "agent_id": agent_id, "ts": _now()}
+            publish_agent_event(tid, end_event)
+            return result
+        except Exception as exc:
+            write_agent_status(tid, node_name, "error")
+            publish_agent_event(tid, {"type": "node_error", "node": node_name,
+                                      "label": label, "agent_id": agent_id,
+                                      "error": str(exc), "ts": _now()})
+            raise
+    return wrapper
+
+
 def build_orchestrator():
     """
     Assembles the full Why Analysis V3 Orchestrator graph.
@@ -1202,14 +1247,14 @@ def build_orchestrator():
     g = StateGraph(WhyAnalysisV3State)
 
     # ── Register nodes ────────────────────────────────────────────────────────
-    g.add_node("initialize", initialize_node)
-    g.add_node("payload_builder", payload_builder_node)
-    g.add_node("question_agent", question_agent_node)
-    g.add_node("cause_generation_agent", cause_generation_agent_node)
-    g.add_node("validation_agent", validation_agent_node)
-    g.add_node("human_review", human_review_node)
-    g.add_node("zero_evidence_agent", zero_evidence_agent_node)
-    g.add_node("finalize", finalize_node)
+    g.add_node("initialize", _tracked("initialize", initialize_node))
+    g.add_node("payload_builder", _tracked("payload_builder", payload_builder_node))
+    g.add_node("question_agent", _tracked("question_agent", question_agent_node))
+    g.add_node("cause_generation_agent", _tracked("cause_generation_agent", cause_generation_agent_node))
+    g.add_node("validation_agent", _tracked("validation_agent", validation_agent_node))
+    g.add_node("human_review", _tracked("human_review", human_review_node))
+    g.add_node("zero_evidence_agent", _tracked("zero_evidence_agent", zero_evidence_agent_node))
+    g.add_node("finalize", _tracked("finalize", finalize_node))
 
     # ── Entry ─────────────────────────────────────────────────────────────────
     g.add_edge(START, "initialize")

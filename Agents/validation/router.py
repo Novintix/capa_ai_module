@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from .agent import ValidationAgent
 from .logger import log_api_request, log_api_response
 from .schemas import ValidationInput, ValidationResult
+from agent_ops import agentops_session
 
 
 router = APIRouter(prefix="/validation", tags=["validation"])
@@ -24,6 +25,7 @@ def get_validation_agent():
 
 
 @router.post("/", response_model=ValidationResult)
+@agentops_session(name="validation@router.post(_, response_model=ValidationResult)", tags=["agents", "validation"])
 def validate_generated_causes(payload: ValidationInput):
 	"""
 	Validate generated causes against complaint and investigation evidence.

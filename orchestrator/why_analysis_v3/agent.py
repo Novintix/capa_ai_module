@@ -10,8 +10,10 @@ from typing import Dict, Any
 from .orchestrator import orchestrator_graph, deep_serialize
 from .schemas import WhyAnalysisV3Input
 from .logger import log_error
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="Why_Analysis")
 class WhyAnalysisV3Orchestrator:
     """
     Why Analysis V3 Orchestrator Agent.
@@ -23,6 +25,7 @@ class WhyAnalysisV3Orchestrator:
     def __init__(self):
         self.graph = orchestrator_graph
 
+    @agentops_operation(name="Why_Analysis")
     def analyze(self, input_data: WhyAnalysisV3Input) -> Dict[str, Any]:
         """
         Run Why Analysis V3 orchestration.
@@ -83,6 +86,7 @@ class WhyAnalysisV3Orchestrator:
                 "errors": [{"error": str(exc), "timestamp": time.time()}],
             }
 
+    @agentops_operation(name="resume_with_human_selection")
     def resume_with_human_selection(self, session_id: str, selected_cause_id: str, decision: str = "root_cause") -> Dict[str, Any]:
         """
         Resume a paused workflow with human's cause selection.

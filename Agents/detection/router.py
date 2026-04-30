@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException
 from .schemas import ComplaintData, DetectionScore
 from .logger import log_api_request, log_api_response
 from .agent import DetectionAgentLangGraph
+from agent_ops import agentops_session
 
 
 # Create API router
@@ -27,6 +28,7 @@ def get_detection_agent():
 
 
 @router.post("/", response_model=DetectionScore)
+@agentops_session(name="detection@router.post(_, response_model=DetectionScore)", tags=["agents", "detection"])
 def detect_score(complaint: ComplaintData, policy_path: str = None):
     """
     Calculate detection score with optional policy document.

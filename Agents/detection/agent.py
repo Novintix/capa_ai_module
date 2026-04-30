@@ -9,8 +9,10 @@ from .graph import create_detection_graph
 from .state import AgentState
 from .schemas import ComplaintData
 from config.aws_bedrock_config import get_llm
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="detection_agent")
 class DetectionAgentLangGraph:
     """
     Detection Agent using LangGraph.
@@ -28,6 +30,7 @@ class DetectionAgentLangGraph:
         # Create graph
         self.graph = create_detection_graph()
     
+    @agentops_operation(name="process_complaint")
     def process_complaint(
         self,
         complaint_data: ComplaintData,

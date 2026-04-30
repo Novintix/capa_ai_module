@@ -22,9 +22,20 @@ def get_mongodb_client():
 
 def get_complaints_collection():
     """
-    Returns the complaints collection.
+    Returns the legacy complaints collection.
+    Kept for backwards compatibility — prefer get_capa_complaints_collection().
     """
     client = get_mongodb_client()
     db = client["capa-db"]
     collection = db["complaints"]
     return collection
+
+
+def get_capa_complaints_collection():
+    """
+    Returns the centralised capa_complaints collection.
+    Used by pattern agent and similar cases agent for vector search.
+    """
+    client = get_mongodb_client()
+    db = client["capa-db"]
+    return db["capa_complaints"]

@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 from Agents.ranking.state import RankingInput, RankingOutput, RankingConfig
 from Agents.ranking.logger import log_api_request, log_api_response
 from Agents.ranking.agent import RankingAgent
+from agent_ops import agentops_session
 
 
 # Create API router
@@ -25,6 +26,7 @@ def get_ranking_agent():
 
 
 @router.post("/", response_model=RankingOutput)
+@agentops_session(name="ranking@router.post(_, response_model=RankingOutput)", tags=["agents", "ranking"])
 def rank_causes(request: RankingInput):
     """
     Rank candidate root causes using configurable RCPS methodology.

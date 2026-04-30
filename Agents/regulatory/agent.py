@@ -9,8 +9,10 @@ from .graph import create_regulatory_graph
 from .state import AgentState
 from .schemas import ComplaintInput, RegulatoryPolicy
 from config.aws_bedrock_config import get_llm
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="regulatory_agent")
 class RegulatoryAgentLangGraph:
     """
     Regulatory Agent using LangGraph.
@@ -28,6 +30,7 @@ class RegulatoryAgentLangGraph:
         # Create graph
         self.graph = create_regulatory_graph()
     
+    @agentops_operation(name="process_complaint")
     def process_complaint(
         self,
         complaint_data: ComplaintInput,

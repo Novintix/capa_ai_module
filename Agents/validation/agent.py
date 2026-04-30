@@ -8,8 +8,10 @@ from typing import Any, Dict
 from .graph import create_validation_graph
 from .logger import log_error
 from .schemas import ValidationInput
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="validation_agent")
 class ValidationAgent:
 	"""
 	Validation Agent using LangGraph.
@@ -27,6 +29,7 @@ class ValidationAgent:
 	def __init__(self):
 		self.graph = create_validation_graph()
 
+	@agentops_operation(name="validate_causes")
 	def validate_causes(self, validation_input: ValidationInput) -> Dict[str, Any]:
 		"""
 		Validate generated causes against complaint and investigation evidence.

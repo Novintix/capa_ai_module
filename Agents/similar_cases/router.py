@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 from Agents.similar_cases.state import SimilarCasesInput, SimilarCasesOutput
 from Agents.similar_cases.logger import log_api_request, log_api_response
 from Agents.similar_cases.agent import SimilarCasesAgent
+from agent_ops import agentops_session
 
 
 # Create API router
@@ -25,6 +26,7 @@ def get_similar_cases_agent():
 
 
 @router.post("/", response_model=SimilarCasesOutput)
+@agentops_session(name="similar_cases@router.post(_, response_model=SimilarCasesOutput)", tags=["agents", "similar_cases"])
 def find_similar_cases(request: SimilarCasesInput):
     """
     Find similar items using vector search - GENERIC & REUSABLE.

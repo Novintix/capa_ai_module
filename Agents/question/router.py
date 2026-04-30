@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from .schemas import StartWhyInput, ContinueWhyInput, WhyQuestionOutput, WhyQuestionError, WhyChainHistoryOutput, WhyChainEntry
 from .logger import log_api_request, log_api_response, log_error
 from .agent import WhyQuestionAgent
+from agent_ops import agentops_session
 
 
 # ---------------------------------------------------------------------------
@@ -33,6 +34,7 @@ def _get_agent() -> WhyQuestionAgent:
 # ---------------------------------------------------------------------------
 
 @router.post("/start", response_model=WhyQuestionOutput)
+@agentops_session(name="question@router.post(_start, response_model=WhyQuestionOutput)", tags=["agents", "question"])
 def start_why_chain(input_data: StartWhyInput):
     """
     Start a new 5 Whys chain for a complaint.
@@ -75,6 +77,7 @@ def start_why_chain(input_data: StartWhyInput):
 
 
 @router.post("/continue", response_model=WhyQuestionOutput)
+@agentops_session(name="question@router.post(_continue, response_model=WhyQuestionOutput)", tags=["agents", "question"])
 def continue_why_chain(input_data: ContinueWhyInput):
     """
     Continue an existing 5 Whys chain with the answer to the last Why question.

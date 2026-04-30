@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException
 from .schemas import QuestionInput, CauseGenerationResult
 from .logger import log_api_request, log_api_response
 from .agent import CauseGenerationAgent
+from agent_ops import agentops_session
 
 
 # Create API router
@@ -27,6 +28,7 @@ def get_cause_agent():
 
 
 @router.post("/", response_model=CauseGenerationResult)
+@agentops_session(name="cause_generation@router.post(_, response_model=CauseGenerationResult)", tags=["agents", "cause_generation"])
 def generate_causes(question: QuestionInput, fmea_path: str = None):
     """
     Generate list of all possible causes based on "why" question

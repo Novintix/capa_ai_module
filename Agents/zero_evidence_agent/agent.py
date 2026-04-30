@@ -17,8 +17,10 @@ from .graph import create_zero_evidence_graph
 from .schemas import ZeroEvidenceInput
 from .logger import log_error
 from config.aws_bedrock_config import get_llm
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="zero_evidence_agent")
 class ZeroEvidenceAgent:
     """
     Zero Evidence Agent - Ranks causes by criticality and selects the most critical one.
@@ -41,6 +43,7 @@ class ZeroEvidenceAgent:
         # Create graph
         self.graph = create_zero_evidence_graph()
 
+    @agentops_operation(name="analyze")
     def analyze(self, input_data: ZeroEvidenceInput) -> Dict[str, Any]:
         """
         Rank causes and return the most critical one.
