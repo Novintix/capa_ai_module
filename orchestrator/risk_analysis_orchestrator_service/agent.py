@@ -21,7 +21,7 @@ from .orchestrator import orchestrator_graph, deep_serialize, MAX_CORRECTION_ATT
 from agent_ops import agentops_agent, agentops_operation
 
 
-@agentops_agent(name="risk_analysis_v3_orchestrator")
+@agentops_agent(name="risk_analysis")
 class RiskAnalysisOrchestratorAgent:
     """
     Risk Analysis Orchestrator Agent — AgentOps-traced wrapper.

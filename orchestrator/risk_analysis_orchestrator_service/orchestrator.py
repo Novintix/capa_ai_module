@@ -507,46 +507,39 @@ def dispatch_parallel(state: RiskAnalysisState) -> list[Send]:
 # Defined at the module level so AgentOps extracts their names cleanly.
 # ══════════════════════════════════════════════════════════════════════════════
 
-@agentops_agent(name="detection_agent")
 class _DetectionRunner:
     @agentops_operation(name="process_complaint")
     def run(self, agent_input):
         graph = build_detection_graph()
         return deep_serialize(graph.invoke(agent_input))
 
-@agentops_agent(name="similar_cases_agent")
 class _SimilarCasesRunner:
     @agentops_operation(name="find_similar_cases")
     def run(self, agent_input):
         return deep_serialize(similar_cases_graph.invoke(agent_input))
 
-@agentops_agent(name="pattern_agent")
 class _PatternRunner:
     @agentops_operation(name="process_pattern")
     def run(self, agent_input):
         graph = build_pattern_graph()
         return deep_serialize(graph.invoke(agent_input))
 
-@agentops_agent(name="severity_agent")
 class _SeverityRunner:
     @agentops_operation(name="evaluate_severity")
     def run(self, agent_input):
         graph = build_severity_graph()
         return deep_serialize(graph.invoke(agent_input))
 
-@agentops_agent(name="occurrence_agent")
 class _OccurrenceRunner:
     @agentops_operation(name="analyze_with_pattern_and_similar_cases")
     def run(self, graph_input):
         return deep_serialize(occurrence_graph.invoke(graph_input))
 
-@agentops_agent(name="regulatory_agent")
 class _RegulatoryRunner:
     @agentops_operation(name="process_complaint")
     def run(self, graph, inp):
         return deep_serialize(graph.invoke(inp))
 
-@agentops_agent(name="aireasoning_agent")
 class _AiReasoningRunner:
     @agentops_operation(name="generate_reasoning")
     def run(self, inp):
