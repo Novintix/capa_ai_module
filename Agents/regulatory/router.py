@@ -30,7 +30,7 @@ def get_regulatory_agent():
 @router.post("/", response_model=RegulatoryDecision)
 def evaluate_regulatory_compliance(
     complaint: ComplaintInput,
-    policy: Optional[RegulatoryPolicy] = None
+    policy_path: Optional[str] = None
 ):
     """
     Evaluate regulatory compliance and determine reporting requirements.
@@ -42,11 +42,12 @@ def evaluate_regulatory_compliance(
     - CAPA requirements
     - Compliance risk level
     
-    If policy is not provided, returns non-reportable decision with CAPA recommendation.
+    The agent loads regulatory policy from a JSON file (default: regulatory_policy.json).
+    If no policy file exists or policy_path is not provided, returns non-reportable decision.
     
     Args:
         complaint: Complaint data with product and issue details
-        policy: Optional regulatory policy with rules
+        policy_path: Optional path to regulatory policy JSON file
         
     Returns:
         RegulatoryDecision with reportability, timeline, CAPA requirements, and justification
@@ -57,10 +58,10 @@ def evaluate_regulatory_compliance(
         regulatory_agent = get_regulatory_agent()
         
         # Log request
-        log_api_request("/regulatory", complaint.complaint_id, has_policy=bool(policy))
+        log_api_request("/regulatory", complaint.complaint_id, has_policy=bool(policy_path))
         
         # Process complaint
-        result = regulatory_agent.process_complaint(complaint, policy)
+        result = regulatory_agent.process_complaint(complaint, policy_path)
         
         # Log response
         log_api_response(
