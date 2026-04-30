@@ -24,7 +24,7 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Optional
 from config.mongodb_config import get_capa_complaints_collection
 
-HISTORY_MONTHS = int(os.getenv("PATTERN_HISTORY_MONTHS", "63"))
+HISTORY_MONTHS = int(os.getenv("PATTERN_HISTORY_MONTHS", "24"))
 
 logger = logging.getLogger(__name__)
 
