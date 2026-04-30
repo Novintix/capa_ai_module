@@ -50,9 +50,11 @@ from .payloads import build_all_payloads
 from agent_ops import agentops_operation
 
 try:
-    from config.redis_config import REDIS_URL as _REDIS_URL
+    from config.redis_config import REDIS_URL as _REDIS_URL, write_agent_status, publish_agent_event
 except Exception:
     _REDIS_URL = "redis://localhost:6379"
+    write_agent_status = lambda *args: None
+    publish_agent_event = lambda *args: None
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CONSTANTS
@@ -1192,6 +1194,40 @@ def route_after_finalize(state: WhyAnalysisV3State) -> str:
 # All routing lives here — full flow visible in one place
 # ══════════════════════════════════════════════════════════════════════════════
 
+def _tracked(node_name: str, fn):
+    """
+    Wraps a node function so it writes running/done/error status to Redis
+    and publishes to the agent_events Pub/Sub channel on each state change.
+    """
+    try:
+        from config.redis_config import _NODE_LABELS, _NODE_AGENT_IDS
+        label    = _NODE_LABELS.get(node_name, node_name)
+        agent_id = _NODE_AGENT_IDS.get(node_name)
+    except Exception:
+        label = node_name
+        agent_id = None
+
+    def wrapper(state):
+        tid = state.get("session_id", "unknown") if isinstance(state, dict) else "unknown"
+        write_agent_status(tid, node_name, "running")
+        publish_agent_event(tid, {"type": "node_start", "node": node_name,
+                                  "label": label, "agent_id": agent_id, "ts": _now()})
+        try:
+            result = fn(state)
+            write_agent_status(tid, node_name, "done")
+            end_event = {"type": "node_end", "node": node_name,
+                         "label": label, "agent_id": agent_id, "ts": _now()}
+            publish_agent_event(tid, end_event)
+            return result
+        except Exception as exc:
+            write_agent_status(tid, node_name, "error")
+            publish_agent_event(tid, {"type": "node_error", "node": node_name,
+                                      "label": label, "agent_id": agent_id,
+                                      "error": str(exc), "ts": _now()})
+            raise
+    return wrapper
+
+
 def build_orchestrator():
     """
     Assembles the full Why Analysis V3 Orchestrator graph.
@@ -1211,14 +1247,14 @@ def build_orchestrator():
     g = StateGraph(WhyAnalysisV3State)
 
     # ── Register nodes ────────────────────────────────────────────────────────
-    g.add_node("initialize", initialize_node)
-    g.add_node("payload_builder", payload_builder_node)
-    g.add_node("question_agent", question_agent_node)
-    g.add_node("cause_generation_agent", cause_generation_agent_node)
-    g.add_node("validation_agent", validation_agent_node)
-    g.add_node("human_review", human_review_node)
-    g.add_node("zero_evidence_agent", zero_evidence_agent_node)
-    g.add_node("finalize", finalize_node)
+    g.add_node("initialize", _tracked("initialize", initialize_node))
+    g.add_node("payload_builder", _tracked("payload_builder", payload_builder_node))
+    g.add_node("question_agent", _tracked("question_agent", question_agent_node))
+    g.add_node("cause_generation_agent", _tracked("cause_generation_agent", cause_generation_agent_node))
+    g.add_node("validation_agent", _tracked("validation_agent", validation_agent_node))
+    g.add_node("human_review", _tracked("human_review", human_review_node))
+    g.add_node("zero_evidence_agent", _tracked("zero_evidence_agent", zero_evidence_agent_node))
+    g.add_node("finalize", _tracked("finalize", finalize_node))
 
     # ── Entry ─────────────────────────────────────────────────────────────────
     g.add_edge(START, "initialize")
