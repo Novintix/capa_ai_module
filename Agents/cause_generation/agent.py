@@ -8,8 +8,10 @@ from typing import Dict, Any
 from .graph import create_cause_generation_graph
 from .schemas import QuestionInput, CauseGenerationResult
 from .logger import log_error
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="cause_generation_agent")
 class CauseGenerationAgent:
     """
     Cause Generation Agent using LangGraph
@@ -31,6 +33,7 @@ class CauseGenerationAgent:
         """Initialize the cause generation agent"""
         self.graph = create_cause_generation_graph()
     
+    @agentops_operation(name="process_question")
     def process_question(
         self, 
         question_input: QuestionInput, 

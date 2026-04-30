@@ -9,7 +9,9 @@ from typing import Dict, Any, List
 from .graph import create_ingestion_graph
 from .schemas import DocumentInput, ExtractionResult, FileMetadata, DocumentType, BatchDocumentInput, BatchExtractionResult
 from .logger import log_error
+from agent_ops import agentops_agent, agentops_operation
 
+@agentops_agent(name="ingestion_agent")
 class DocumentIngestionAgent:
     """
     Document Ingestion Agent using LangGraph
@@ -32,6 +34,7 @@ class DocumentIngestionAgent:
         """Initialize the document ingestion agent"""
         self.graph = create_ingestion_graph()
     
+    @agentops_operation(name="process_document")
     def process_document(self, document_input: DocumentInput) -> Dict[str, Any]:
         """
         Process single document and extract content
@@ -115,6 +118,7 @@ class DocumentIngestionAgent:
                 "processing_time": 0.0
             }
     
+    @agentops_operation(name="process_batch")
     def process_batch(self, batch_input: BatchDocumentInput) -> Dict[str, Any]:
         """
         Process multiple documents in batch

@@ -29,6 +29,7 @@ from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from .orchestrator import orchestrator_graph, redis_client, MAX_CORRECTION_ATTEMPTS
+from agent_ops import agentops_session
 
 router = APIRouter(prefix="/capa", tags=["CAPA Risk Analysis"])
 
@@ -228,6 +229,7 @@ def _build_full_response(thread_id: str, result: dict) -> dict:
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.post("/analyze")
+@agentops_session(name="Risk_Analysis", tags=["risk_analysis", "orchestrator"])
 async def analyze(request: CAPARequest):
     """
     Submit a complaint for full synchronous risk analysis.
@@ -295,6 +297,7 @@ async def analyze(request: CAPARequest):
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.post("/correct/{thread_id}")
+@agentops_session(name="Risk_Analysis_Correction", tags=["risk_analysis", "correction"])
 async def correct_input(thread_id: str, body: CorrectionRequest):
     """
     Submit corrected input after a validation failure.
@@ -504,6 +507,7 @@ async def get_state(thread_id: str):
 # ══════════════════════════════════════════════════════════════════════════════
 
 @router.post("/resume/{thread_id}")
+@agentops_session(name="Risk_Analysis_Resume", tags=["risk_analysis", "resume"])
 async def resume(thread_id: str, body: ResumeRequest = ResumeRequest()):
     """
     Resume a paused or crashed workflow from last Redis checkpoint.

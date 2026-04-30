@@ -8,6 +8,7 @@ from .agent import WhyAnalysisV3Orchestrator
 from .logger import log_api_request, log_api_response, log_error
 from .orchestrator import _read_state_from_redis, orchestrator_graph
 from .schemas import WhyAnalysisV3Input, WhyAnalysisV3Output, HumanReviewInput
+from agent_ops import agentops_session
 
 
 router = APIRouter(prefix="/why-analysis-v3", tags=["why-analysis-v3-orchestrator"])
@@ -23,6 +24,7 @@ def _get_orchestrator() -> WhyAnalysisV3Orchestrator:
 
 
 @router.post("/", response_model=WhyAnalysisV3Output)
+@agentops_session(name="Why_Analysis", tags=["why_analysis", "orchestrator"])
 def run_why_analysis_v3(input_data: WhyAnalysisV3Input):
     """
     Run Why Analysis V3 using JSON input.
@@ -55,6 +57,7 @@ def run_why_analysis_v3(input_data: WhyAnalysisV3Input):
 
 
 @router.post("/human-review", response_model=WhyAnalysisV3Output)
+@agentops_session(name="Why_Analysis_Human_Review", tags=["why_analysis", "hitl"])
 def submit_human_review(review_input: HumanReviewInput):
     """
     Submit human's cause selection to resume a paused workflow.

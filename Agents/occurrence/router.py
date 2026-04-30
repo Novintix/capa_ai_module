@@ -6,11 +6,13 @@ from Agents.occurrence.state import ComplaintData, OccurrenceOutput, PatternData
 from Agents.occurrence.graph import occurrence_graph
 from Agents.occurrence.utils import MetricsParser, load_metrics
 from Agents.occurrence.logger import log_request, log_final_output, log_error
+from agent_ops import agentops_session
 
 router = APIRouter(prefix="/occurrence", tags=["occurrence"])
 
 
 @router.post("/analyze", response_model=OccurrenceOutput)
+@agentops_session(name="occurrence@router.post(_analyze, response_model=OccurrenceOutput)", tags=["agents", "occurrence"])
 async def analyze_occurrence(
     complaint_id: str = Form(...),
     description: str = Form(...),

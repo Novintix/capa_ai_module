@@ -20,6 +20,7 @@ from .state import AgentState
 from .schemas import StartWhyInput, ContinueWhyInput
 from .logger import log_error
 from config.aws_bedrock_config import get_llm
+from agent_ops import agentops_agent, agentops_operation
 
 
 # ---------------------------------------------------------------------------
@@ -35,6 +36,7 @@ REDIS_TTL_MINUTES = 7 * 24 * 60  # 7 days = 10080 minutes
 # Agent
 # ---------------------------------------------------------------------------
 
+@agentops_agent(name="why_question_agent")
 class WhyQuestionAgent:
     """
     Why Question Agent using LangGraph + Redis checkpointer.
@@ -66,6 +68,7 @@ class WhyQuestionAgent:
     # Public methods
     # ------------------------------------------------------------------
 
+    @agentops_operation(name="start")
     def start(self, input_data: StartWhyInput) -> Dict[str, Any]:
         """
         Start a new Why chain for a complaint.
@@ -98,6 +101,7 @@ class WhyQuestionAgent:
         final_state = self.graph.invoke(initial_state, config=config)
         return self._build_result(final_state)
 
+    @agentops_operation(name="continue_chain")
     def continue_chain(self, input_data: ContinueWhyInput) -> Dict[str, Any]:
         """
         Continue an existing Why chain.
@@ -147,6 +151,7 @@ class WhyQuestionAgent:
         final_state = self.graph.invoke(new_state, config=config)
         return self._build_result(final_state)
 
+    @agentops_operation(name="get_history")
     def get_history(self, complaint_id: str) -> Dict[str, Any]:
         """
         Retrieve the full Q&A history for a complaint's Why chain from Redis.

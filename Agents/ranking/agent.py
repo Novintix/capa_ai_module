@@ -6,8 +6,10 @@ Ranks candidate root causes using RCPS methodology
 from Agents.ranking.state import RankingInput, RankingOutput, CauseInput
 from Agents.ranking.graph import ranking_graph
 from Agents.ranking.logger import clear_logs, log_api_request, log_api_response, log_error
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="ranking_agent")
 class RankingAgent:
     """
     Ranking Agent for root cause prioritization.
@@ -24,6 +26,7 @@ class RankingAgent:
         """Initialize the ranking agent with compiled graph."""
         self.graph = ranking_graph
     
+    @agentops_operation(name="rank_causes")
     def rank_causes(self, causes: list, config: dict = None) -> RankingOutput:
         """
         Rank candidate root causes by RCPS score with configurable parameters.

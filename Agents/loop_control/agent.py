@@ -6,8 +6,10 @@ from typing import Any, Dict
 
 from Agents.loop_control.graph import create_loop_control_graph
 from Agents.loop_control.state import LoopControlInput
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="loop_control_agent")
 class LoopControlAgent:
 	"""
 	Main interface for Loop Control analysis.
@@ -16,6 +18,7 @@ class LoopControlAgent:
 	def __init__(self):
 		self.graph = create_loop_control_graph()
 
+	@agentops_operation(name="evaluate")
 	def evaluate(self, payload: LoopControlInput) -> Dict[str, Any]:
 		initial_state = {
 			"input": payload,

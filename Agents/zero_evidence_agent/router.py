@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from .schemas import ZeroEvidenceInput, ZeroEvidenceResult, SelectedRootCause
 from .logger import log_api_request, log_api_response
 from .agent import ZeroEvidenceAgent
+from agent_ops import agentops_session
 
 
 # Create API router
@@ -26,6 +27,7 @@ def get_zero_evidence_agent():
 
 
 @router.post("/", response_model=ZeroEvidenceResult)
+@agentops_session(name="zero_evidence_agent@router.post(_, response_model=ZeroEvidenceResult)", tags=["agents", "zero_evidence_agent"])
 def run_zero_evidence_analysis(input_data: ZeroEvidenceInput):
     """
     Run Zero Evidence Mode analysis.

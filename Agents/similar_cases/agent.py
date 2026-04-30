@@ -7,8 +7,10 @@ from typing import Dict, Any
 from Agents.similar_cases.graph import create_similar_cases_graph
 from Agents.similar_cases.state import SimilarCasesState, SimilarCasesInput, SimilarCasesOutput
 from Agents.similar_cases.logger import log_request, log_final_output
+from agent_ops import agentops_agent, agentops_operation
 
 
+@agentops_agent(name="similar_cases_agent")
 class SimilarCasesAgent:
     """
     Similar Cases Agent using LangGraph.
@@ -19,6 +21,7 @@ class SimilarCasesAgent:
         """Initialize the agent with compiled graph."""
         self.graph = create_similar_cases_graph()
     
+    @agentops_operation(name="find_similar_cases")
     def find_similar_cases(self, query: str) -> SimilarCasesOutput:
         """
         Find similar cases for a given complaint description.

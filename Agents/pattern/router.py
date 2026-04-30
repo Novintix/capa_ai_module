@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException
 from .schemas import PatternAnalysisRequest, PatternAnalysisResponse
 from .agent import PatternAgentLangGraph
 from .logger import log_api_request, log_api_response
+from agent_ops import agentops_session
 
 
 # Create API router
@@ -27,6 +28,7 @@ def get_pattern_agent():
 
 
 @router.post("/", response_model=PatternAnalysisResponse)
+@agentops_session(name="pattern@router.post(_, response_model=PatternAnalysisResponse)", tags=["agents", "pattern"])
 def analyze_pattern(request: PatternAnalysisRequest):
     """
     Analyze patterns in historical complaint data for the given complaint input.
