@@ -32,6 +32,7 @@ def get_redis_client():
 _STATUS_TTL = 86400  # 24 hours
 
 _NODE_LABELS = {
+    # Risk Analysis
     "input_validator":         "Validating Input",
     "request_correction_node": "Requesting Correction",
     "context_node":            "Extracting Context",
@@ -46,9 +47,20 @@ _NODE_LABELS = {
     "A6_regulatory_agent":     "Regulatory Agent",
     "A7_reasoning_agent":      "AI Reasoning Agent",
     "finalize_node":           "Finalizing Report",
+    
+    # Why Analysis V3
+    "initialize":              "Initializing Analysis",
+    "payload_builder":         "Building Payload",
+    "question_agent":          "Question Agent",
+    "cause_generation_agent":  "Cause Generation Agent",
+    "validation_agent":        "Validation Agent",
+    "human_review":            "Human Review",
+    "zero_evidence_agent":     "Zero Evidence Agent",
+    "finalize":                "Finalizing Report",
 }
 
 _NODE_AGENT_IDS = {
+    # Risk Analysis
     "A5_detection_agent":      "A5",
     "A1_similar_cases_agent":  "A1",
     "A2_pattern_agent":        "A2",
@@ -56,6 +68,11 @@ _NODE_AGENT_IDS = {
     "A4_occurrence_agent":     "A4",
     "A6_regulatory_agent":     "A6",
     "A7_reasoning_agent":      "A7",
+    
+    # Why Analysis V3
+    "question_agent":          "A12",
+    "cause_generation_agent":  "A13",
+    "validation_agent":        "A14",
 }
 
 def write_agent_status(thread_id: str, node: str, status: str) -> None:
