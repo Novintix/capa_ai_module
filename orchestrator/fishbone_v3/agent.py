@@ -30,7 +30,7 @@ from Agents.zero_evidence_agent.agent import ZeroEvidenceAgent
 from Agents.zero_evidence_agent.schemas import ZeroEvidenceInput, CauseInput as ZeroEvidenceCauseInput
 
 
-@agentops_agent(name="fishbone_v3_orchestrator")
+@agentops_agent(name="fishbone")
 class FishboneOrchestratorV3:
     """
     Fishbone v3 Orchestrator - HITL Flow
@@ -50,7 +50,7 @@ class FishboneOrchestratorV3:
         redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379")
         self.session_manager = SessionMemoryManagerV3(redis_url=redis_url)
     
-    @agentops_operation(name="analyze")
+    @agentops_operation(name="fishbone")
     def analyze(self, input_data: FishboneV3Input) -> Dict[str, Any]:
         """Phase 1: Run analysis up to validation and wait for human"""
         try:
@@ -288,7 +288,7 @@ class FishboneOrchestratorV3:
 
     # ── Internal Agent Call Methods (Adapted from V2) ──────────────────────────
     
-    @agentops_operation(name="List_Causes_Agent")
+    @agentops_operation(name="A13_Cause_Generation_Agent")
     def _call_list_causes_agent(self, state_machine: FishboneV3StateMachine) -> Dict[str, Any]:
         """Generate causes from complaint"""
         state_machine.control_memory.execution_trace.append("1. ListCausesAgent")
@@ -306,7 +306,7 @@ class FishboneOrchestratorV3:
         log_agent_call("ListCausesAgent", {"found": len(causes)}, True)
         return {"causes": causes}
 
-    @agentops_operation(name="Categorization_Agent")
+    @agentops_operation(name="A1_Categorize_Agent")
     def _call_categorization_agent(self, state_machine: FishboneV3StateMachine, causes: List[Dict]) -> Dict[str, Any]:
         """Categorize into 6M"""
         state_machine.control_memory.execution_trace.append("2. CategorizationAgent")
@@ -334,7 +334,7 @@ class FishboneOrchestratorV3:
         
         return {"categorized_causes": causes, "category_summary": {}}
 
-    @agentops_operation(name="Validation_Agent")
+    @agentops_operation(name="A14_Validation_Agent")
     def _call_validation_agent(self, state_machine: FishboneV3StateMachine, causes: List[Dict]) -> Dict[str, Any]:
         """Validate against evidence"""
         state_machine.control_memory.execution_trace.append("3. ValidationAgent")
@@ -372,7 +372,7 @@ class FishboneOrchestratorV3:
             "overall_confidence": result.get("overall_confidence", 0.0)
         }
 
-    @agentops_operation(name="Zero_Evidence_Agent")
+    @agentops_operation(name="A17_Zero_Evidence_Agent")
     def _call_zero_evidence_agent(self, state_machine: FishboneV3StateMachine, causes: List[Dict]) -> Dict[str, Any]:
         """Rank causes using Zero Evidence Agent when no high confidence causes exist"""
         state_machine.control_memory.execution_trace.append("4. ZeroEvidenceAgent (Ranking)")

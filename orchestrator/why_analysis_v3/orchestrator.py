@@ -364,7 +364,7 @@ def payload_builder_node(state: WhyAnalysisV3State) -> dict:
 # Generates Why question
 # ══════════════════════════════════════════════════════════════════════════════
 
-@agentops_operation(name="Question_Agent")
+@agentops_operation(name="A12_Question_Agent")
 def question_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 2] Question Agent: generating Why question...")
     log_node_entry("question_agent", state)
@@ -436,7 +436,7 @@ def question_agent_node(state: WhyAnalysisV3State) -> dict:
 # Generates list of potential causes
 # ══════════════════════════════════════════════════════════════════════════════
 
-@agentops_operation(name="Cause_Generation_Agent")
+@agentops_operation(name="A13_Cause_Generation_Agent")
 def cause_generation_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 3] Cause Generation Agent: generating causes...")
     log_node_entry("cause_generation_agent", state)
@@ -530,7 +530,7 @@ def cause_generation_agent_node(state: WhyAnalysisV3State) -> dict:
 # Validates causes against evidence
 # ══════════════════════════════════════════════════════════════════════════════
 
-@agentops_operation(name="Validation_Agent")
+@agentops_operation(name="A14_Validation_Agent")
 def validation_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 4] Validation Agent: validating causes against evidence...")
     log_node_entry("validation_agent", state)
@@ -890,7 +890,7 @@ def human_review_node(state: WhyAnalysisV3State) -> dict:
 # Selects cause by criticality when no validated causes
 # ══════════════════════════════════════════════════════════════════════════════
 
-@agentops_operation(name="Zero_Evidence_Agent")
+@agentops_operation(name="A17_Zero_Evidence_Agent")
 def zero_evidence_agent_node(state: WhyAnalysisV3State) -> dict:
     print("\n[STEP 5-ALT] Zero Evidence Agent: selecting by criticality...")
     log_node_entry("zero_evidence_agent", state)

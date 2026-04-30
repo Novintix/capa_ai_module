@@ -13,7 +13,7 @@ from .logger import log_error
 from agent_ops import agentops_agent, agentops_operation
 
 
-@agentops_agent(name="Why_Analysis_Orchestrator")
+@agentops_agent(name="Why_Analysis")
 class WhyAnalysisV3Orchestrator:
     """
     Why Analysis V3 Orchestrator Agent.
@@ -25,7 +25,7 @@ class WhyAnalysisV3Orchestrator:
     def __init__(self):
         self.graph = orchestrator_graph
 
-    @agentops_operation(name="Why_Analysis_Workflow")
+    @agentops_operation(name="Why_Analysis")
     def analyze(self, input_data: WhyAnalysisV3Input) -> Dict[str, Any]:
         """
         Run Why Analysis V3 orchestration.
