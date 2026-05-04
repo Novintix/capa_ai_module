@@ -17,6 +17,10 @@ class DecisionAction(str, Enum):
 
 class FishboneV3Input(BaseModel):
     """Input schema for Fishbone v3 Orchestrator - HITL Analysis"""
+    session_id: Optional[str] = Field(
+        default=None,
+        description="Optional per-run session identifier for streaming status"
+    )
     complaint_id: str = Field(
         ...,
         description="Unique identifier for the complaint record"

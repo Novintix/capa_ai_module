@@ -9,6 +9,7 @@ a state-machine based workflow with the same logic.
 
 import time
 import os
+import datetime
 from typing import Dict, Any, List, Optional
 from .schemas import FishboneV3Input, FishboneV3Output, FishboneV3DecisionInput, DecisionAction
 from .logger import (
@@ -28,6 +29,25 @@ from Agents.validation.agent import ValidationAgent
 from Agents.validation.schemas import ValidationInput, GeneratedCause
 from Agents.zero_evidence_agent.agent import ZeroEvidenceAgent
 from Agents.zero_evidence_agent.schemas import ZeroEvidenceInput, CauseInput as ZeroEvidenceCauseInput
+
+try:
+    from config.redis_config import (
+        _NODE_LABELS,
+        get_redis_client,
+        publish_agent_event,
+        write_agent_status,
+    )
+except Exception:
+    _NODE_LABELS = {}
+
+    def write_agent_status(*args, **kwargs):
+        return None
+
+    def publish_agent_event(*args, **kwargs):
+        return None
+
+    def get_redis_client():
+        return None
 
 
 @agentops_agent(name="fishbone")
@@ -49,15 +69,83 @@ class FishboneOrchestratorV3:
         # Session memory manager
         redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379")
         self.session_manager = SessionMemoryManagerV3(redis_url=redis_url)
+
+    def _session_id(self, complaint_id: str, explicit_session_id: Optional[str] = None) -> str:
+        if explicit_session_id:
+            return str(explicit_session_id).strip()
+        return str(complaint_id).strip()
+
+    def _timestamp(self) -> str:
+        return datetime.datetime.utcnow().isoformat() + "Z"
+
+    def _clear_status(self, session_id: str) -> None:
+        client = get_redis_client()
+        if client is None:
+            return
+        try:
+            client.delete(f"agent_status:{session_id}")
+        except Exception:
+            pass
+
+    def _emit_node_start(self, session_id: str, node: str) -> None:
+        write_agent_status(session_id, node, "running")
+        publish_agent_event(
+            session_id,
+            {
+                "type": "node_start",
+                "node": node,
+                "label": _NODE_LABELS.get(node, node),
+                "ts": self._timestamp(),
+            },
+        )
+
+    def _emit_node_end(self, session_id: str, node: str, output_preview: Optional[str] = None) -> None:
+        write_agent_status(session_id, node, "done")
+        event = {
+            "type": "node_end",
+            "node": node,
+            "label": _NODE_LABELS.get(node, node),
+            "ts": self._timestamp(),
+        }
+        if output_preview:
+            event["output_preview"] = output_preview
+        publish_agent_event(session_id, event)
+
+    def _emit_node_error(self, session_id: str, node: str, message: str) -> None:
+        write_agent_status(session_id, node, "error")
+        publish_agent_event(
+            session_id,
+            {
+                "type": "node_error",
+                "node": node,
+                "label": _NODE_LABELS.get(node, node),
+                "message": message,
+                "ts": self._timestamp(),
+            },
+        )
+
+    def _preview(self, value: Any) -> str:
+        if value is None:
+            return ""
+        text = str(value).strip().replace("\n", " ")
+        if len(text) <= 140:
+            return text
+        return text[:137] + "..."
     
     @agentops_operation(name="fishbone")
     def analyze(self, input_data: FishboneV3Input) -> Dict[str, Any]:
         """Phase 1: Run analysis up to validation and wait for human"""
+        session_id = self._session_id(input_data.complaint_id, input_data.session_id)
         try:
+            self._clear_status(session_id)
+
             # ── Guardrail: Input Validation ──────────────────────────────────
+            self._emit_node_start(session_id, "initialize")
             error = self._validate_input(input_data)
             if error:
+                self._emit_node_error(session_id, "initialize", error)
                 return {"error": error, "status": "ERROR"}
+            self._emit_node_end(session_id, "initialize", "Input validated")
 
             log_orchestrator_start(input_data.complaint_id, "HITL_V3")
             
@@ -75,6 +163,8 @@ class FishboneOrchestratorV3:
             if not causes_result.get("causes"):
                 state_machine.control_memory.stop_reason = StopReason.NO_CAUSES_FOUND
                 state_machine.transition_to(FishboneV3State.ERROR, "No causes found")
+                self._emit_node_start(session_id, "finalize")
+                self._emit_node_end(session_id, "finalize", "No causes found")
                 return state_machine.get_final_result()
             
             # Step 2: Categorize
@@ -119,6 +209,12 @@ class FishboneOrchestratorV3:
                 # Pause flow for HITL
                 state_machine.transition_to(FishboneV3State.WAIT_FOR_HUMAN, "Pausing for human review")
                 state_machine.control_memory.stop_reason = StopReason.HITL_PENDING
+                self._emit_node_start(session_id, "human_review")
+                self._emit_node_end(
+                    session_id,
+                    "human_review",
+                    f"Awaiting review for {len(high_confidence_causes)} causes",
+                )
             else:
                 # No high confidence causes - use Zero Evidence Agent to rank
                 state_machine.transition_to(FishboneV3State.ANALYSIS_COMPLETE, "No high confidence causes - ranking with Zero Evidence Agent")
@@ -136,7 +232,9 @@ class FishboneOrchestratorV3:
                 }
             
             # Persist full state to Redis
+            self._emit_node_start(session_id, "finalize")
             result = state_machine.get_final_result()
+            self._emit_node_end(session_id, "finalize", self._preview(result.get("status")))
             
             # Store all causes in Redis for later use
             if high_confidence_causes:
@@ -150,12 +248,14 @@ class FishboneOrchestratorV3:
             return result
             
         except Exception as e:
+            self._emit_node_error(session_id, "finalize", str(e))
             log_error("analyze", str(e))
             return {"error": f"Orchestrator error in analyze: {str(e)}", "status": "ERROR"}
 
     @agentops_operation(name="submit_decisions")
     def submit_decisions(self, decision_input: FishboneV3DecisionInput) -> Dict[str, Any]:
         """Phase 2: Record human decisions and complete analysis"""
+        session_id = self._session_id(decision_input.complaint_id)
         try:
             # 1. Retrieve state from Redis
             state_data = self.session_manager.get_state(decision_input.complaint_id)
@@ -201,6 +301,7 @@ class FishboneOrchestratorV3:
             if decision_error:
                 return {"error": decision_error, "status": "ERROR"}
 
+            self._emit_node_start(session_id, "record_decisions")
             state_machine.transition_to(FishboneV3State.RECORDING_DECISIONS, "User submitted decisions")
             
             # 3. Apply decisions to causes
@@ -219,6 +320,12 @@ class FishboneOrchestratorV3:
             log_hitl_action(decision_input.complaint_id, len(cached_result["causes"]), len(decision_input.decisions))
             
             final_result = state_machine.get_final_result()
+            self._emit_node_end(
+                session_id,
+                "record_decisions",
+                f"Recorded {len(decision_input.decisions)} decisions",
+            )
+            self._emit_node_start(session_id, "finalize")
 
             # Persist terminal completion marker so parent orchestrators can verify child completion.
             self.session_manager.save_state(
@@ -231,12 +338,14 @@ class FishboneOrchestratorV3:
                     "completed_at": time.time(),
                 },
             )
+            self._emit_node_end(session_id, "finalize", self._preview(final_result.get("status")))
             
             log_orchestrator_complete(decision_input.complaint_id, "COMPLETED", final_result["execution_time_seconds"])
             
             return final_result
             
         except Exception as e:
+            self._emit_node_error(session_id, "record_decisions", str(e))
             log_error("submit_decisions", str(e))
             return {"error": f"Orchestrator error in submit_decisions: {str(e)}", "status": "ERROR"}
 
@@ -291,6 +400,8 @@ class FishboneOrchestratorV3:
     @agentops_operation(name="A13_Cause_Generation_Agent")
     def _call_list_causes_agent(self, state_machine: FishboneV3StateMachine) -> Dict[str, Any]:
         """Generate causes from complaint"""
+        session_id = self._session_id(state_machine.complaint_id, state_machine.kwargs.get("session_id"))
+        self._emit_node_start(session_id, "list_causes_agent")
         state_machine.control_memory.execution_trace.append("1. ListCausesAgent")
         log_agent_call("ListCausesAgent", {"id": state_machine.complaint_id}, None)
         
@@ -304,11 +415,14 @@ class FishboneOrchestratorV3:
         causes = result.get("causes", [])
         
         log_agent_call("ListCausesAgent", {"found": len(causes)}, True)
+        self._emit_node_end(session_id, "list_causes_agent", f"Found {len(causes)} causes")
         return {"causes": causes}
 
     @agentops_operation(name="A1_Categorize_Agent")
     def _call_categorization_agent(self, state_machine: FishboneV3StateMachine, causes: List[Dict]) -> Dict[str, Any]:
         """Categorize into 6M"""
+        session_id = self._session_id(state_machine.complaint_id, state_machine.kwargs.get("session_id"))
+        self._emit_node_start(session_id, "categorize_agent")
         state_machine.control_memory.execution_trace.append("2. CategorizationAgent")
         
         categorize_causes = [Cause(cause_id=c["cause_id"], cause_text=c["cause_text"]) for c in causes]
@@ -330,13 +444,17 @@ class FishboneOrchestratorV3:
                         "category_confidence": match.confidence,
                         "category_reasoning": match.reasoning
                     })
+            self._emit_node_end(session_id, "categorize_agent", f"Categorized {len(causes)} causes")
             return {"categorized_causes": causes, "category_summary": output.summary}
         
+        self._emit_node_end(session_id, "categorize_agent", "No category summary returned")
         return {"categorized_causes": causes, "category_summary": {}}
 
     @agentops_operation(name="A14_Validation_Agent")
     def _call_validation_agent(self, state_machine: FishboneV3StateMachine, causes: List[Dict]) -> Dict[str, Any]:
         """Validate against evidence"""
+        session_id = self._session_id(state_machine.complaint_id, state_machine.kwargs.get("session_id"))
+        self._emit_node_start(session_id, "validation_agent_v3")
         state_machine.control_memory.execution_trace.append("3. ValidationAgent")
         
         generated = [GeneratedCause(cause_id=c["cause_id"], cause_text=c["cause_text"]) for c in causes]
@@ -366,15 +484,23 @@ class FishboneOrchestratorV3:
                 if match.get("evidence_match_status") in ["matched", "partially_matched"]:
                     validated_causes.append(cause)
         
-        return {
+        result_payload = {
             "all_causes": causes,
             "validated_causes": validated_causes,
             "overall_confidence": result.get("overall_confidence", 0.0)
         }
+        self._emit_node_end(
+            session_id,
+            "validation_agent_v3",
+            f"Validated {len(validated_causes)} of {len(causes)} causes",
+        )
+        return result_payload
 
     @agentops_operation(name="A17_Zero_Evidence_Agent")
     def _call_zero_evidence_agent(self, state_machine: FishboneV3StateMachine, causes: List[Dict]) -> Dict[str, Any]:
         """Rank causes using Zero Evidence Agent when no high confidence causes exist"""
+        session_id = self._session_id(state_machine.complaint_id, state_machine.kwargs.get("session_id"))
+        self._emit_node_start(session_id, "zero_evidence_agent")
         state_machine.control_memory.execution_trace.append("4. ZeroEvidenceAgent (Ranking)")
         log_agent_call("ZeroEvidenceAgent", {"causes": len(causes)}, None)
         
@@ -419,6 +545,11 @@ class FishboneOrchestratorV3:
                         break
             
             log_agent_call("ZeroEvidenceAgent", {"selected": selected_root is not None}, True)
+            self._emit_node_end(
+                session_id,
+                "zero_evidence_agent",
+                self._preview(selected_root.get("cause_text") if selected_root else "No root cause ranked"),
+            )
             
             return {
                 "ranked_causes": causes,
@@ -426,5 +557,6 @@ class FishboneOrchestratorV3:
             }
         
         except Exception as e:
+            self._emit_node_error(session_id, "zero_evidence_agent", str(e))
             log_error("_call_zero_evidence_agent", str(e))
             return {"ranked_causes": causes, "selected_root_cause": None}
