@@ -68,13 +68,14 @@ def vector_search(state: SimilarCasesState) -> Dict[str, Any]:
         similarity_threshold = float(os.getenv("SIMILARITY_THRESHOLD", "0.70"))
         vector_search_limit = int(os.getenv("VECTOR_SEARCH_LIMIT", "5000"))
         
-        # Define projection fields
+        # Define projection fields matching capa_complaints schema
+        # Note: _id is always included by MongoDB; we remap it to complaintId below
         projection_fields = [
-            "recordId", "complaintId", "dateReceived", "source", "regionCountry",
-            "severity", "productFamily", "site", "descriptionOfIssue", "status",
-            "daysOpen", "assignedTo", "isNc", "ncId", "fieldAction", "euReportable",
-            "fdaReportable", "capaNeeded", "capaId", "capaRationale", "repeated",
-            "workflowStage"
+            "ref", "raisedBy", "raisedDate", "type", "status", "severity",
+            "category", "source", "productIdentifier", "productType",
+            "marketCountry", "region", "site", "batchNumber", "slaDays",
+            "description", "ncId", "euReportable", "fdaReportable", "repeated",
+            "intakeForm"
         ]
         
         # Perform vector search
@@ -85,6 +86,21 @@ def vector_search(state: SimilarCasesState) -> Dict[str, Any]:
             threshold=similarity_threshold,
             projection_fields=projection_fields
         )
+
+        # Remap _id -> complaintId and flatten capaId from intakeForm
+        # Also alias new schema fields to original MatchResult fields to preserve UI compatibility
+        for doc in results:
+            doc["complaintId"] = doc.pop("_id", None)
+            intake = doc.pop("intakeForm", None) or {}
+            doc["capaId"] = intake.get("capaId")
+            
+            # Alias for UI
+            doc["dateReceived"] = doc.pop("raisedDate", None)
+            doc["descriptionOfIssue"] = doc.pop("description", None)
+            doc["productFamily"] = doc.pop("productType", None)
+            doc["regionCountry"] = doc.pop("marketCountry", None) 
+            doc["isNc"] = (doc.get("status") == "NC")
+            doc["daysOpen"] = doc.pop("slaDays", None)
         
         log_vector_search(vector_search_limit, similarity_threshold, len(results))
         log_node_end("vector_search", f"Found {len(results)} similar cases")
@@ -121,7 +137,7 @@ def format_results(state: SimilarCasesState) -> Dict[str, Any]:
             reverse=True
         )
         
-        # Convert datetime objects and round similarity
+        # Serialise any datetime objects and round similarity
         for match in all_similar_sorted:
             if "dateReceived" in match and hasattr(match["dateReceived"], "isoformat"):
                 match["dateReceived"] = match["dateReceived"].isoformat()

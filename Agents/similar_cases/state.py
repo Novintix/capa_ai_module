@@ -7,7 +7,7 @@ class MatchResult(BaseModel):
     """A single similar complaint match with all key fields."""
     recordId: Optional[str] = None
     complaintId: Optional[str] = None
-    dateReceived: Optional[datetime] = None
+    dateReceived: Optional[str] = None
     source: Optional[str] = None
     regionCountry: Optional[str] = None
     severity: Optional[str] = None
