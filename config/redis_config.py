@@ -57,6 +57,12 @@ _NODE_LABELS = {
     "human_review":            "Human Review",
     "zero_evidence_agent":     "Zero Evidence Agent",
     "finalize":                "Finalizing Report",
+
+    # Fishbone V3
+    "list_causes_agent":       "List of Cause Agent",
+    "categorize_agent":        "Categorise Agent",
+    "validation_agent_v3":     "Validate Agent",
+    "record_decisions":        "Recording Decisions",
 }
 
 _NODE_AGENT_IDS = {
@@ -73,6 +79,12 @@ _NODE_AGENT_IDS = {
     "question_agent":          "A12",
     "cause_generation_agent":  "A13",
     "validation_agent":        "A14",
+
+    # Fishbone V3
+    "list_causes_agent":       "A13",
+    "categorize_agent":        "A1",
+    "validation_agent_v3":     "A14",
+    "zero_evidence_agent":     "A17",
 }
 
 def write_agent_status(thread_id: str, node: str, status: str) -> None:
