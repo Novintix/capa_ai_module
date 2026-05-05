@@ -249,12 +249,6 @@ async def analyze(request: CAPARequest):
     thread_id = request.thread_id or f"capa-{uuid.uuid4().hex[:12]}"
     config    = _config(thread_id)
 
-    import json as _json
-    print("\n" + "="*60)
-    print("[/capa/analyze] Incoming payload:")
-    print(_json.dumps(request.model_dump(exclude_none=True), indent=2))
-    print("="*60 + "\n")
-
     # Resolve the text used for validation + LLM extraction.
     # Priority: explicit raw_input → enriched_input.core_issue → error
     raw_input = request.raw_input
@@ -537,7 +531,6 @@ from .orchestrator import deep_serialize, _now as _ts_now
 @router.websocket("/events/{thread_id}")
 async def event_stream(websocket: WebSocket, thread_id: str):
     await websocket.accept()
-    print(f"WS connected: {thread_id}")
     try:
         initial = _read_state_from_redis(thread_id)
         if initial:
