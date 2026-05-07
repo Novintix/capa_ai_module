@@ -1,4 +1,4 @@
-"""
+﻿"""
 Cause Generation Agent Prompts
 Single LLM prompt for cause validation or generation
 """
@@ -32,7 +32,6 @@ WHEN FMEA CAUSES ARE PROVIDED:
 WHEN NO FMEA CAUSES ARE PROVIDED:
 - Generate 3-5 most likely causes for the problem
 - Include process-related, material-related, and human-related causes
-- Provide realistic severity, occurrence, and detection ratings (1-10)
 - Focus on actionable causes teams can investigate
 - CRITICAL: Keep cause_text SHORT and FOCUSED (3-8 words max)
 - Each cause should describe ONE specific issue only
@@ -58,42 +57,29 @@ FOR CAUSE GENERATION:
       "cause_text": "Short focused description (3-8 words)",
       "process_step": "Relevant process step",
       "failure_mode": "The effect/consequence of this cause (what happens next)",
-      "potential_effects": "Impact if not addressed",
       "severity": 7,
-      "occurrence": 3,
-      "detection": 4,
-      "current_controls": "Typical controls",
-      "source": "Generated"
-    },
-    {
-      "cause_text": "Another cause description",
-      "process_step": "Different process step",
-      "failure_mode": "Different failure mode",
-      "potential_effects": "Different impact",
-      "severity": 8,
-      "occurrence": 6,
-      "detection": 7,
-      "current_controls": "Different controls",
       "source": "Generated"
     }
   ]
 }
 
-RPN SCORING INSTRUCTIONS:
+NOTE: For generated causes (not from FMEA):
+- occurrence and detection are NOT included (we don't have historical data)
+- Only severity can be estimated based on potential impact
+- potential_effects and current_controls are optional (can be null if unknown)
+
+SEVERITY SCORING (for generated causes):
 - Severity: Based on impact severity (1=minor, 10=critical)
-- Occurrence: Based on how likely this cause is (1=rare, 10=frequent)
-- Detection: Based on how hard to detect (1=easy to detect, 10=hard to detect)
-- Analyze each cause individually and assign appropriate scores
-- Scores should reflect the specific characteristics of each cause
+- Analyze each cause individually based on potential consequences
 
 CRITICAL INSTRUCTIONS FOR FAILURE_MODE:
 - Describe the EFFECT or CONSEQUENCE of the cause
 - This becomes the basis for the next "Why" question in iterative analysis
 - Examples:
-  * Cause: "Compression force set incorrectly" → Failure Mode: "Excessive force applied to tablets"
-  * Cause: "Operator training inadequate" → Failure Mode: "Incorrect equipment setup"
-  * Cause: "Calibration not performed" → Failure Mode: "Sensor readings inaccurate"
-  * Cause: "Checklist not followed" → Failure Mode: "Critical steps skipped"
+  * Cause: "Compression force set incorrectly" -> Failure Mode: "Excessive force applied to tablets"
+  * Cause: "Operator training inadequate" -> Failure Mode: "Incorrect equipment setup"
+  * Cause: "Calibration not performed" -> Failure Mode: "Sensor readings inaccurate"
+  * Cause: "Checklist not followed" -> Failure Mode: "Critical steps skipped"
 - DO NOT use generic phrases like "Directly mentioned in evidence" or repeat the cause text
 - The failure mode should answer: "What happens because of this cause?"
 
@@ -134,9 +120,22 @@ QUESTION: {question}
 
 CRITICAL REQUIREMENTS FOR CAUSE_TEXT:
 - ONE specific issue only
-- No long explanations
+- No long explanations 
 - Focus on the core problem
 - Examples: "Training inadequate", "Checklist outdated", "Equipment not calibrated"
+
+REQUIRED FIELDS (MUST be included in every cause):
+- cause_text: Short description of the cause
+- process_step: Relevant process step
+- failure_mode: What happens as a result of this cause
+- severity: Estimated impact (1-10) based on potential consequences
+- source: "Generated"
+
+OPTIONAL FIELDS (can be null if unknown):
+- potential_effects: Impact description
+- current_controls: Control description
+- occurrence: NOT INCLUDED (no historical data for generated causes)
+- detection: NOT INCLUDED (no historical data for generated causes)
 
 Generate expert causes JSON with causes array."""
     
@@ -200,33 +199,33 @@ YOUR ROLE:
 - CRITICAL: Understand the difference between PARENT causes and SPECIFIC causes
 
 DUPLICATE DETECTION CRITERIA (BE VERY STRICT):
-1. **Exact duplicates**: Same wording → REMOVE
-2. **Semantic duplicates**: Same meaning, different words → REMOVE
-3. **Subset duplicates**: One cause is a more specific version of another → KEEP SPECIFIC, REMOVE GENERIC
-4. **Paraphrases**: Different phrasing of the same issue → REMOVE
-5. **FMEA + Evidence duplicates**: FMEA cause matches evidence-based cause → KEEP EVIDENCE-BASED, REMOVE FMEA
+1. Exact duplicates: Same wording -> REMOVE
+2. Semantic duplicates: Same meaning, different words -> REMOVE
+3. Subset duplicates: One cause is a more specific version of another -> KEEP SPECIFIC, REMOVE GENERIC
+4. Paraphrases: Different phrasing of the same issue -> REMOVE
+5. FMEA + Evidence duplicates: FMEA cause matches evidence-based cause -> KEEP EVIDENCE-BASED, REMOVE FMEA
 
 CRITICAL: PARENT vs SPECIFIC CAUSES
 When you see a GENERIC cause and a SPECIFIC cause that could be related:
 - Example: "Operator setup error" (generic) vs "Compression force set to 12kN instead of 10kN" (specific)
 - These are NOT duplicates if the specific cause is ONE INSTANCE of the generic category
 - KEEP BOTH if the generic cause could have OTHER specific instances
-- REMOVE the generic ONLY if it's just a vague restatement of the specific cause
+- REMOVE the generic ONLY if it is just a vague restatement of the specific cause
 
 EXAMPLES OF PARENT vs SPECIFIC (KEEP BOTH):
-- "Operator setup error" + "Compression force set to 12kN instead of 10kN" → KEEP BOTH (specific is one type of setup error)
-- "Calibration issue" + "Load cell not calibrated for 6 months" → KEEP BOTH (specific is one type of calibration issue)
-- "Training inadequate" + "Operator not trained on new SOP version 2.1" → KEEP BOTH (specific is one training gap)
+- "Operator setup error" + "Compression force set to 12kN instead of 10kN" -> KEEP BOTH (specific is one type of setup error)
+- "Calibration issue" + "Load cell not calibrated for 6 months" -> KEEP BOTH (specific is one type of calibration issue)
+- "Training inadequate" + "Operator not trained on new SOP version 2.1" -> KEEP BOTH (specific is one training gap)
 
 EXAMPLES OF TRUE DUPLICATES (REMOVE ONE):
-- "Compression force set incorrectly" + "Compression force was set at 12kN instead of 10kN" → SAME CAUSE (keep specific)
-- "Operator made setup mistake" + "Operator setup error" → SAME CAUSE (keep either, same level)
-- "Equipment not calibrated" + "Calibration not performed" → SAME CAUSE (keep either, same level)
+- "Compression force set incorrectly" + "Compression force was set at 12kN instead of 10kN" -> SAME CAUSE (keep specific)
+- "Operator made setup mistake" + "Operator setup error" -> SAME CAUSE (keep either, same level)
+- "Equipment not calibrated" + "Calibration not performed" -> SAME CAUSE (keep either, same level)
 
 COMMON DUPLICATE PATTERNS (FMEA + Evidence):
-- FMEA: "Compression force set incorrectly" + Evidence: "Compression force was set at 12kN instead of 10kN" → DUPLICATE (same issue, keep evidence)
-- FMEA: "Sensor drift" + Evidence: "Load cell sensor showing drift from calibration baseline" → DUPLICATE (same issue, keep evidence)
-- FMEA: "Training inadequate" + Evidence: "Insufficient operator training on new equipment" → DUPLICATE (same issue, keep evidence)
+- FMEA: "Compression force set incorrectly" + Evidence: "Compression force was set at 12kN instead of 10kN" -> DUPLICATE (same issue, keep evidence)
+- FMEA: "Sensor drift" + Evidence: "Load cell sensor showing drift from calibration baseline" -> DUPLICATE (same issue, keep evidence)
+- FMEA: "Training inadequate" + Evidence: "Insufficient operator training on new equipment" -> DUPLICATE (same issue, keep evidence)
 
 KEEP THE BETTER VERSION (Priority Order):
 1. Evidence-based with specific details (numbers, dates, names) > Everything else
@@ -239,8 +238,8 @@ DEDUPLICATION_TASK_INSTRUCTIONS = """TASK: Review the list of causes and remove 
 
 RULES:
 1. Compare EVERY cause with ALL others
-2. If two causes describe the same underlying issue at the SAME LEVEL → THEY ARE DUPLICATES → Keep only ONE
-3. If one cause is GENERIC and another is a SPECIFIC INSTANCE → THEY ARE NOT DUPLICATES → Keep BOTH
+2. If two causes describe the same underlying issue at the SAME LEVEL -> THEY ARE DUPLICATES -> Keep only ONE
+3. If one cause is GENERIC and another is a SPECIFIC INSTANCE -> THEY ARE NOT DUPLICATES -> Keep BOTH
 4. When choosing which duplicate to keep:
    - ALWAYS prefer evidence-based causes (source="Evidence") over FMEA causes (source="FMEA")
    - ALWAYS prefer more specific descriptions over generic ones
@@ -253,47 +252,47 @@ CRITICAL DECISION TREE:
 For each pair of causes, ask:
 
 Q1: Are they describing the EXACT SAME issue?
-    YES → DUPLICATE → Keep the better version (evidence > FMEA, specific > generic)
-    NO → Go to Q2
+    YES -> DUPLICATE -> Keep the better version (evidence > FMEA, specific > generic)
+    NO -> Go to Q2
 
 Q2: Is one a SPECIFIC INSTANCE of the other (parent-child relationship)?
-    YES → NOT DUPLICATES → Keep BOTH
-    NO → Go to Q3
+    YES -> NOT DUPLICATES -> Keep BOTH
+    NO -> Go to Q3
     
 Q3: Are they at the same level of abstraction but with different wording?
-    YES → DUPLICATE → Keep the better version
-    NO → NOT DUPLICATES → Keep BOTH
+    YES -> DUPLICATE -> Keep the better version
+    NO -> NOT DUPLICATES -> Keep BOTH
 
 EXAMPLES WITH DECISIONS:
 
 Example 1:
 - C001 (Evidence): "Compression force was set at 12kN instead of 10kN"
 - C004 (FMEA): "Compression force set incorrectly"
-Decision: Q1=YES (same issue) → DUPLICATE → Keep C001 (evidence, specific), Remove C004
+Decision: Q1=YES (same issue) -> DUPLICATE -> Keep C001 (evidence, specific), Remove C004
 
 Example 2:
 - C001 (Evidence): "Compression force was set at 12kN instead of 10kN"
 - C002 (Evidence): "Operator setup error"
-Decision: Q1=NO, Q2=YES (C001 is a specific instance of operator setup error) → NOT DUPLICATES → Keep BOTH
+Decision: Q1=NO, Q2=YES (C001 is a specific instance of operator setup error) -> NOT DUPLICATES -> Keep BOTH
 
 Example 3:
 - C002 (FMEA): "Operator setup error"
 - C007 (FMEA): "Operator made setup mistake"
-Decision: Q1=NO, Q2=NO, Q3=YES (same level, different wording) → DUPLICATE → Keep either (same source, similar severity)
+Decision: Q1=NO, Q2=NO, Q3=YES (same level, different wording) -> DUPLICATE -> Keep either (same source, similar severity)
 
 Example 4:
 - C005 (Evidence): "Load cell not calibrated for 6 months"
 - C006 (FMEA): "Calibration procedure not followed"
-Decision: Q1=YES (both about calibration not done) → DUPLICATE → Keep C005 (evidence, specific)
+Decision: Q1=YES (both about calibration not done) -> DUPLICATE -> Keep C005 (evidence, specific)
 
 Example 5:
 - C003 (FMEA): "Calibration issue"
 - C005 (Evidence): "Load cell not calibrated for 6 months"
-Decision: Q1=NO, Q2=YES (C005 is a specific type of calibration issue) → NOT DUPLICATES → Keep BOTH
+Decision: Q1=NO, Q2=YES (C005 is a specific type of calibration issue) -> NOT DUPLICATES -> Keep BOTH
 
 IMPORTANT NOTES:
 - BE STRICT: If causes are semantically the same at the same level, they ARE duplicates
-- BE SMART: Don't remove parent causes just because you have specific instances
+- BE SMART: Do not remove parent causes just because you have specific instances
 - A generic cause like "Operator error" can have many specific instances - keep both levels
 - Focus on whether they describe the SAME SPECIFIC PROBLEM or different problems in the same category"""
 

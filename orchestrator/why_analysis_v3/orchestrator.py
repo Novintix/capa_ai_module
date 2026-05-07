@@ -245,38 +245,6 @@ def _normalized_cause(cause: Dict[str, Any], fallback_id: str) -> Dict[str, Any]
     }
 
 
-def _build_fallback_causes(question: str) -> List[Dict[str, Any]]:
-    """Build deterministic fallback causes when upstream generation returns empty."""
-    question_text = _safe_text(question, "the observed issue")
-    return [
-        {
-            "cause_id": "C001",
-            "cause_text": f"System default override triggered during processing of: {question_text}",
-            "process_step": "Application logic",
-            "failure_mode": "Default value overwrite",
-            "potential_effects": "Incorrect output values shown in generated records",
-            "severity": 8,
-            "occurrence": None,
-            "detection": None,
-            "current_controls": "Add rule-based validation before final record generation",
-            "source": "Fallback_Generated",
-        },
-        {
-            "cause_id": "C002",
-            "cause_text": "Data mapping mismatch between source and template fields",
-            "process_step": "Data integration",
-            "failure_mode": "Field mapping error",
-            "potential_effects": "Critical values populated from stale or wrong source",
-            "severity": 9,
-            "occurrence": None,
-            "detection": None,
-            "current_controls": "Schema contract checks and end-to-end reconciliation tests",
-            "source": "Fallback_Generated",
-        },
-    ]
-
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 # NODE 1 — INITIALIZE
 # Validates input and sets up initial state
@@ -489,12 +457,18 @@ def cause_generation_agent_node(state: WhyAnalysisV3State) -> dict:
                     causes = [_normalized_cause(c, f"C-{idx + 1:03d}") for idx, c in enumerate(retry_causes_raw)]
                     result_serialized = retry_result_serialized
 
-            # Fallback causes if still empty
+            # Return error if no causes generated
             if not causes:
-                print("   [WARNING] No causes generated. Using fallback causes...")
-                causes = _build_fallback_causes(state.get("current_why_question") or "")
-                result_serialized["matched_entries"] = 0
-                result_serialized["notes"] = "Generated deterministic fallback causes after empty upstream output."
+                error_msg = "No causes could be generated"
+                print(f"   [ERROR] {error_msg}")
+                log_error("cause_generation_agent", error_msg)
+                return {
+                    "status": "error",
+                    "error": error_msg,
+                    "stopping_reason": "cause_generation_empty",
+                    "node_log": [{"node": "cause_generation_agent", "status": "error", 
+                                 "error": error_msg, "timestamp": _now()}],
+                }
 
             print(f"   Causes generated : {len(causes)}")
             print(f"   FMEA matched     : {result_serialized.get('matched_entries', 0)}")
