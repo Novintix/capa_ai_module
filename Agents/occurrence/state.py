@@ -12,28 +12,28 @@ class PatternData(BaseModel):
     error: Optional[str] = None
 
 class SimilarCaseMatch(BaseModel):
-    recordId: str
-    complaintId: str
-    dateReceived: str
-    source: str
+    recordId: Optional[str] = None
+    complaintId: Optional[str] = None
+    dateReceived: Optional[str] = None
+    source: Optional[str] = None
     regionCountry: Optional[str] = None
-    severity: str
-    productFamily: str
-    site: str
-    descriptionOfIssue: str
-    status: str
-    daysOpen: int
-    assignedTo: str
-    isNc: Optional[str] = None
+    severity: Optional[str] = None
+    productFamily: Optional[str] = None
+    site: Optional[str] = None
+    descriptionOfIssue: Optional[str] = None
+    status: Optional[str] = None
+    daysOpen: Optional[int] = None
+    assignedTo: Optional[str] = None
+    isNc: Optional[bool] = None
     ncId: Optional[str] = None
     fieldAction: Optional[str] = None
-    euReportable: Optional[str] = None
-    fdaReportable: Optional[str] = None
-    capaNeeded: bool
+    euReportable: Optional[bool] = None
+    fdaReportable: Optional[bool] = None
+    capaNeeded: Optional[bool] = None
     capaId: Optional[str] = None
-    capaRationale: str
-    repeated: bool
-    workflowStage: str
+    capaRationale: Optional[str] = None
+    repeated: Optional[bool] = None
+    workflowStage: Optional[str] = None
     similarity: float
 
 class SimilarCasesData(BaseModel):

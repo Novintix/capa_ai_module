@@ -1,0 +1,218 @@
+{
+  "regulatory_rules": [
+    {
+      "rule_id": "FDA-MDR-001",
+      "regulation_reference": "21 CFR 803.50",
+      "country": "USA",
+      "conditions": {
+        "distributed_to_market": true,
+        "death_or_injury": true,
+        "severity": ["Critical"]
+      },
+      "regulatory_classification": "Medical Device Report - Death/Serious Injury",
+      "reportable": true,
+      "authority": ["FDA"],
+      "report_type": "MDR - 5 Day Report",
+      "reporting_timeline_days": 5,
+      "timeline_type": "Working",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "FDA-MDR-002",
+      "regulation_reference": "21 CFR 803.50",
+      "country": "USA",
+      "conditions": {
+        "distributed_to_market": true,
+        "severity": ["Critical", "Major"],
+        "issue_type": "Device Malfunction"
+      },
+      "regulatory_classification": "Medical Device Report - Malfunction",
+      "reportable": true,
+      "authority": ["FDA"],
+      "report_type": "MDR - 30 Day Report",
+      "reporting_timeline_days": 30,
+      "timeline_type": "Calendar",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "FDA-QUALITY-001",
+      "regulation_reference": "21 CFR 820.100",
+      "country": "USA",
+      "conditions": {
+        "distributed_to_market": true,
+        "severity": ["Critical", "Major"],
+        "description_keywords": "contamination foreign material particles sterility"
+      },
+      "regulatory_classification": "Quality System - CAPA Required",
+      "reportable": true,
+      "authority": ["FDA"],
+      "report_type": "Field Alert Report",
+      "reporting_timeline_days": 10,
+      "timeline_type": "Working",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "EU-MDR-001",
+      "regulation_reference": "MDR 2017/745 Article 87",
+      "country": "EU",
+      "conditions": {
+        "distributed_to_market": true,
+        "death_or_injury": true,
+        "severity": ["Critical"]
+      },
+      "regulatory_classification": "Serious Incident Report",
+      "reportable": true,
+      "authority": ["EMA", "National Competent Authority"],
+      "report_type": "SIR - Immediate Report",
+      "reporting_timeline_days": 2,
+      "timeline_type": "Working",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "EU-MDR-002",
+      "regulation_reference": "MDR 2017/745 Article 87",
+      "country": "EU",
+      "conditions": {
+        "distributed_to_market": true,
+        "severity": ["Critical", "Major"],
+        "patient_risk_level": ["High", "Medium"]
+      },
+      "regulatory_classification": "Serious Incident Report",
+      "reportable": true,
+      "authority": ["EMA", "National Competent Authority"],
+      "report_type": "SIR - Follow-up Report",
+      "reporting_timeline_days": 15,
+      "timeline_type": "Calendar",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "UK-MHRA-001",
+      "regulation_reference": "UK MDR 2002 Regulation 32",
+      "country": "UK",
+      "conditions": {
+        "distributed_to_market": true,
+        "death_or_injury": true
+      },
+      "regulatory_classification": "Adverse Incident Report",
+      "reportable": true,
+      "authority": ["MHRA"],
+      "report_type": "AIR - Urgent Report",
+      "reporting_timeline_days": 2,
+      "timeline_type": "Working",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "UK-MHRA-002",
+      "regulation_reference": "UK MDR 2002 Regulation 32",
+      "country": "UK",
+      "conditions": {
+        "distributed_to_market": true,
+        "severity": ["Critical", "Major"],
+        "issue_type": ["Device Malfunction", "Quality Defect"]
+      },
+      "regulatory_classification": "Adverse Incident Report",
+      "reportable": true,
+      "authority": ["MHRA"],
+      "report_type": "AIR - Standard Report",
+      "reporting_timeline_days": 10,
+      "timeline_type": "Working",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "CANADA-HC-001",
+      "regulation_reference": "MDR SOR/98-282 Section 59",
+      "country": "Canada",
+      "conditions": {
+        "distributed_to_market": true,
+        "death_or_injury": true,
+        "severity": ["Critical"]
+      },
+      "regulatory_classification": "Mandatory Problem Report",
+      "reportable": true,
+      "authority": ["Health Canada"],
+      "report_type": "MPR - Immediate",
+      "reporting_timeline_days": 10,
+      "timeline_type": "Calendar",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "CANADA-HC-002",
+      "regulation_reference": "MDR SOR/98-282 Section 59",
+      "country": "Canada",
+      "conditions": {
+        "distributed_to_market": true,
+        "severity": ["Critical", "Major"],
+        "patient_risk_level": ["High"]
+      },
+      "regulatory_classification": "Mandatory Problem Report",
+      "reportable": true,
+      "authority": ["Health Canada"],
+      "report_type": "MPR - Standard",
+      "reporting_timeline_days": 30,
+      "timeline_type": "Calendar",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "FDA-RECALL-001",
+      "regulation_reference": "21 CFR 7.40",
+      "country": "USA",
+      "conditions": {
+        "distributed_to_market": true,
+        "severity": ["Critical"],
+        "patient_risk_level": ["High"],
+        "description_keywords": "contamination defect malfunction hazard"
+      },
+      "regulatory_classification": "Class I Recall - Life Threatening",
+      "reportable": true,
+      "authority": ["FDA"],
+      "report_type": "Recall Notification",
+      "reporting_timeline_days": 24,
+      "timeline_type": "Hours",
+      "capa_required": "Mandatory",
+      "compliance_risk_level": "High"
+    },
+    {
+      "rule_id": "ISO-13485-001",
+      "regulation_reference": "ISO 13485:2016 Section 8.5.2",
+      "country": "Global",
+      "conditions": {
+        "severity": ["Major", "Moderate"],
+        "issue_type": ["Quality Defect", "Process Deviation"]
+      },
+      "regulatory_classification": "Quality Management System - CAPA",
+      "reportable": false,
+      "authority": ["Internal QMS"],
+      "report_type": "Internal CAPA",
+      "reporting_timeline_days": 30,
+      "timeline_type": "Working",
+      "capa_required": "Recommended",
+      "compliance_risk_level": "Medium"
+    },
+    {
+      "rule_id": "INTERNAL-001",
+      "regulation_reference": "Internal Quality Policy",
+      "country": "Global",
+      "conditions": {
+        "severity": ["Minor"],
+        "distributed_to_market": false
+      },
+      "regulatory_classification": "Internal Quality Issue",
+      "reportable": false,
+      "authority": ["Internal QA"],
+      "report_type": "Quality Investigation",
+      "reporting_timeline_days": 45,
+      "timeline_type": "Working",
+      "capa_required": "Optional",
+      "compliance_risk_level": "Low"
+    }
+  ]
+}
