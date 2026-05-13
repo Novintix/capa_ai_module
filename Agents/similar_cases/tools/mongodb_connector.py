@@ -81,7 +81,8 @@ class MongoDBConnector:
             embedding_field = os.getenv("EMBEDDING_FIELD", "descriptionEmbedding")
             
             # Build projection
-            projection = {"_id": 0}
+            # Include _id so nodes can remap it to complaintId (new capa_complaints schema)
+            projection = {"_id": 1}
             if projection_fields:
                 for field in projection_fields:
                     projection[field] = 1

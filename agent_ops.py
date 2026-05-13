@@ -106,6 +106,35 @@ def agentops_workflow(name: Optional[str] = None, attributes: Optional[Dict[str,
     return _safe_decorator_call(_workflow, name, attributes)
 
 
+def _clear_otel_span_context():
+    """
+    Detach the currently active OpenTelemetry span from the context so that
+    the next ao.start_trace() call always produces a true root trace rather
+    than a child span nested inside a previous trace.
+
+    Returns an opaque token that must be passed to _restore_otel_context()
+    once the new trace ends, to avoid context leakage in the other direction.
+    """
+    try:
+        from opentelemetry import context as _otel_ctx
+        # Attaching an empty Context detaches any inherited parent span.
+        token = _otel_ctx.attach(_otel_ctx.Context())
+        return token
+    except Exception:
+        return None
+
+
+def _restore_otel_context(token) -> None:
+    """Undo the context detachment created by _clear_otel_span_context()."""
+    if token is None:
+        return
+    try:
+        from opentelemetry import context as _otel_ctx
+        _otel_ctx.detach(token)
+    except Exception:
+        pass
+
+
 def agentops_session(
     name: str = "agent_run",
     tags: Optional[List[str]] = None,
@@ -125,6 +154,9 @@ def agentops_session(
             ao = _get_agentops()
             if ao is None:
                 return await fn(*args, **kwargs)
+            # Detach any inherited OTel span so start_trace() creates a true
+            # root trace, not a child of whatever ran before this request.
+            otel_token = _clear_otel_span_context()
             trace = None
             try:
                 trace = ao.start_trace(trace_name=name, tags=tags or [])
@@ -138,12 +170,17 @@ def agentops_session(
                     except Exception:
                         pass
                 raise
+            finally:
+                _restore_otel_context(otel_token)
 
         @functools.wraps(fn)
         def sync_wrapper(*args, **kwargs):
             ao = _get_agentops()
             if ao is None:
                 return fn(*args, **kwargs)
+            # Same isolation as async_wrapper — prevents Why Analysis /
+            # Risk Analysis OTel context from bleeding into subsequent traces.
+            otel_token = _clear_otel_span_context()
             trace = None
             try:
                 trace = ao.start_trace(trace_name=name, tags=tags or [])
@@ -157,6 +194,8 @@ def agentops_session(
                     except Exception:
                         pass
                 raise
+            finally:
+                _restore_otel_context(otel_token)
 
         import asyncio
         if asyncio.iscoroutinefunction(fn):
