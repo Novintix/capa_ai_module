@@ -966,6 +966,7 @@ def process_with_llm_node(state: AgentState) -> AgentState:
     
     try:
         question = state["question"]
+        complaint_description = state.get("context", "")
         causes = state.get("causes", [])
         fmea_available = state.get("fmea_available", False)
         
@@ -1032,7 +1033,7 @@ def process_with_llm_node(state: AgentState) -> AgentState:
                 
         else:
             # GENERATION MODE: Generate causes when no FMEA or FMEA extraction failed
-            prompt = get_unified_cause_prompt(question)
+            prompt = get_unified_cause_prompt(question, complaint_description=complaint_description)
             
             # Call LLM
             response = llm.invoke(prompt)
