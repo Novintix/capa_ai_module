@@ -23,7 +23,6 @@ from Agents.loop_control.router import router as loop_control_router
 
 # # ── Orchestrator ──────────────────────────────────────────────────────────────
 from orchestrator.risk_analysis_orchestrator_service.router import router as orchestrator_router
-from orchestrator.why_analysis_orchestrator.router import router as why_analysis_router
 from orchestrator.why_analysis_v2.router import router as why_analysis_v2_router
 from orchestrator.why_analysis_v3.router import router as why_analysis_v3_router  # NEW: Simplified with human-in-the-loop
 from orchestrator.rca_v2.router import router as rca_v2_router #updated why analysis orchestrator
@@ -32,7 +31,7 @@ from orchestrator.fishbone_v3.router import router as fishbone_v3_router  # NEW:
 from orchestrator.Root_cause_analysis.router import router as root_cause_analysis_router
 from orchestrator.Root_cause_analysis_v2.router_v2 import router as root_cause_analysis_v2_router
 from orchestrator.capa_director.router import router as director_router
-from orchestrator.dynamic_builder.router import router as dynamic_builder_router
+
 
 
 def register_routes(app: FastAPI):
@@ -57,7 +56,6 @@ def register_routes(app: FastAPI):
     app.include_router(action_plan_router)
     app.include_router(why_question_router)
     app.include_router(zero_evidence_router)
-    app.include_router(why_analysis_router)
     app.include_router(why_analysis_v2_router)
     app.include_router(why_analysis_v3_router)  # NEW: Why Analysis V3
     app.include_router(rca_v2_router)
@@ -75,7 +73,6 @@ def register_routes(app: FastAPI):
 
     # # ── Orchestrator router ───────────────────────────────────────────────────
     app.include_router(orchestrator_router)  # exposes POST /capa/analyze
-    app.include_router(dynamic_builder_router, prefix="/dynamic")
     
     @app.get("/")
     def root():
