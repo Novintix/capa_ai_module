@@ -89,14 +89,15 @@ IMPORTANT FOR CAUSE_TEXT:
 - Good examples: "Calibration procedure not followed", "Operator training inadequate", "Equipment maintenance overdue"
 - Bad examples: Long sentences with multiple concepts or detailed explanations"""
 
-def get_unified_cause_prompt(question: str, causes_text: str = None) -> str:
+def get_unified_cause_prompt(question: str, causes_text: str = None, complaint_description: str = None) -> str:
     """
     Build unified prompt for either validation or generation
-    
+
     Args:
         question: The original why question
         causes_text: Optional formatted list of FMEA causes to validate
-        
+        complaint_description: Original complaint description for domain anchoring
+
     Returns:
         Complete prompt for LLM
     """
@@ -112,15 +113,26 @@ FMEA CAUSES TO VALIDATE:
 
 Return validation JSON with relevant_cause_numbers array."""
     else:
-        # Generation mode
+        # Generation mode — include complaint description to anchor domain and terminology
+        complaint_context = ""
+        if complaint_description:
+            complaint_context = f"""
+ORIGINAL COMPLAINT DESCRIPTION:
+{complaint_description}
+
+Use the complaint description above to understand the exact industry, product type, and process context.
+All causes you generate must use terminology consistent with this specific complaint context.
+"""
+
         task_specific = f"""MODE: GENERATION
 Generate possible causes for the problem since no FMEA document is available.
-
+{complaint_context}
 QUESTION: {question}
 
 CRITICAL REQUIREMENTS FOR CAUSE_TEXT:
 - ONE specific issue only
-- No long explanations 
+- No long explanations
+- Use terminology that matches the product and industry in the complaint description
 - Focus on the core problem
 - Examples: "Training inadequate", "Checklist outdated", "Equipment not calibrated"
 
