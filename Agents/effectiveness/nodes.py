@@ -306,11 +306,14 @@ def validate_evaluations_node(state: EffectivenessState) -> EffectivenessState:
                 )
 
             # G13: Explanation must contain at least one specific evidence reference
-            # Check for numbers, dates, percentages, or named identifiers
+            # Accepts: numbers, percentages, named IDs, dates, or frequency/temporal words
+            # (e.g. "quarterly" is a concrete fact when the evidence itself has no digits)
             import re
             has_evidence_ref = bool(re.search(
-                r'\d+|%|TECH-\d+|SOP-\d+|[A-Z]+-\d+|\d{2}-[A-Za-z]+-\d{4}',
-                explanation
+                r'\d+|%|TECH-\d+|SOP-\d+|[A-Z]+-\d+|\d{2}-[A-Za-z]+-\d{4}'
+                r'|\b(?:daily|weekly|monthly|quarterly|annually|bi-annual|semi-annual|annual|hourly)\b',
+                explanation,
+                re.IGNORECASE
             ))
             if not has_evidence_ref:
                 raise ValueError(

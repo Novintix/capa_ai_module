@@ -190,7 +190,7 @@ Determine success_criteria_met FIRST, then use it as the score anchor:
   success_criteria_met = "Yes":
     → Score baseline is 65 or higher
     → Yes + root_cause_addressed=Yes  → score 75-95
-    → Yes + root_cause_addressed=Partially → score 65-80
+    → Yes + root_cause_addressed=Partially → score 65-75  (G3 cap: Partially ≤ 75)
     → Yes + root_cause_addressed=No  → score 65-75 (action met its own criteria but doesn't address root cause)
 
   success_criteria_met = "Partial":
