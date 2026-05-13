@@ -18,7 +18,7 @@ from .logger import (
 )
 from .state_machine import FishboneV3StateMachine, FishboneV3State, IterationMemory, StopReason
 from .session_memory import SessionMemoryManagerV3
-from agent_ops import agentops_agent, agentops_operation
+from agent_ops import agentops_operation
 
 # Import agents (re-using V2 agent logic)
 from Agents.cause_generation.schemas import QuestionInput
@@ -50,7 +50,6 @@ except Exception:
         return None
 
 
-@agentops_agent(name="fishbone")
 class FishboneOrchestratorV3:
     """
     Fishbone v3 Orchestrator - HITL Flow

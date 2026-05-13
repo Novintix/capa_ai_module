@@ -79,7 +79,7 @@ def generate_actions_node(state: ActionPlanState) -> ActionPlanState:
         # Validate using Pydantic
         validated_response = CapaActionPlanResponse(**parsed_json)
 
-        state["action_items"] = [item.dict() for item in validated_response.action_items]
+        state["action_items"] = [item.model_dump() for item in validated_response.action_items]
         state["total_actions"] = validated_response.total_actions
         state["primary_actions"] = validated_response.primary_actions
         state["preventive_systemic_actions"] = validated_response.preventive_systemic_actions

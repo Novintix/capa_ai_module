@@ -27,7 +27,7 @@ from typing import Optional
 from .graph import build_graph
 from .model import EffectivenessEvaluationInput, EffectivenessEvaluationResponse
 from .logger import logger
-from agent_ops import agentops_operation, agentops_session
+from agent_ops import agentops_session
 
 router = APIRouter()
 
@@ -38,8 +38,7 @@ def get_graph():
 
 
 @router.post("/effectiveness", response_model=EffectivenessEvaluationResponse)
-@agentops_session(name="effectiveness@router.post(_effectiveness, response_model=EffectivenessEvaluationResponse)", tags=["agents", "effectiveness"])
-@agentops_operation(name="effectiveness.evaluate")
+@agentops_session(name="Effectiveness_Evaluation", tags=["agents", "effectiveness"])
 async def evaluate_effectiveness(
     # ── Required form fields ─────────────────────────────────────────────────
     root_cause_description: str = Form(
