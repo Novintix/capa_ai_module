@@ -3,6 +3,9 @@ Cause Generation Agent Prompts
 Single LLM prompt for cause validation or generation
 """
 
+from typing import List
+from langchain_core.messages import SystemMessage, HumanMessage, BaseMessage
+
 
 # =============================================================================
 # UNIFIED CAUSE PROCESSING PROMPT
@@ -30,8 +33,8 @@ WHEN FMEA CAUSES ARE PROVIDED:
 - Remove causes from unrelated process steps
 
 WHEN NO FMEA CAUSES ARE PROVIDED:
-- Generate 3-5 most likely causes for the problem
-- Include process-related, material-related, and human-related causes
+- Generate 12-15 causes covering ALL six Ishikawa categories: Man, Machine, Method, Material, Measurement, Environment
+- Include at least 1-2 causes per category — do NOT leave any category empty
 - Focus on actionable causes teams can investigate
 - CRITICAL: Keep cause_text SHORT and FOCUSED (3-8 words max)
 - Each cause should describe ONE specific issue only
@@ -158,6 +161,64 @@ Generate expert causes JSON with causes array."""
 {CAUSE_PROCESSING_OUTPUT_FORMAT}
 
 {task_specific}"""
+
+
+_CAUSE_SYSTEM_PROMPT = f"""{CAUSE_PROCESSING_SYSTEM_ROLE}
+
+{CAUSE_PROCESSING_TASK_INSTRUCTIONS}
+
+{CAUSE_PROCESSING_OUTPUT_FORMAT}"""
+
+
+def get_unified_cause_messages(
+    question: str,
+    causes_text: str = None,
+    complaint_description: str = None,
+) -> List[BaseMessage]:
+    """
+    G3-compliant prompt builder.
+    SystemMessage = static instructions only.
+    HumanMessage = all user-supplied data (question, complaint, causes).
+    """
+    if causes_text:
+        user_content = f"""MODE: VALIDATION
+Filter the provided FMEA causes to keep only those relevant to the question.
+
+QUESTION: {question}
+
+FMEA CAUSES TO VALIDATE:
+{causes_text}
+
+Return validation JSON with relevant_cause_numbers array."""
+    else:
+        complaint_section = ""
+        if complaint_description:
+            complaint_section = f"""ORIGINAL COMPLAINT DESCRIPTION:
+{complaint_description}
+
+Use the complaint description to understand the exact industry, product type, and process.
+All causes must use terminology consistent with this specific complaint.
+Ensure causes are generated for ALL six categories: Man, Machine, Method, Material, Measurement, Environment.
+
+"""
+        user_content = f"""MODE: GENERATION
+Generate possible causes for the problem since no FMEA document is available.
+
+{complaint_section}QUESTION: {question}
+
+REQUIRED FIELDS per cause:
+- cause_text: Short description (3-8 words)
+- process_step: Relevant process step
+- failure_mode: Effect/consequence of this cause
+- severity: 1-10 impact estimate
+- source: "Generated"
+
+Generate expert causes JSON with causes array."""
+
+    return [
+        SystemMessage(content=_CAUSE_SYSTEM_PROMPT),
+        HumanMessage(content=user_content),
+    ]
 
 
 # =============================================================================

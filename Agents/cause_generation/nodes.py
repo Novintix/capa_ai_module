@@ -12,7 +12,7 @@ from .state import AgentState
 from .tools.excel_extractor import extract_fmea_from_excel, normalize_column_names
 from .tools.semantic_matcher import rank_fmea_by_semantic_similarity
 from .prompts import (
-    get_unified_cause_prompt,
+    get_unified_cause_messages,
     format_causes_for_validation,
     validate_prompt_inputs,
     get_scoring_prompt
@@ -988,10 +988,10 @@ def process_with_llm_node(state: AgentState) -> AgentState:
         if fmea_available and causes:
             # VALIDATION MODE: Filter FMEA causes
             causes_text = format_causes_for_validation(causes)
-            prompt = get_unified_cause_prompt(question, causes_text)
-            
+            messages = get_unified_cause_messages(question, causes_text=causes_text)
+
             # Call LLM
-            response = llm.invoke(prompt)
+            response = llm.invoke(messages)
             response_text = clean_llm_response(response.content)
             
             # Parse JSON response
@@ -1033,10 +1033,10 @@ def process_with_llm_node(state: AgentState) -> AgentState:
                 
         else:
             # GENERATION MODE: Generate causes when no FMEA or FMEA extraction failed
-            prompt = get_unified_cause_prompt(question, complaint_description=complaint_description)
-            
+            messages = get_unified_cause_messages(question, complaint_description=complaint_description)
+
             # Call LLM
-            response = llm.invoke(prompt)
+            response = llm.invoke(messages)
             response_text = clean_llm_response(response.content)
             
             # Parse JSON response

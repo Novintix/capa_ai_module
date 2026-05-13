@@ -89,12 +89,22 @@ class BedrockLLM:
         self.client = client
         self.model_id = model_id
 
-    def invoke(self, prompt: str):
-
-        messages = [
-            {"role": "system", "content": "Return ONLY valid JSON. No explanations."},
-            {"role": "user", "content": prompt}
-        ]
+    def invoke(self, prompt):
+        if isinstance(prompt, list):
+            # Message list from get_unified_cause_messages (SystemMessage + HumanMessage)
+            messages = []
+            for msg in prompt:
+                if hasattr(msg, "type"):
+                    role = "assistant" if msg.type == "ai" else ("system" if msg.type == "system" else "user")
+                    messages.append({"role": role, "content": msg.content})
+                elif isinstance(msg, dict):
+                    messages.append(msg)
+        else:
+            # Legacy string prompt — wrap with generic system message
+            messages = [
+                {"role": "system", "content": "Return ONLY valid JSON. No explanations."},
+                {"role": "user", "content": prompt}
+            ]
 
         payload = {
             "messages": messages,

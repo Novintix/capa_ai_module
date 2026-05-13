@@ -424,10 +424,25 @@ class FishboneOrchestratorV3:
         self._emit_node_start(session_id, "categorize_agent")
         state_machine.control_memory.execution_trace.append("2. CategorizationAgent")
         
-        categorize_causes = [Cause(cause_id=c["cause_id"], cause_text=c["cause_text"]) for c in causes]
+        categorize_causes = [
+            Cause(
+                cause_id=c.get("cause_id", ""),
+                cause_text=c.get("cause_text", ""),
+                process_step=c.get("process_step", ""),
+                failure_mode=c.get("failure_mode", ""),
+                potential_effects=c.get("potential_effects") or "",
+                severity=c.get("severity"),
+                occurrence=c.get("occurrence"),
+                detection=c.get("detection"),
+                current_controls=c.get("current_controls"),
+                source=c.get("source", ""),
+            )
+            for c in causes
+        ]
         categorize_input = CategorizeInput(
             question=state_machine.complaint,
-            causes=categorize_causes
+            causes=categorize_causes,
+            additional_context=state_machine.complaint,
         )
         
         result = categorize_graph.invoke(CategorizeState(input=categorize_input, iteration=0))
