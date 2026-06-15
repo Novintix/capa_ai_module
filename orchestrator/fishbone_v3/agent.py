@@ -1,10 +1,14 @@
 """
 Fishbone v3 Orchestrator Agent
+
 Production-grade HITL (Human-in-the-Loop) Fishbone Analysis
 
 Note: This agent can be used standalone or integrated with LangGraph.
+
 For LangGraph integration, see graph.py and nodes.py which provide
+
 a state-machine based workflow with the same logic.
+
 """
 
 import time
